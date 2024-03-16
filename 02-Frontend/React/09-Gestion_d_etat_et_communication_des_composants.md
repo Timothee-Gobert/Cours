@@ -171,3 +171,218 @@ input {
   padding: 10px 15px;
 }
 ```
+
+## Communication d'un composant parent vers un composant enfant
+
+### Modification de *App.jsx*
+
+Commençons par le composant racine :
+
+```jsx
+import { useState } from 'react';
+import TodoList from './components/TodoList';
+import AddTodo from './components/AddTodo';
+
+function App() {
+  const [todoList, setTodoList] = useState([]);
+
+  function addTodo(content) {
+    const todo = { id: crypto.randomUUID(), done: false, edit: false, content };
+    setTodoList([...todoList, todo]);
+  }
+
+  function deleteTodo(id) {
+    setTodoList(todoList.filter((todo) => todo.id !== id));
+  }
+
+  return (
+    <div className="d-flex justify-content-center align-items-center p-20">
+      <div className="card container p-20">
+        <h1 className="mb-20">Liste de tâches</h1>
+        <AddTodo addTodo={addTodo} />
+        <TodoList todoList={todoList} deleteTodo={deleteTodo} />
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
+
+Notez bien que la fonction de suppression utilise la méthode `filter()` **qui retourne un nouveau tableau sans modifier le tableau dans la variable d'état *todoList*.** Nous respectons donc bien la règle de ne pas modifier directement l'état !
+
+Nous passons la fonction de suppression à notre composant `TodoList` en *prop*.
+
+### Modification de `TodoList.jsx`
+
+Dans le composant `TodoList` nous affichons un message s'il n'y a pas de tâches. S'il y a au moins un tâche dans le tableau *todoList* nous parcourons le tableau et créons un composant `TodoItem` pour chaque tâche.
+
+Nous utilisons l'identifiant unique de la tâche comme *key*.
+
+Nous utilisons une *closure* pour créer une fonction anonyme retournant la fonction de suppression liée à la valeur de l'identifiant unique de la tâche.
+
+>*Si vous avez besoin d'une petite mise au point sur le concept de fermeture (**closure**), n'hésitez pas à vous rendre sur la formation JavaScript.*
+
+```jsx
+import TodoItem from './TodoItem';
+
+export default function TodoList({ todoList, deleteTodo }) {
+  return todoList.length ? (
+    <ul>
+      {todoList.map((todo) => (
+        <TodoItem
+          key={todo.id}
+          todo={todo}
+          deleteTodo={() => deleteTodo(todo.id)}
+        />
+      ))}
+    </ul>
+  ) : (
+    <p>Aucune tâche en cours </p>
+  );
+}
+```
+ 
+### Modification de `TodoItem.jsx`
+
+Dans le composant d'affiche de chaque tâche nous avons simplement :
+
+```jsx
+export default function TodoItem({ todo, deleteTodo }) {
+  return (
+    <li className="mb-10 d-flex justify-content-center align-items-center p-10">
+      <span className="flex-fill">{todo.content}</span>
+      <button className="btn btn-primary mr-15">Valider</button>
+      <button className="btn btn-primary mr-15">Modifier</button>
+      <button className="btn btn-reverse-primary" onClick={deleteTodo}>
+        Supprimer
+      </button>
+    </li>
+  );
+}
+```
+
+## Valider et éditer une todo
+
+### Modification de `App.jsx`
+
+Dans le composant racine, nous ajoutons une fonction pour passer une tâche en mode édition.
+
+En effet, quand la propriété *edit* d'une tâche vaut *true* nous voulons afficher le formulaire d'édition de cette tâche et quand elle vaut *false*, nous voulons afficher la tâche.
+
+Nous devons donc ajouter cette mécanique pour déclencher le mode édition.
+
+```jsx
+import { useState } from 'react';
+import TodoList from './components/TodoList';
+import AddTodo from './components/AddTodo';
+
+function App() {
+  const [todoList, setTodoList] = useState([]);
+
+  function addTodo(content) {
+    const todo = { id: crypto.randomUUID(), done: false, edit: false, content };
+    setTodoList([...todoList, todo]);
+  }
+
+  function deleteTodo(id) {
+    setTodoList(todoList.filter((todo) => todo.id !== id));
+  }
+
+  function toggleTodo(id) {
+    setTodoList(
+      todoList.map((todo) =>
+        todo.id === id ? { ...todo, done: !todo.done } : todo
+      )
+    );
+  }
+
+  function toggleTodoEdit(id) {
+    setTodoList(
+      todoList.map((todo) =>
+        todo.id === id ? { ...todo, edit: !todo.edit } : todo
+      )
+    );
+  }
+
+  return (
+    <div className="d-flex justify-content-center align-items-center p-20">
+      <div className="card container p-20">
+        <h1 className="mb-20">Liste de tâches</h1>
+        <AddTodo addTodo={addTodo} />
+        <TodoList
+          todoList={todoList}
+          deleteTodo={deleteTodo}
+          toggleTodo={toggleTodo}
+          toggleTodoEdit={toggleTodoEdit}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
+ 
+### Modification de `TodoList.jsx`
+
+Dans *TodoList*, nous affichons un composant différent suivant que nous sommes en mode édition ou non.
+
+Comme d'habitude, nous faisons une *closure* et la passons en *prop* pour permettre au composant `TodoItem` de déclencher le mode édition pour une tâche donnée :
+
+```jsx
+import TodoItem from './TodoItem';
+import EditTodo from './EditTodo';
+
+export default function TodoList({
+  todoList,
+  deleteTodo,
+  toggleTodo,
+  toggleTodoEdit,
+}) {
+  return todoList.length ? (
+    <ul>
+      {todoList.map((todo) =>
+        todo.edit ? (
+          <EditTodo key={todo.id} todo={todo} />
+        ) : (
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            deleteTodo={() => deleteTodo(todo.id)}
+            toggleTodo={() => toggleTodo(todo.id)}
+            editTodo={() => toggleTodoEdit(todo.id)}
+          />
+        )
+      )}
+    </ul>
+  ) : (
+    <p>Aucune tâche en cours </p>
+  );
+}
+```
+ 
+### Modification de `TodoItem.jsx`
+
+Dans `TodoItem`, nous passons simplement notre *prop* `editTodo` en gestionnaire d'événement pour le clic sur le bouton "Modifier" :
+
+```jsx
+export default function TodoItem({ todo, deleteTodo, toggleTodo, editTodo }) {
+  return (
+    <li className="mb-10 d-flex justify-content-center align-items-center p-10">
+      <span className="flex-fill">
+        {todo.content} {todo.done && '✅'}
+      </span>
+      <button className="btn btn-primary mr-15" onClick={toggleTodo}>
+        Valider
+      </button>
+      <button className="btn btn-primary mr-15" onClick={editTodo}>
+        Modifier
+      </button>
+      <button className="btn btn-reverse-primary" onClick={deleteTodo}>
+        Supprimer
+      </button>
+    </li>
+  );
+}
+```
