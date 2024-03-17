@@ -543,4 +543,277 @@ export default function EditTodo({ todo, editTodo, cancelEditTodo }) {
     </div>
   );
 }
+```
+
+## Selectionner une todo
+
+### Modification de `App.jsx`
+
+Nous ajoutons une fonction pour sélectionner une tâche et désélectionner les autres :
+
+```jsx
+import { useState } from 'react';
+import TodoList from './components/TodoList';
+import AddTodo from './components/AddTodo';
+
+function App() {
+  const [todoList, setTodoList] = useState([]);
+
+  function addTodo(content) {
+    const todo = {
+      id: crypto.randomUUID(),
+      done: false,
+      edit: false,
+      selected: false,
+      content,
+    };
+    setTodoList([...todoList, todo]);
+  }
+
+  function deleteTodo(id) {
+    setTodoList(todoList.filter((todo) => todo.id !== id));
+  }
+
+  function toggleTodo(id) {
+    setTodoList(
+      todoList.map((todo) =>
+        todo.id === id ? { ...todo, done: !todo.done } : todo
+      )
+    );
+  }
+
+  function toggleTodoEdit(id) {
+    setTodoList(
+      todoList.map((todo) =>
+        todo.id === id ? { ...todo, edit: !todo.edit } : todo
+      )
+    );
+  }
+
+  function editTodo(id, content) {
+    setTodoList(
+      todoList.map((todo) =>
+        todo.id === id ? { ...todo, edit: false, content } : todo
+      )
+    );
+  }
+
+  function selectTodo(id) {
+    setTodoList(
+      todoList.map((todo) =>
+        todo.id === id
+          ? { ...todo, selected: !todo.selected }
+          : { ...todo, selected: false }
+      )
+    );
+  }
+
+  return (
+    <div className="d-flex justify-content-center align-items-center p-20">
+      <div className="card container p-20">
+        <h1 className="mb-20">Liste de tâches</h1>
+        <AddTodo addTodo={addTodo} />
+        <TodoList
+          todoList={todoList}
+          deleteTodo={deleteTodo}
+          toggleTodo={toggleTodo}
+          toggleTodoEdit={toggleTodoEdit}
+          editTodo={editTodo}
+          selectTodo={selectTodo}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default App;
+```
+ 
+### Modification de `TodoList.jsx`
+
+Nous modifions le composant `TodoList` simplement pour passer en *prop* plus bas dans l'arbre la fonction permettant de sélectionner une tâche :
+
+```jsx
+import TodoItem from './TodoItem';
+import EditTodo from './EditTodo';
+
+export default function TodoList({
+  todoList,
+  deleteTodo,
+  toggleTodo,
+  toggleTodoEdit,
+  editTodo,
+  selectTodo,
+}) {
+  return todoList.length ? (
+    <ul>
+      {todoList.map((todo) =>
+        todo.edit ? (
+          <EditTodo
+            key={todo.id}
+            todo={todo}
+            editTodo={(content) => editTodo(todo.id, content)}
+            cancelEditTodo={() => toggleTodoEdit(todo.id)}
+          />
+        ) : (
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            deleteTodo={() => deleteTodo(todo.id)}
+            toggleTodo={() => toggleTodo(todo.id)}
+            editTodo={() => toggleTodoEdit(todo.id)}
+            selectTodo={() => selectTodo(todo.id)}
+          />
+        )
+      )}
+    </ul>
+  ) : (
+    <p>Aucune tâche en cours </p>
+  );
+}
+```
+ 
+### Modification de `TodoItem.jsx`
+
+Nous modifions le composant `TodoItem` :
+
+```jsx
+export default function TodoItem({
+  todo,
+  deleteTodo,
+  toggleTodo,
+  editTodo,
+  selectTodo,
+}) {
+  return (
+    <li
+      onClick={selectTodo}
+      className={`mb-10 d-flex flex-row justify-content-center align-items-center p-10 ${
+        todo.selected ? 'selected' : ''
+      }  `}
+    >
+      <span className="flex-fill">
+        {todo.content} {todo.done && '✅'}
+      </span>
+      <button
+        className="btn btn-primary mr-15"
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleTodo();
+        }}
+      >
+        Valider
+      </button>
+      <button
+        className="btn btn-primary mr-15"
+        onClick={(e) => {
+          e.stopPropagation();
+          editTodo();
+        }}
+      >
+        Modifier
+      </button>
+      <button
+        className="btn btn-reverse-primary"
+        onClick={(e) => {
+          e.stopPropagation();
+          deleteTodo();
+        }}
+      >
+        Supprimer
+      </button>
+    </li>
+  );
+}
+```
+
+Pourquoi avons-nous besoin de stopper la propagation des clics dans les gestionnaires d'événement des boutons ?
+
+La réponse est le traitement par lots des mises à jour avant le prochain rendu.
+
+En fait ce qu'il se passe, par exemple si nous cliquons sur le bouton "Valider" par exemple :
+
+- `toggleTodo()` est exécutée :
+
+```jsx
+function toggleTodo(id) {
+  setTodoList(
+    todoList.map((todo) =>
+      todo.id === id ? { ...todo, done: !todo.done } : todo
+    )
+  );
+}
+```
+
+*React* met **dans sa queue de mise à jour,** pour le prochain rendu la nouvelle valeur de notre tâche, par exemple :
+
+```jsx
+{
+  content: "1",
+  done: true,
+  edit: false,
+  id: "b702f80a-2d23-4f74-8388-5eebf681ffd4",
+  selected: false
+}
+``` 
+
+- ensuite l'événement se propage et remonte sur le *DOM*
+- `selectTodo()` est donc exécutée :
+
+```jsx
+function selectTodo(id) {
+  setTodoList(
+    todoList.map((todo) =>
+      todo.id === id
+        ? { ...todo, selected: !todo.selected }
+        : { ...todo, selected: false }
+    )
+  );
+}
+```
+
+*React* met **dans sa queue de mise à jour,** pour le prochain rendu la nouvelle valeur de notre tâche, par exemple :
+
+```jsx
+{
+  content: "1",
+  done: false,
+  edit: false,
+  id: "b702f80a-2d23-4f74-8388-5eebf681ffd4",
+  selected: true
+}
+```
+
+Remarquez bien que *done* est à *false* !
+
+En effet, la valeur de la tâche pour ce rendu n'a pas changé ! Rappelez-vous que les mises à jour d'état se font au prochain rendu donc dans la liste nous avons toujours l'ancienne tâche et donc *done* est à *false* !
+
+Au prochain rendu, *React* exécute sa queue de mise à jour et prend la dernière mise à jour de la tâche et nous obtenons donc :
+
+```jsx
+{
+  content: "1",
+  done: false,
+  edit: false,
+  id: "b702f80a-2d23-4f74-8388-5eebf681ffd4",
+  selected: true
+}
+```
+
+C'est assez complexe à comprendre au début mais c'est vraiment essentiel à comprendre pour maîtriser *React*, aussi n'hésitez pas à relire 2 / 3 fois les explications.
+
+ 
+Modification de `_themes.scss`
+
+```scss
+.selected {
+  border: 2px solid var(--primary);
+  border-radius: 4px;
+}
+
+li {
+  cursor: pointer;
+}
+```
+
 
