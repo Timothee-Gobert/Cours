@@ -1218,3 +1218,126 @@ function App() {
 export default App;
 ```
 
+## Présentation de `useReducer()`
+
+### Qu'est-ce qu'un Reducer ?
+
+Les composants qui ont de nombreux *hooks* d'état et qui ont des mises à jour nombreuses de ces états peuvent devenir rapidement complexes à maintenir et à organiser.
+
+**Pour ces composants, vous pouvez utiliser un *hook* spécifique qui permet de gérer toutes les mises à jour de l'état du composant dans une fonction unique, extérieure au composant, appelée *reducer*.**
+
+Le *hook* `useReducer()` vient en remplacement de plusieurs *hooks* `useState()` dans un composant.
+
+La syntaxe d'un reducer est :
+
+```jsx
+const [state, dispatch] = useReducer(reducer, initialState);
+```
+
+- **state :** état courant contenant un objet avec des propriétés. *Vous pouvez le voir comme la fusion de tous les états locaux des `useState()`.*
+- **dispatch :** fonction permettant d'envoyer une *action* au *reducer*.
+- **reducer :** fonction permettant de mettre à jour l'état (*state*) en fonction d'une *action*.
+- **initialState :** état initial pour le premier rendu du composant.
+
+ ### Les actions
+
+Une *action* est l'objet passé à la fonction `dispatch()` et qui représente ce que l'utilisateur a fait.
+
+Une *action* doit représenter une seule interaction même si elle a plusieurs effets.
+
+Par convention, une *action* a une **propriété** *type* qui décrit ce qu'il s'est passé et qui sert au *reducer* pour l'identifier, et **optionnellement d'autres propriétés avec des données.**
+
+### Le reducer
+
+Le *reducer* est une **fonction pure** qui reçoit en arguments l'**état courant** et l'*action*.
+
+**Il doit retourner le nouvel état résultant des modifications engendrées par l'*action*.**
+
+Comme pour `useState()`, **l'état doit toujours être considéré en lecture seul et c'est un nouvel objet qui doit être retourné comme nouvel état.**
+
+**Par convention, on utilise une instruction *switch / case* avec un cas pour chaque type d'*action*.**
+
+Exemple :
+
+```jsx
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment_age': {
+      return {
+        name: state.name,
+        age: state.age + 1
+      };
+    }
+    case 'change_name': {
+      return {
+        name: action.newName,
+        age: state.age
+      };
+    }
+  }
+  throw Error('Action inconnue : ' + action.type);
+}
+```
+
+*Le nom de **reducer**, vient de la programmation fonctionnelle, et plus précisément de la fonction `reduce()` dont le fonctionnement est similaire.*
+
+*`reduce()` prend en premier argument la valeur courante de l'accumulation et en second argument l'accumulateur et retourne la nouvelle valeur de l'accumulateur.*
+
+*Les **reducers** de **React** ont la même logique : ils prennent l'état actuel et une *action* et retourne le nouvel état. Ils "accumulent" les *actions* au cours du temps et retourne à chaque fois la nouvelle valeur de l'état qui est l'accumulateur.*
+
+### Exemple basique
+
+Par exemple, si nous avons un bouton qui incrémente un compteur contenu dans l'état, nous pourrions avoir une *action* qui a une propriété *type* **'inc_count'** :
+
+```jsx
+function handleClick() {
+  dispatch({ type: 'inc_count' });
+}
+```
+
+Voici un exemple complet basique pour comprendre le fonctionnement :
+
+```jsx
+import { useReducer } from 'react';
+
+function reducer(state, action) {
+  if (action.type === 'inc_count') {
+    return {
+      count: state.count + 1
+    };
+  }
+  throw Error('Action inconnue.');
+}
+
+export default function Counter() {
+  const [state, dispatch] = useReducer(reducer, { count: 0 });
+
+  return (
+    <>
+      <button onClick={() => {
+        dispatch({ type: 'inc_count' })
+      }}>
+        +1
+      </button>
+      <p>Le compteur vaut {state.count}.</p>
+    </>
+  );
+}
+```
+
+Evidemment, dans cet exemple trivial, utiliser `useReducer()` n'a aucun intérêt, mais nous devons commencer par un exemple très simple pour bien comprendre les étapes.
+
+L'état initial est `{count: 0}`.
+
+Lorsque l'utilisateur clique sur le bouton, une *action* `{type: 'inc_count'}` est envoyée en utilisant la fonction *dispatch* (qui signifie justement expédier / envoyer).
+
+Le *reducer* reçoit alors en premier argument l'état actuel en premier argument et l'*action* en second argument.
+
+Il met à jour l'état en fonction de la propriété *type* de l'*action* et des éventuelles données contenues dans celle-ci.
+
+Il doit retourner le nouvel état.
+
+Pour résumer :
+
+**Etat initial => dispatch(action) => reducer(etatActuel, action) => nouvel état**
+
