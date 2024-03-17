@@ -916,3 +916,305 @@ Il ne faut pas abuser du *Context*, en *React* il n'est pas rare que des dizaine
 - ***Routing* :** la plupart des solutions de *React* pour le routing utilise en fait le *Context*. Nous verrons cela dans la suite de la formation.
 - **Gérer l'état global :** nous verrons que dans les applications importantes il peut être efficace de gérer l'état en combinant *Context* et le *hook* `useReducer()`.
 
+## Exemple d'utilisation du hook `useContext()`
+
+### Création de `ThemeContext.js`
+
+Dans notre application, créez un dossier `context` dans `src`.
+
+Dans ce dossier, créez le fichier `ThemeContext.js` :
+
+```jsx
+import { createContext } from 'react';
+
+const ThemeContext = createContext('primary');
+export default ThemeContext;
+```
+ 
+### Création du composant `Button.jsx`
+
+Dans le dossier `components`, créez le fichier `Button.jsx` :
+
+```jsx
+import { useContext } from 'react';
+import ThemeContext from '../context/ThemeContext';
+
+export default function Button({ text, className, ...props }) {
+  const theme = useContext(ThemeContext);
+
+  return (
+    <button
+      {...props}
+      className={`btn btn-${theme} ${className ? className : ''}`}
+    >
+      {text}
+    </button>
+  );
+}
+```
+
+**{ text, className, ...props } :** permet de récupérer les *props* *text* et *className* grâce à la déstructuration et de mettre le reste des *props* dans une propriété *props* grâce à l'opérateur **rest (...)**.
+
+>*N'hésitez pas à revoir l'opérateur **rest** -également appelé paramètres du reste-, qui ne doit pas être confondu avec l'opérateur **spread** -également appelé opérateur de décomposition-, dans la formation **JavaScript**.*
+
+**{ ...props } :** permet de copier toutes les propriétés de l'objet *props* (grâce à l'opérateur *spread*) et de les passer comme *props* au composant natif *button*.
+
+Notez que nous récupérons le `Context` avec le hook `useContext()`.
+
+Nous l'utilisons pour dynamiquement changer la classe de nos boutons.
+
+### Modification du partial `_themes.scss`
+
+```scss
+.btn-secondary {
+  background-color: #2980b9;
+  color: white;
+  border: 2px solid #2980b9;
+}
+```
+ 
+### Modification du composant `AddTodo.jsx`
+
+Nous utilisons notre nouveau composant `Button` :
+
+```jsx
+import { useState } from 'react';
+import Button from './Button';
+
+export default function AddTodo({ addTodo }) {
+  const [value, setValue] = useState('');
+
+  function handleChange(e) {
+    const inputValue = e.target.value;
+    setValue(inputValue);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && value.length) {
+      addTodo(value);
+      setValue('');
+    }
+  }
+
+  function handleClick() {
+    if (value.length) {
+      addTodo(value);
+      setValue('');
+    }
+  }
+
+  return (
+    <div className="d-flex justify-content-center align-items-center mb-20">
+      <input
+        type="text"
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        value={value}
+        className="mr-15 flex-fill"
+        placeholder="Ajouter une tâche"
+      />
+      <Button text="Ajouter" onClick={handleClick} />
+    </div>
+  );
+}
+```
+
+### Modification du composant `TodoItem.jsx`
+
+Nous utilisons notre nouveau composant `Button` :
+
+```jsx
+import Button from './Button';
+
+export default function TodoItem({
+  todo,
+  deleteTodo,
+  toggleTodo,
+  editTodo,
+  selectTodo,
+}) {
+  return (
+    <li
+      onClick={selectTodo}
+      className={`mb-10 d-flex flex-row justify-content-center align-items-center p-10 ${
+        todo.selected ? 'selected' : ''
+      }  `}
+    >
+      <span className="flex-fill">
+        {todo.content} {todo.done && '✅'}
+      </span>
+      <Button
+        text="Valider"
+        className="mr-15"
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleTodo();
+        }}
+      />
+      <Button
+        text="Modifier"
+        className="mr-15"
+        onClick={(e) => {
+          e.stopPropagation();
+          editTodo();
+        }}
+      />
+      <Button
+        text="Supprimer"
+        onClick={(e) => {
+          e.stopPropagation();
+          deleteTodo();
+        }}
+      />
+    </li>
+  );
+}
+```
+ 
+### Modification du composant `EditTodo.jsx`
+
+Nous utilisons notre nouveau composant `Button` :
+
+```jsx
+import { useState } from 'react';
+import Button from './Button';
+
+export default function EditTodo({ todo, editTodo, cancelEditTodo }) {
+  const [value, setValue] = useState(todo.content);
+
+  function handleChange(e) {
+    const inputValue = e.target.value;
+    setValue(inputValue);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && value.length) {
+      editTodo(value);
+      setValue('');
+    }
+  }
+
+  function handleClick() {
+    if (value.length) {
+      editTodo(value);
+      setValue('');
+    }
+  }
+
+  return (
+    <div className="d-flex justify-content-center align-items-center mb-10">
+      <input
+        type="text"
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        value={value}
+        className="mr-15 flex-fill"
+        placeholder="Ajouter une tâche"
+      />
+      <Button text="Sauvegarder" className="mr-15" onClick={handleClick} />
+      <Button text="Annuler" className="mr-15" onClick={cancelEditTodo} />
+    </div>
+  );
+}
+```
+ 
+### Modification du composant `App.jsx`
+
+Dans le composant racine nous ajoutons une liste d'options permettant de modifier le thème des boutons.
+
+La liste est liée de manière bidirectionnelle avec l'état local *theme* grâce à `value={theme} onChange={handleThemeChange}`.
+
+Nous utilisons ensuite un fournisseur de *Context* pour lier la valeur de la variable d'état *theme* au *Context* fourni aux composants enfants du composant racine (donc tous les autres composants) grâce à `<ThemeContext.Provider value={theme}>`.
+
+```jsx
+import { useState } from 'react';
+import TodoList from './components/TodoList';
+import AddTodo from './components/AddTodo';
+import ThemeContext from './context/ThemeContext';
+
+function App() {
+  const [todoList, setTodoList] = useState([]);
+  const [theme, setTheme] = useState('primary');
+
+  function addTodo(content) {
+    const todo = {
+      id: crypto.randomUUID(),
+      done: false,
+      edit: false,
+      selected: false,
+      content,
+    };
+    setTodoList([...todoList, todo]);
+  }
+
+  function deleteTodo(id) {
+    setTodoList(todoList.filter((todo) => todo.id !== id));
+  }
+
+  function toggleTodo(id) {
+    setTodoList(
+      todoList.map((todo) =>
+        todo.id === id ? { ...todo, done: !todo.done } : todo
+      )
+    );
+  }
+
+  function toggleTodoEdit(id) {
+    setTodoList(
+      todoList.map((todo) =>
+        todo.id === id ? { ...todo, edit: !todo.edit } : todo
+      )
+    );
+  }
+
+  function editTodo(id, content) {
+    setTodoList(
+      todoList.map((todo) =>
+        todo.id === id ? { ...todo, edit: false, content } : todo
+      )
+    );
+  }
+
+  function selectTodo(id) {
+    setTodoList(
+      todoList.map((todo) =>
+        todo.id === id
+          ? { ...todo, selected: !todo.selected }
+          : { ...todo, selected: false }
+      )
+    );
+  }
+
+  function handleThemeChange(e) {
+    setTheme(e.target.value);
+  }
+
+  return (
+    <ThemeContext.Provider value={theme}>
+      <div className="d-flex justify-content-center align-items-center p-20">
+        <div className="card container p-20">
+          <h1 className="mb-20 d-flex justify-content-center align-items-center">
+            <span className="flex-fill">Liste de tâches</span>
+            <select value={theme} onChange={handleThemeChange}>
+              <option value="primary">Rouge</option>
+              <option value="secondary">Bleu</option>
+            </select>
+          </h1>
+          <AddTodo addTodo={addTodo} />
+          <TodoList
+            todoList={todoList}
+            deleteTodo={deleteTodo}
+            toggleTodo={toggleTodo}
+            toggleTodoEdit={toggleTodoEdit}
+            editTodo={editTodo}
+            selectTodo={selectTodo}
+          />
+        </div>
+      </div>
+    </ThemeContext.Provider>
+  );
+}
+
+export default App;
+```
+
