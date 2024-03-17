@@ -816,4 +816,103 @@ li {
 }
 ```
 
+## Présentation du hook `useContext()` et de `createContext()`
+
+## A quoi sert *Context* ?
+
+Nous avons vu jusqu'à maintenant que pour passer des informations d'un composant parent vers un composant enfant il suffisait d'utiliser des *props*.
+
+Mais passer des *props* peut devenir très verbeux et pénible s'il faut les passer très loin en bas de l'arbre des composants ou si plusieurs branches ont besoin des mêmes *props*.
+
+Par exemple, nous avons besoin d'une information dans tous les composants en bleu. Nous devons donc passer en *prop* cette information 8 fois :
+
+![Diagram with a tree of ten nodes, each node with two children or less. The root node contains a bubble representing a value highlighted in purple. The value flows down through the two children, each of which pass the value but do not contain it. The left child passes the value down to two children which are both highlighted purple. The right child of the root passes the value through to one of its two children - the right one, which is highlighted purple. That child passed the value through its single child, which passes it down to both of its two children, which are highlighted purple.](/00-assets/images/React/passing_data_prop_drilling.webp)
+
+***Context* permet de rendre des informations disponibles dans tous les composants enfant d'un composant même s'ils sont très éloignés.**
+
+![Diagram with a tree of ten nodes, each node with two children or less. The root parent node contains a bubble representing a value highlighted in orange. The value projects down directly to four leaves and one intermediate component in the tree, which are all highlighted in orange. None of the other intermediate components are highlighted.](/00-assets/images/React/passing_data_context_far.webp)
+
+
+### Utilisation du *Context*
+
+#### 1 - Créer le *Context*
+
+Pour créer un *Context*, on utilise un fichier pour le déclarer avec `createContext()` et on l'exporte.
+
+**On passe la valeur que l'on souhaite partager en argument.**
+
+Par convention le nom du fichier est suffixé par *Context*, par exemple `ExempleContext.js` :
+
+```jsx
+import { createContext } from 'react';
+
+export const ExempleContext = createContext(42);
+```
+
+#### 2 - Utiliser le *Context*
+
+Pour ensuite l'utiliser dans n'importe quel composant il suffit de l'importer et d'utiliser le *hook* `useContext()` :
+
+```jsx
+import { useContext } from 'react';
+import { ExempleContext } from './ExempleContext.js';
+
+export default function UnComposant() {
+  const data = useContext(ExempleContext);
+}
+```
+
+**Comme tous les *hooks* il est obligatoire d'utiliser `useContext()` au premier niveau d'un composant (ni imbriqué dans un bloc conditionnel, ni dans une fonction).**
+
+#### 3 - Fournir un autre *Context*
+
+Pour fournir (*provide*) un *Context* il faut l’importer et utiliser le composant `<NomContext.provider value={valeur}>` :
+
+```jsx
+import ExempleContext from './ExempleContext';
+import UnComposantEnfant from './UnComposantEnfant';
+
+export default function UnComposantParnet() {
+  return (
+    <ExempleContext.Provider value={100}>
+      <UnComposantEnfant />
+    </ExempleContext.Provider>
+  );
+}
+```
+
+**Cela permet de changer la valeur fournie pour tous les composants situés plus bas dans l'arbre.**
+
+*Pour comprendre le fonctionnement du **Context** vous pouvez faire le parallèle avec l'héritage des propriétés **CSS**. En **CSS**, quand vous appliquez une propriété sur un élément, par exemple `color: blue` sur une `<div>`, tous les éléments en-dessous seront bleu sauf si vous écrasez cette propriété pour un autre élément plus bas sur le **DOM**.*
+
+**Le *Context* n'est pas forcément une valeur statique vous pouvez très bien le lier à une valeur dynamique, par exemple un état :**
+
+```jsx
+import ExempleContext from './ExempleContext';
+import UnComposantEnfant from './UnComposantEnfant';
+import { useState } from 'react';
+
+export default function UnComposantParnet() {
+  const [valeur, setValeur] = useState(42);
+
+  return (
+    <ExempleContext.Provider value={valeur}>
+      <UnComposantEnfant />
+    </ExempleContext.Provider>
+  );
+}
+```
+ 
+### Quand utiliser le *Context* ?
+
+Il ne faut pas abuser du *Context*, en *React* il n'est pas rare que des dizaines de *props* soient passées le long de l'arbre des composants sur une application complexe. Ce n'est pas une raison pour les remplacer par *Context*.
+
+**En effet, avec les *props* il est facile de voir d'où elles viennent et où elles vont. Elles sont donc plus facilement lisibles et maintenables.**
+
+**Voici des exemples d'usages recommandés du *Context* par l'équipe *React* :**
+
+- **Les thèmes :** si votre application a deux ou plusieurs thèmes (par exemple un mode sombre), vous pouvez utiliser un *Context* pour indiquer le mode choisi aux composants qui ont besoin d'être adapté suivant le mode.
+- **L'utilisateur connecté :** de nombreux composants partout dans l'application ont souvent besoin d'avoir des informations sur l'utilisateur connecté. Cela permet de rendre disponible ces informations partout dans l'application.
+- ***Routing* :** la plupart des solutions de *React* pour le routing utilise en fait le *Context*. Nous verrons cela dans la suite de la formation.
+- **Gérer l'état global :** nous verrons que dans les applications importantes il peut être efficace de gérer l'état en combinant *Context* et le *hook* `useReducer()`.
 
