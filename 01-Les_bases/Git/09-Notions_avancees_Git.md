@@ -1,2 +1,0 @@
-## Notion avancées de Git
-
