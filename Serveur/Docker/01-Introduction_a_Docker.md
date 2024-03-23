@@ -152,3 +152,94 @@ Ces systèmes de fichiers fonctionnent en créant des couches (*layers*). Ils so
 
 Nous étudierons en détails le fonctionnement de ces systèmes de fichiers lorsque nous verrons les images.
 
+## L’écosystème Docker
+
+### Le *Docker Engine*
+
+**Le *Docker Engine* ou moteur *Docker* est une application sur un modèle client / serveur.**
+
+Il est composé de **trois parties** principales.
+
+#### 1 - Le serveur *dockerd*
+
+**Le serveur *dockerd*** qui est un service, également appelé démon, qui est exécuté en permanence. C'est lui qui va créer et gérer tous les objets *Docker* : par exemples les images, les conteneurs, les réseaux et les volumes.
+
+#### 2 - L'*API REST*
+
+L'*API REST* spécifie les interfaces que les programmes peuvent utiliser pour communiquer avec le service *dockerd*.
+
+#### 3 - Le client (*CLI*)
+
+**Le client** (un *CLI* pour *command line interface*) permet d'exécuter des commandes *Docker*. Le *CLI* traduit les commandes entrées par l'utilisateur en requêtes pour l'*API REST*.
+
+Le schéma officiel suivant montre les relations entre le client, le démon et la bibliothèque d'images (*Docker Hub* ou un *registry* privé) dont nous avons parlé dans la leçon précédente :
+
+![](/00-assets/images/Docker/image-1_04_1.png)
+
+### Premier aperçu des objets *Docker*
+
+#### Les images
+
+**Une image *Docker* est un schéma en lecture seule qui contient les instructions pour créer un conteneur *Docker*.**
+
+Le plus souvent, une image est elle-même basée sur une autre image avec des configurations spécifiques.
+
+Par exemple, il est possible de prendre une image *Node.js* et d'ajouter les fichiers nécessaires au fonctionnement de votre application.
+
+**Pour créer une image, il faut utiliser un fichier spécifique appelé *Dockerfile*** qui a une syntaxe particulière permettant de définir les étapes nécessaires à la création de l'image.
+
+**Chaque instruction dans un *Dockerfile* permet de créer une couche dans l'image.**
+
+Lorsque vous modifiez le *Dockerfile* et que vous rebuildez l'image, **seules les couches modifiées sont rebuild**. C'est l'une des raisons pourquoi *Docker* est beaucoup plus rapide que les machines virtuelles.
+
+#### Les conteneurs
+
+**Un conteneur est une instance d'une image en cours d'exécution qui peut prendre des options de configuration passées lors du lancement.**
+
+Vous pouvez donc avoir de nombreux conteneurs à partir de la même image.
+
+C'est la même logique avec un programme que vous pouvez lancer plusieurs fois en même temps créant ainsi plusieurs processus.
+
+Pour créer, démarrer, arrêter, déplacer ou supprimer un conteneur il faut utiliser le *CLI* dont nous avons parlé.
+
+Nous verrons qu'il est possible de connecter un conteneur à un ou plusieurs réseaux, qu'il est également possible de lui attacher un ou plusieurs volumes de stockage.
+
+Comme nous l'avons vu, par défaut, un conteneur est isolé des autres conteneurs et de la machine hôte. Il est bien sûr possible de paramétrer cette isolation en modifiant les réseaux auxquels le conteneur est connecté, le stockage etc.
+
+#### Les volumes
+
+**Les volumes permettent aux conteneurs de stocker des données.**
+
+Ils sont initialisés lors de la création d'un conteneur.
+
+Ils permettent de persister et de partager des données d'un conteneur.
+
+Ces volumes sont stockés en dehors du système *UnionFS* que nous avons vu. Ils permettent en effet de conserver des données même si un conteneur est supprimé, mis à jour ou rechargé.
+
+### Scaler avec *Docker*
+
+Pour l'instant nous avons vu les objets permettant de lancer une ou plusieurs instances d'une image sous la forme de conteneurs.
+
+Mais au fur et à mesure que votre application grandit, vous voudrez lancer plusieurs conteneurs sur le même hôte ou plusieurs conteneurs sur plusieurs hôtes.
+
+Des outils extrêmement puissants permettent de gérer pour vous la problématique du scaling sur plusieurs hôtes.
+
+#### Exécuter une application multi-conteneurs avec *Docker compose*
+
+***Docker Compose* est l'outil *Docker* permettant de définir et de lancer des applications multi-conteneurs.**
+
+Nous verrons que nous aurons simplement à utiliser un fichier de configuration spécifique pour définir **les services de votre application.**
+
+Avec *Docker Compose* vous pourrez ainsi lancer tous les services de votre application en une commande.
+
+Par exemple, un service pour votre base de données, un service pour l'authentification et un troisième pour votre application serveur.
+
+#### Utiliser un orchestrateur pour du multi-hôte avec *Docker swarm* ou *Kubernetes*
+
+***Docker Swarm* est un orchestrateur qui permet de gérer facilement plusieurs conteneurs (souvent nombreux) sur de multiples serveurs.**
+
+Nous verrons que ce sont les mêmes fichiers de configuration que *Docker Compose* mais pas les mêmes commandes.
+
+***Kubernetes* est également un orchestrateur mais développé par *Google* et non par *Docker*.**
+
+C'est un outil extrêmement puissant permettant de faire énormément de choses (auto-scaling notamment). Il permet de faire beaucoup plus de choses que *Docker Swarm* mais est bien plus long à maîtriser. Vous n'en aurez besoin que dans des cas spécifiques (énormes charges -applications vidéos très connues par exemple-, machine-learning etc). 
