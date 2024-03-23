@@ -243,3 +243,125 @@ Nous verrons que ce sont les mêmes fichiers de configuration que *Docker Compos
 ***Kubernetes* est également un orchestrateur mais développé par *Google* et non par *Docker*.**
 
 C'est un outil extrêmement puissant permettant de faire énormément de choses (auto-scaling notamment). Il permet de faire beaucoup plus de choses que *Docker Swarm* mais est bien plus long à maîtriser. Vous n'en aurez besoin que dans des cas spécifiques (énormes charges -applications vidéos très connues par exemple-, machine-learning etc). 
+
+## Installation de Docker
+
+### Installation sur votre machine *Ubuntu*
+
+Installez *Docker Desktop* en allant sur ce [lien](https://docs.docker.com/desktop/install/linux-install/).
+
+### Installation sur *Ubuntu* sans GUI (sans Docker Desktop)
+
+**A suivre uniquement si vous ne voulez pas utiliser *Docker Desktop*.**
+
+Il faut commencer par supprimer les anciens paquets de *Docker* pour éviter tout conflit s'il était installé préalablement :
+
+```bash
+sudo apt-get remove docker docker-engine docker.io containerd runc
+```
+
+Il faut ensuite mettre à jour votre liste de paquets disponibles pour *APT* :
+
+```bash
+sudo apt-get update
+```
+
+Il faut installer certaines dépendances :
+
+```bash
+sudo apt-get install     ca-certificates     curl     gnupg
+```
+
+Ensuite, il faut ajouter la clé *GPG* de *Docker* :
+
+```bash
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+```
+
+Cette clé permet la transmission des paquets de manière signés et chiffrés, garantissant ainsi leurs authenticité, intégrité et confidentialité. Autrement dit, personne ne pourra se faire passer pour *Docker* pour installer des paquets.
+
+Il faut ensuite ajouter le répertoire officiel de *Docker* :
+
+```bash
+echo   "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu   "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" |   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+Et enfin, il ne reste qu'à installer la dernière version :
+
+```bash
+sudo apt-get update &&sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+Pour vérifier l'installation, faites simplement :
+
+```bash
+sudo docker run hello-world
+```
+
+Vous aurez alors le message suivant :
+
+```bash
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+  1. The Docker client contacted the Docker daemon.
+  2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+    (amd64)
+  3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+  4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+  $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+  https://hub.docker.com/
+
+For more examples and ideas, visit:
+  https://docs.docker.com/get-started/
+```
+
+Vous êtes prêt à commencer à utiliser *Docker* !
+
+Si vous n'avez rien, lancez le démon *Docker* avec cette commande :
+
+```bash
+systemctl start docker
+```
+
+### Installation sur Windows ou sur MacOS
+
+Utilisez simplement l'exécutable disponible à cette [adresse](https://docs.docker.com/get-docker/)
+
+### Installation de *Visual Studio Code*
+
+*Visual Studio Code* est un éditeur de code extensible développé par *Microsoft*.
+
+Il a été créé en 2015 et est *open source* depuis sa création.
+
+Nous allons l'utiliser dans toutes les formations et le recommandons fortement car il est très performant et gratuit.
+
+Vous pouvez le télécharger [ici](https://code.visualstudio.com/).
+
+### Utilisation de *Git Bash* sur *Windows*
+
+Sur *Windows*, téléchargez et installer *Git* en utilisant l'exécutable officiel que vous trouverez [ici](https://git-scm.com/download/win).
+
+Par défaut, sur *Windows*, le terminal est *Powershell*.
+
+Dans tous les cours nous utilisons *bash*, qui est le terminal le plus utilisé et que vous retrouverez sur les serveurs et sur la plupart des environnements de développement.
+
+Sur *Windows*, ouvez *VS Code*.
+
+Faites *Ctrl + Shift + p* ou *View* puis *Command Palette*.
+
+Entrez *select default shell* puis faites entrée.
+
+Ensuite sélectionnez *Git Bash*.
+
+Vous pouvez ensuite faire *Terminal* puis *New Terminal* et vous aurez un terminal *Bash* ! 
+
