@@ -981,3 +981,83 @@ Puis à tout supprimer :
 docker system prune -a
 ```
 
+## Docker pause, unpause, rename et exec
+
+### Renommer un conteneur
+
+Nous avons vu qu'il est possible de passer un nom lors de la création d'un conteneur avec `docker container create` ou `docker container run` en utilisant l'option `--name`.
+
+Après la création d'un conteneur, il reste possible de changer de nom en utilisant la commande `docker container rename`.
+
+```bash
+docker container rename CONTENEUR NOUVEAU_NOM
+```
+
+Pour cibler le conteneur à renommer vous pouvez comme d'habitude utiliser le nom ou l'*ID* de celui-ci.
+
+### Mettre en pause et reprendre les processus dans d'un conteneur
+
+La commande `docker container pause` permet de suspendre tous les processus d'un ou de plusieurs conteneurs spécifiés.
+
+Il utilise en fait la fonctionnalité du noyau *Linux* des *freezer cgroup* qui permet de suspendre les processus sans envoyer de signaux (*SIGSTOP*). Cela permet en fait que les processus ne puissent pas réagir car aucun signal n'est envoyé et de les "geler".
+
+Ainsi, il est possible de mettre en pause et de reprendre n'importe quel processus.
+
+Pour reprendre les processus d'un ou plusieurs conteneurs *Docker* il suffit ensuite d'utiliser `docker container unpause`.
+
+Mettre en pause des conteneurs est utile dans de rares cas : par exemple si vous voulez mettre en pause des conteneurs trop gourmands en ressource sur certains serveurs le temps d'un pic de charge.
+
+### Exécuter des commandes dans des conteneurs en cours d'exécution
+
+**Pour exécuter des commandes dans des conteneurs en cours d'exécution il faut utiliser la commande `docker container exec`.**
+
+La commande `docker container exec` n'exécute la commande passée en argument que tant que le premier processus du conteneur (avec le *PID 1*) est en cours d'exécution.
+
+Vous pouvez passez également l'option `--detach` ou `-d` pour exécuter la nouvelle commande en arrière plan.
+
+Vous pouvez également utiliser les options `--interactive` ou `-i` et `--tty` ou `-t` que nous avons déjà vues.
+
+Prenons un exemple : nous allons commencer par démarrer un conteneur *redis* en arrière-plan avec le nom *redis* :
+
+```bash
+docker run -d --name redis redis
+```
+
+Nous allons ensuite exécuter le *CLI* de *redis* à l'intérieur du conteneur :
+
+```bash
+docker exec -it redis redis-cli
+```
+
+Nous pouvons ensuite taper une ou deux commandes redis qui fonctionneront :
+
+```bash
+set cle 42
+get cle
+```
+
+### Obtenir un *shell* dans n'importe quel conteneur en cours d'exécution
+
+Pour obtenir un terminal connecté à un *shell* dans n'importe quel conteneur vous pouvez utiliser :
+
+```bash
+docker exec -it redis bash
+```
+
+Si jamais *bash* n'est pas installé dans le conteneur, par exemple avec *alpine* vous pouvez bien sûr utiliser *sh* à la place :
+
+```bash
+docker exec -it redis sh
+```
+
+### Chemins sur Windows avec GitBash
+
+Si vous utilisez *GitBash* sur *Windows*, *Git Bash* tente de convertir les chemins de fichiers *POSIX* (comme */app*) en chemins de fichiers *Windows*.
+
+Ainsi, dans l'exemple de la vidéo, si vous utilisez */app*, *Git Bash* va essayer de convertir */app* en *C:/Program Files/Git/app *ce qui ne fonctionnera pas. Il faut donc faire :
+
+```bash
+docker container exec test mkdir //app
+``` 
+
+Pensez-y si vous rencontrez d'autres problèmes de chemins.
