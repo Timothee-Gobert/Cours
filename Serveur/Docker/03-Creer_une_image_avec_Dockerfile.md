@@ -566,3 +566,152 @@ RUN pwd
 ```
 
 `pwd` affichera */app/back*. 
+
+### Les instructions CMD et ENTRYPOINT
+
+#### Différence entre commande et point d'entrée
+
+Avant d'aborder les deux instructions suivantes, *CMD* et *ENTRYPOINT*, il faut expliquer ce que sont la commande et le point d'entrée d'un conteneur.
+
+Par défaut, *Docker* a un point d'entrée par défaut qui est */bin/sh -c* mais n'a pas de commande par défaut.
+
+Si l'on lance par exemple :
+
+```bash
+docker run -it ubuntu bash
+```
+
+Ici le point d'entrée reste celui par défaut, */bin/sh -c*, et la commande est *bash*.
+
+Cela signifie que c'est un *shell sh* qui va lancer la commande *bash*, ce qui est exécuté par *Docker* dans le conteneur est précisément :
+
+```sh
+/bin/sh -c bash
+```
+Autrement dit, c'est un nouveau *shell sh* qui va lancer un *shell bash* et avec lequel vous interagirez avec un *TTY* (terminal) grâce aux options `-it`.
+
+**Ce qu'il faut absolument comprendre est que la commande est passée au point d'entrée,** et que celui-ci est par défaut */bin/sh -c*.
+
+Donc lorsque nous utilisons l'instruction `CMD`, comme nous le verrons juste après, cela revient à faire exécuter tout ce que vous passez par un *shell sh* par défaut.
+
+Vous pouvez changer ce comportement par défaut en modifiant le point d'entrée grâce à `ENTRYPOINT`.
+
+Dans ce cas, ce ne sera plus *sh* qui lancera la commande mais **l'exécutable que vous précisez.**
+
+#### L'instruction `CMD`
+
+**L'instruction `CMD` permet de fournir la commande exécutée par défaut pour les conteneurs lancés depuis l'image.**
+
+Il ne peut y avoir qu'**une seule instruction `CMD` par *Dockerfile***
+
+Il existe trois formes pour l'instruction `CMD` : la forme *exec*, la forme *shell* et la forme en utilisation conjointe avec `ENTRYPOINT`.
+
+Comme pour `RUN`, la forme *exec* est :
+
+```dockerfile
+CMD ["exécutable","param1","param2"]
+```
+
+Dans ce cas l'exécutable n'est pas lancé par un *shell*.
+
+La forme *shell* est :
+
+```dockerfile
+CMD commande param1 param2
+```
+
+Dans ce cas, la commande est lancée par le *shell sh* par défaut avec les paramètres spécifiés (en utilisant */bin/sh -c*).
+
+**La forme recommandée par *Docker* est la forme *exec*.**
+
+#### L'instruction `ENTRYPOINT`
+
+**L'instruction `ENTRYPOINT` permet de configurer un conteneur qui sera lancé comme un exécutable.**
+
+Autrement dit, elle permet de configurer la commande qui sera toujours exécutée lorsque vous lancerez un conteneur.
+
+L'instruction `ENTRYPOINT` a aussi une forme *shell* et *exec*. Cependant, comme la forme *shell* est déconseillée, nous ne montrerons que la forme *exec* :
+
+```dockerfile
+ENTRYPOINT ["exécutable", "param1", "param2"]
+```
+
+#### Interaction entre `CMD` et `ENTRYPOINT`
+
+Elle s'utilise en combinaison avec l'instruction `CMD`.
+
+L'usage recommandé est d'utiliser `ENTRYPOINT` pour définir les commandes et les arguments stables et d'utiliser les arguments par défaut qui sont plus susceptibles d'être changés par l'utilisateur dans `CMD`.
+
+Ce qu'il faut retenir est qu'au moins une instruction `CMD` ou `ENTRYPOINT` doit être présente dans un *Dockerfile*.
+
+`ENTRYPOINT` doit être utilisé lorsqu'on utilise le conteneur comme un exécutable.
+
+`CMD` doit alors être utilisé pour définir des arguments par défaut pour `ENTRYPOINT`.
+
+Prenons un exemple pour bien comprendre, considérons le *Dockerfile* suivant :
+
+```dockerfile
+FROM alpine
+ENTRYPOINT ["/bin/ping"]
+CMD ["localhost"]
+```
+
+Construisons notre image de test :
+
+```bash
+docker build -t test .
+```
+
+Et lançons là sans rien :
+
+```bash
+docker run test
+```
+
+Sans surprise, nous obtenons :
+
+```bash
+PING localhost (127.0.0.1): 56 data bytes
+64 bytes from 127.0.0.1: seq=0 ttl=64 time=0.121 ms
+64 bytes from 127.0.0.1: seq=1 ttl=64 time=0.105 ms
+64 bytes from 127.0.0.1: seq=2 ttl=64 time=0.108 ms
+64 bytes from 127.0.0.1: seq=3 ttl=64 time=0.104 ms
+```
+
+Car la commande qui est exécutée par défaut est */bin/ping localhost*.
+
+Maintenant essayons de faire :
+
+```bash
+docker run -it test bash
+```
+
+Nous obtenons alors :
+
+```bash
+ping: bad address 'bash'
+```
+
+Car la commande exécutée en définitive est */bin/ping bash*.
+
+Par contre nous pouvons faire :
+
+```bash
+docker run -it test google.fr
+```
+
+Cette fois-ci nous remplaçons la commande par défaut (*localhost)* par notre commande et nous aurons bien :
+
+```bash
+PING google.fr (216.58.204.131): 56 data bytes
+64 bytes from 216.58.204.131: seq=0 ttl=116 time=18.985 ms
+64 bytes from 216.58.204.131: seq=1 ttl=116 time=22.357 ms
+```
+
+Vous pouvez quand même supplanter le point d'entrée avec l'option `--entrypoint` :
+
+```bash
+docker run -it --entrypoint="/bin/sh" test
+```
+
+Dans ce cas ce ne sera plus la commande */bin/ping* mais */bin/sh* qui sera exécutée. 
