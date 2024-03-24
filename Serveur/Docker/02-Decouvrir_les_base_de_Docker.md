@@ -711,3 +711,273 @@ Pour en plus supprimer les images qui sont *taguées*, donc toutes les images sa
 ```bash
 docker system prune -a
 ```
+
+## Le cycle de vie d'un conteneur
+
+### Créer un conteneur sans l'exécuter
+
+Nous avons vu que `docker run image` permettait de réaliser un ensemble d'actions et notamment de créer un conteneur en mode détaché (arrière-plan).
+
+**La commande `docker container create` permet de créer un conteneur mais de ne pas l'exécuter.**
+
+C'est utile lorsque vous souhaitez créer un conteneur avec une configuration spécifique et le démarrer lorsque vous en aurez besoin.
+
+Le statut initial d'un conteneur créé avec cette commande est *CREATED*.
+
+Faites par exemple :
+
+```bash
+docker container create alpine
+```
+
+Puis faites `docker container ls -a`. Vous verrez que le conteneur a le statut *Created*.
+
+Lorsque vous faites cette commande, l'*ID* du conteneur est affiché pour que vous puissiez le démarrer lorsque vous en avez besoin.
+
+La commande vous affichera ainsi quelque chose comme :
+
+```
+25ce86f0edead3d3eeece53ae8f31225648b7fbbe94d8a7d539988bfbf6e386f
+```
+
+Par exemple, pour une configuration basique, vous pouvez créer un conteneur en mode interactif auquel un *TTY* sera rattaché et avec le nom "alpine1" :
+
+```bash
+docker container create --name alpine1 -it  alpine
+```
+
+### Exécuter un conteneur avec `docker container start`
+
+Vous pouvez ensuite démarrer un conteneur créé quand vous le souhaitez avec `docker container start`.
+
+Si le conteneur n'est pas interactif et n'est pas relié à un terminal, le containeur quittera comme si vous aviez fait `docker run alpine`.
+
+Par contre, si vous aviez créer le conteneur avec les options `-it`, le conteneur est alors interactif, vous pouvez le lancer avec l'option `-a` pour l'attacher à votre terminal :
+
+```bash
+docker container start -a alpine1
+```
+
+Quelques explications s'imposent.
+
+Premièrement, *start* ne peut pas changer les options ou la commande définies lors de la création. Si le conteneur n'est pas relié à un *TTY* et qu'il n'est pas interactif vous ne pourrez pas le changer.
+
+Ainsi si vous faites :
+
+```bash
+docker container create --name alpine2  alpine
+```
+
+Et que vous essayez d'avoir un terminal interactif :
+
+```bash
+docker container start -ai alpine2
+```
+
+Cela ne fonctionnera pas !
+
+Par contre, si vous faites la même chose avec un conteneur qui avait été créé avec les options `-it` vous pourrez faire :
+
+```bash
+docker container start -ai alpine1
+```
+
+**L'option `-a` pour `--attach` permet d'attacher la sortie standard (*STDOUT*) et la sortie d'erreur (*STDERR*) à votre terminal.** Autrement dit, cela permet d'afficher les flux de sortie de votre conteneur dans votre terminal comme si vous étiez dans le conteneur.
+
+**L'option `-i` pour `--interactive` permet d'attacher l'entrée standard (*STDIN*) de votre terminal au conteneur.** Autrement dit, cela permet de taper des commandes dans votre terminal comme si vous étiez dans le conteneur.
+
+A noter que `docker start -ai` revient à utiliser les commandes suivantes :
+
+```bash
+docker start alpine1
+docker attach alpine1
+```
+
+En effet, cette commande permet d'attacher les trois flux d'un conteneur (*STDIN*, *STDOUT* et *STDERR*) au terminal.
+
+### Stopper un conteneur en cours d'exécution avec `docker container stop`
+
+Nous allons recréer un conteneur en utilisant l'image *alpine* et qui va exécuter la commande `ping google.fr` :
+
+```bash
+docker container create alpine ping google.fr
+```
+
+Nous allons ensuite le démarrer en utilisant son *ID* :
+
+```bash
+docker container start 22c829bbb7990ccab66efaaf56bbdf3bd79ef90854a2ff6cce8db5f62a7b9922
+```
+
+Il faut bien sûr remplacer par l'*ID* qui vous a été fourni.
+
+Ensuite, nous allons lister tous les conteneurs en cours d'exécutions :
+
+```bash
+docker container ls
+```
+
+Vous aurez alors :
+
+![](/00-assets/images/Docker/image-2-09-1.png)
+
+*Vous pourriez en voir deux si vous aviez démarrer l'autre conteneur dans une leçon précédente.*
+
+Vous voyez que le statut du conteneur est *UP* donc en cours d'exécution.
+
+Vous pouvez d'ailleurs vérifier les logs du conteneur :
+
+```bash
+docker container logs stupefied_blackwell
+```
+
+#### Stopper un conteneur avec un *SIGTERM*
+
+Nous allons le stopper en utilisant la commande **`docker container stop` ou l'alias `docker stop`**.
+
+La commande accepte soit l'*ID* soit le nom du conteneur :
+
+```bash
+docker container stop stupefied_blackwell
+```
+
+Notez que vous pouvez utiliser la touche tabulation pour obtenir l'autocomplétion après avoir entré le début du nom du conteneur, c'est beaucoup plus rapide !
+
+Le conteneur va mettre plusieurs secondes à se couper et il vous sera retourné son nom, dans notre exemple :
+
+```bash
+stupefied_blackwell
+```
+
+En fait, `docker container stop` envoie un *SIGTERM* pour laisser au conteneur le temps d'effectuer des éventuelles tâches de nettoyage / sauvegarde avant de se couper.
+
+Si au bout de quelques secondes le conteneur est toujours en cours d'exécution, le démon envoie alors un *SIGKILL* au conteneur pour forcer son interruption.
+
+Ici c'est le cas car la commande *ping* n'a pas de code permettant de répondre à un *SIGTERM*.
+
+>*Si vous n'êtes pas à l'aise avec ces notions, nous vous conseillons de vous tourner vers le cours **Linux**.*
+
+#### Stopper un conteneur avec un *SIGKILL*
+
+Nous pouvons également forcer l'exécution du conteneur en cours d'exécution immédiatement en envoyant un *SIGKILL* avec la commande `docker container kill` ou l'alias `docker kill`.
+
+Nous allons recréer un conteneur en arrière plan :
+
+```bash
+docker run -d alpine ping google.fr
+```
+
+Puis nous allons le *kill* immédiatement avec la commande `docker container kill` :
+
+```bash
+docker container kill 7d99
+```
+
+Notez que vous pouvez taper que le début de l'*ID* du conteneur tant que celui-ci est discriminant (à savoir qu'aucun autre objet *Docker* commence par le même début).
+
+Ne vous inquiétez pas, si le début de l'*ID* n'est pas discriminant vous aurez une erreur qui vous préviendra :
+
+```bash
+Error response from daemon: Cannot kill container: 4: Multiple IDs found with provided prefix: 4
+```
+
+Il suffira alors de rentrer quelques caractères de plus.
+
+#### Stopper tous les conteneurs en cours d'exécution
+
+Pour stopper tous les conteneurs en cours d'exécution vous pouvez faire :
+
+```bash
+docker stop $(docker ps -aq)
+```
+
+Si vous avez fait le cours *Linux* cette commande est triviale. Sinon voici quelques explications :
+
+**$()** est une substitution de commande qui va exécuter la commande entre les parenthèses et la remplacer avec le résultat avant d'exécuter la `commande docker stop`.
+
+`docker ps -aq` ou `docker container ls -aq` permettent de lister tous les *ID* des conteneurs.
+
+Nous passons donc la liste des *ID* de tous les conteneurs à la commande `docker stop` qui va pouvoir stopper tous les conteneurs en cours d'exécution.
+
+### Petit exercice
+
+Maintenant que vous connaissez pas mal de choses nous allons faire un petit exercice.
+
+L'objectif est de démarrer trois conteneurs basés respectivement sur les images officielles de *MongoDB*, *redis* et *postgreSQL*.
+
+Ces conteneurs doivent être démarrés en arrière-plan et avec les noms *mongo*, *redis* et *postgre*.
+
+Pour commencer, recherchez le nom des images sur *Docker Hub*.
+
+Une fois toutes les images lancées, vérifiez bien que les conteneurs sont en cours d'exécution.
+
+Ensuite coupez tous les conteneurs et supprimez toutes les images.
+
+Voici la solution. Nous commençons par lancer toutes les images en arrière plan :
+
+```bash
+docker run -d --name mongo mongo
+docker run -d --name redis redis
+docker run -d --name postgres postgres
+```
+
+Ensuite, nous allons vérifier que tous les conteneurs sont bien en cours d'exécution :
+
+```bash
+docker container ls
+```
+
+Nous remarquons que nous n'avons que *mongo* et *redis* qui sont en cours d'exécution. Il faut alors comprendre pourquoi *postgres* ne fonctionne pas. C'est le moment d'utiliser `docker logs` !
+
+```bash
+docker logs postgres
+```
+
+Nous avons l'erreur suivante :
+
+```bash
+Error: Database is uninitialized and superuser password is not specified.
+        You must specify POSTGRES_PASSWORD to a non-empty value for the
+        superuser. For example, "-e POSTGRES_PASSWORD=password" on "docker run".
+
+        You may also use "POSTGRES_HOST_AUTH_METHOD=trust" to allow all
+        connections without a password. This is *not* recommended.
+
+        See PostgreSQL documentation about "trust":
+        https://www.postgresql.org/docs/current/auth-trust.html
+```
+
+L'erreur nous indique que sommes obligé de passer une option lors de la création pour définir un mot de passe ou accepter les connexions sans mot de passe à la base de données.
+
+Comme c'est un exercice nous allons utiliser le mode non recommandé sans mot de passe. Nous allons donc supprimer l'ancien conteneur arrêté et en redémarrer un avec l'option :
+
+```bash
+docker container prune
+```
+
+Nous validons, puis :
+
+```bash
+docker container run --name postgres -d -e POSTGRES_HOST_AUTH_METHOD=trust postgres
+```
+
+L'option `-e` que nous n'avions pas encore vue permet de définir **une variable d'environnement pour le conteneur.** Nous reverrons souvent cette option.
+
+Nous vérifions que cette fois-ci les conteneurs sont bien lancés :
+
+```bash
+docker container ls
+```
+
+Il ne nous reste plus qu'à les stopper :
+
+```bash
+docker container stop $(docker container ls -aq)
+```
+
+Puis à tout supprimer :
+
+```bash
+docker system prune -a
+```
+
