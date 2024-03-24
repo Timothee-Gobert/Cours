@@ -352,3 +352,217 @@ Pour les images utilisant *Ubuntu* ou *Debian*, il est recommandé de supprimer 
 
 `ENV DEBIAN_FRONTEND=noninteractive` permet de spécifier au gestionnaire de paquet *Debian* (*APT*) que nous sommes dans un environnement non interactif pour l'installation. Cela évite les prompts demandés par certains programmes lors de l'installation (par exemple *Git*).
 
+### Les instructions FROM, WORKDIR, RUN, COPY et ADD
+
+#### L'instruction `FROM`
+
+**Tous les *Dockerfile* doivent utiliser une instruction `FROM` comme première instruction.**
+
+La seule exception est que vous pouvez
+placer des commentaires et des arguments globaux avec l'instruction `ARG`.
+
+**L'instruction `FROM` permet d'indiquer quelle est l'image parente depuis laquelle vous allez effectuer les modifications spécifiées dans vos instructions.**
+
+Autrement dit, il s'agit de l'image de base ou d'origine à partir de laquelle vous allez construire votre image.
+
+Le plus souvent vous utiliserez une image de base provenant de *Docker Hub*. Nous l'étudierons en détails dans le prochain chapitre. Mais pour rappel *Docker Hub* est le *registry* officiel.
+
+**Un *registry* est un service d'hébergement qui contient les *repositories* des images.**
+
+**Un *repository* est un ensemble d'images *Docker* qui sont distinguées par des *tags*.**
+
+Autrement dit un *registry* est un ensemble de serveurs qui contient des *repositories* qui sont des ensembles d'images d'une libraire ou d'une application dont les versions sont distinguées par des *tags*.
+
+La syntaxe des arguments passés à `FROM` est :
+
+```dockerfile
+FROM image@digest
+```
+
+Ou :
+
+```dockerfile
+FROM image:tag
+```
+
+Ou :
+
+```dockerfile
+FROM image
+```
+
+Si vous spécifiez un *digest* (qui est l'*ID* de l'image), la version précise de l'image spécifiée sera utilisée.
+
+Si vous spécifiez un *tag*, la version de l'image respectant le tag sera utilisée. Le système *SemVer* (*semantic versioning*) est utilisé la plupart du temps pour les versions, donc :
+
+*image:2.2.3* signifie que la version 2.2.3 de l'image sera téléchargée.
+
+*image:2.2* signifie que la dernière version `2.2.*` sera téléchargée.
+
+*image:2* signifie que la dernière version `2.*.*` sera téléchargée.
+
+Si vous n'utilisez ni un *tag*, ni un *digest*, alors **par défaut, l'image avec le *tag latest* sera utilisée.**
+
+**A noter enfin que l'image de base recommandée officiellement pour la plupart des cas d'utilisation est *Alpine* car c'est la plus petite et la mieux contrôlée.**
+
+#### L'instruction `RUN`
+
+**L'instruction `RUN` permet d'exécuter toutes les commandes spécifiées dans une nouvelle couche (*layer*) au-dessus de la dernière image intermédiaire puis de sauvegarder le résultat.**
+
+L'image qui en résulte sera utilisée pour la prochaine instruction (également appelée étape).
+
+Il existe deux syntaxes pour l'instruction `RUN`, la forme *shell* et la forme *exec*.
+
+##### La forme *exec* de `RUN`
+
+**La forme *exec* utilise un tableau *JSON* de mots qui seront ensuite interprétés en une instruction.**
+
+**Elle permet d'exécuter des commandes avec des exécutables sans utiliser nécessairement un *shell*.**
+
+**Il est obligatoire d'utiliser des guillemets doubles** et non des guillemets simples.
+
+La syntaxe est :
+
+```dockerfile
+RUN ["executable", "param1", "param2"]
+```
+
+Par exemple :
+
+```dockerfile
+RUN ["/bin/bash", "-c", "echo Bonjour !"]
+```
+
+##### La forme *shell* de `RUN`
+
+**La forme *shell* permet d'exécuter une ou plusieurs commandes par un *shell* qui est par défaut *sh*.**
+
+Elle revient en fait à faire */bin/sh -c*. Ce qui permet de faire exécuter la commande passée à l'option `-c` par un nouveau *shell* non interactif et non connecté (*cf cours **Linux***).
+
+L'équivalent à la forme *exec* précédente est donc :
+
+```dockerfile
+RUN echo "Bonjour !"
+```
+
+##### `RUN` et le cache
+
+Extrêmement important : les instructions `RUN` ne sont pas invalidées automatiquement à chaque *build*.
+
+Par exemple, si vous avez l'instruction suivante dans un *Dockerfile* :
+
+```dockerfile
+RUN apt update && apt dist-upgrade -y
+```
+
+Les commandes *shell* ne seront exécutées que lors du premier *build*, ensuite ce sera le cache qui sera utilisé aux prochains *builds*.
+
+Pour empêcher l'utilisation du cache il faut utiliser l'option `--no-cache` lors du *build* :
+
+```bash
+docker build --no-cache
+```
+
+#### L'instruction `ADD`
+
+**L'instruction `ADD` permet de copier des fichiers, des dossiers ou des fichiers distants en utilisant des *URL* et de les ajouter au système de fichiers de l'image.**
+
+`ADD` permet d'automatiquement décompresser des archives locales passées en source avant de les copier dans la destination choisie (à noter que cela ne fonctionne pas pour les *URL*).
+
+La syntaxe est :
+
+```dockerfile
+ADD SOURCE... DESTINATION
+```
+
+Par exemple :
+
+```dockerfile
+ADD exemple.txt /app/
+```
+
+Copiera le fichier *exemple.txt* dans le dossier */app/* du conteneur.
+
+Notez que pour que *Docker* considère que la destination est **un dossier il faut obligatoirement qu'elle finisse par */*.**
+
+Notez également que si le chemin de destination n'existe pas (car les dossiers n'existent pas), il sera créé automatiquement par *Docker*.
+
+Si nous passons un dossier :
+
+```dockerfile
+ADD back/ /app/
+```
+
+Tout le contenu du dossier, y compris les sous-dossiers, seront copiés dans */app/*. Le dossier ne sera pas copié, uniquement son contenu.
+
+##### Les patterns
+
+Il est possible d'utiliser des *patterns*, comme avec *Linux*.
+
+Par exemple :
+
+```dockerfile
+ADD package* /app/
+```
+
+Copiera tous les fichiers commençant par *package* dans le dossier */app/* du conteneur.
+
+Les autres caractères disponibles pour les patterns proviennent du langage *Go* utilisé par *Docker*, nous avons donc accès principalement à :
+
+`*` qui signifie une séquence de caractères de toute longueur qui ne contient pas de caractères de séparation (par exemple espace ou tabulation).
+
+`?` qui signifie un seul caractère qui n'est pas un caractère de séparation.
+
+##### Utilisation de chemins relatifs
+
+Les chemins relatifs des sources sont interprétés en fonction du contexte du *build*. C'est-à-dire en fonction des fichiers et dossiers envoyés au démon lors du *build*, comme nous l'avons vu précédemment.
+
+Il n'est donc pas possible de remonter au dessus du dossier racine du contexte avec `...`
+
+*Docker* recommande fortement de n'u**tiliser que des chemins absolus** avec `WORKDIR` pour plus de lisibilité et de clarté.
+
+Les chemins relatifs des destinations sont interprétés en fonction de l'instruction `WORKDIR` (voir plus bas).
+
+Par exemple :
+
+```dockerfile
+ADD test.txt app/
+```
+
+Sera ainsi interprété comme `<WORKDIR>/app/`.
+
+#### L'instruction `COPY`
+
+**L'instruction `COPY` permet de copier des fichiers et des dossiers et de les ajouter au système de fichiers de l'image.**
+
+Les règles de syntaxe sont les mêmes que pour `ADD`. Les différences entre `COPY` et `ADD` sont les suivantes :
+
+`COPY` contrairement à `ADD`, n'accepte pas d'URL comme source.
+
+`COPY` contrairement à `ADD`, ne va pas automatiquement décompresser des archives locales passées comme source.
+
+**A noter que *Docker* recommande d'utiliser *COPY*** car vous ne risquez pas de décompresser des archives sans que vous le souhaitez.
+
+Il est donc recommandé de **n'utiliser `ADD` que lorsque vous avez besoin des fonctionnalités de décompression ou du téléchargement de sources depuis des URL.**
+
+#### L'instruction `WORKDIR`
+
+**L'instruction `WORKDIR` permet de modifier le répertoire de travail pour toutes les instructions `RUN`, `CMD`, `ENTRYPOINT`, `COPY` et `ADD`.**
+
+Vous pouvez utiliser plusieurs `WORKDIR` dans un *Dockerfile*, dans ce cas chaque `WORKDIR` s'appliquera pour les instructions jusqu'au prochain `WORKDIR`.
+
+Par exemple :
+
+```dockerfile
+WORKDIR /app
+```
+
+A noter que vous pouvez utiliser des variables d'environnement :
+
+```dockerfile
+ENV DIR=/app
+WORKDIR $DIR/back
+RUN pwd
+```
+
+`pwd` affichera */app/back*. 
