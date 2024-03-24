@@ -197,3 +197,158 @@ Vous pouvez maintenant démarrer un conteneur à partir de votre image en faisan
 docker run node
 ```
 
+### Les étapes de la construction d'une image
+
+#### Format du Dockerfile
+
+La syntaxe du *Dockerfile* est la suivante :
+
+```dockerfile
+# Commentaire
+INSTRUCTION arguments
+```
+
+Vous pouvez donc écrire des commentaires en les faisant précéder d'un `#`.
+
+Toutes les instructions, que nous étudierons une par une dans les prochaines leçons, sont en lettres majuscules.
+
+Les arguments sont passés à chaque instruction et peuvent être écrit sur plusieurs lignes pour plus de lisibilité en utilisant des`\` :
+
+```dockerfile
+INSTRUCTION argument1 argument2
+```
+
+#### Fonctionnement du *build* d'une image
+
+Nous allons maintenant rentrer dans les détails de la construction des images (*build*).
+
+Lorsque le démon *Docker* exécute chaque instruction, il crée une couche (*layer*) et la sauvegarde dans une nouvelle image si cela est nécessaire.
+
+En effet, pour rappel, **une image *Docker* est une pile de couches en lecture seule qui représentent les instructions du *Dockerfile***
+
+**Ces couches superposées comportent uniquement les différences par rapport à la couche précédente.** C'est ce qui les rend légères et performantes.
+
+Reprenons par exemple :
+
+```dockerfile
+FROM alpine
+RUN apk add --update nodejs
+COPY ./app.js /app/
+CMD [ "node", "/app/app.js" ]
+```
+
+Revoyons les étapes de *build* :
+
+```bash
+Sending build context to Docker daemon  3.072kB
+Step 1/4 : FROM alpine
+latest: Pulling from library/alpine
+188c0c94c7c5: Pull complete
+Digest: sha256:c0e9560cda118f9ec63ddefb4a173a2b2a0347082d7dff7dc14272e7841a5b5a
+Status: Downloaded newer image for alpine:latest
+  ---> d6e46aa2470d
+Step 2/4 : RUN apk add --update nodejs
+  ---> Running in c1a47e545dcc
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.12/main/x86_64/APKINDEX.tar.gz
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.12/community/x86_64/APKINDEX.tar.gz
+(1/8) Installing ca-certificates (20191127-r4)
+(2/8) Installing brotli-libs (1.0.9-r1)
+(3/8) Installing c-ares (1.16.1-r0)
+(4/8) Installing libgcc (9.3.0-r2)
+(5/8) Installing nghttp2-libs (1.41.0-r0)
+(6/8) Installing libstdc++ (9.3.0-r2)
+(7/8) Installing libuv (1.38.1-r0)
+(8/8) Installing nodejs (12.18.4-r0)
+Executing busybox-1.31.1-r19.trigger
+Executing ca-certificates-20191127-r4.trigger
+OK: 37 MiB in 22 packages
+Removing intermediate container c1a47e545dcc
+  ---> bf558394bb09
+Step 3/4 : COPY ./app.js /app/
+  ---> a2b4ec016b91
+Step 4/4 : CMD [ "node", "/app/app.js" ]
+  ---> Running in 40656f21e5d6
+Removing intermediate container 40656f21e5d6
+  ---> 6c2f2ab1a0e0
+Successfully built 6c2f2ab1a0e0
+Successfully tagged test:latest
+```
+
+L'instruction `FROM` crée une couche qui a pour *hash d6e46aa2470d* contenant l'image de base *alpine:latest*.
+
+Ensuite, un conteneur intermédiaire est créé à partir de cette image de base pour exécuter l'installation de *nodejs*. Ce conteneur a accès à une couche avec les droits d'écriture afin d'effectuer les modifications spécifiées par l'instruction (ici l'installation de *Node*). Une fois l'installation terminée, le conteneur est supprimé et une capture des différences sur le système de fichiers avec l'image précédente est sauvegardée dans une image dont le *hash* est *bf558394bb09*.
+
+Puis, depuis la nouvelle image le démon copie le contenu du contexte sur la machine hôte avec le chemin *./app.js* dans */app/*. Il n'a pas besoin d'exécuter de conteneur intermédiaire car il n'y a rien à exécuter, il suffit d'ajouter les nouveaux fichiers et de sauvegarder les différences dans une nouvelle image avec le *hash a2b4ec016b91*.
+
+Enfin, il ajoute la commande par défaut et l'exécute dans un conteneur intermédiaire. Il sauvegarde enfin la commande dans une nouvelle image avec le *hash 6c2f2ab1a0e0*.
+
+Comme il n'y a plus d'instructions, cette dernière image est le résultat du *build* et elle est donc taguée si vous avez passez l'option `-t` dans la commande de *build*.
+
+Ici le tag est *test:latest*.
+
+#### Fonctionnement du cache
+
+**Dès que c'est possible, *Docker* va réutiliser les images intermédiaires qui sont mises en cache pour accélérer (souvent énormément) la vitesse de *build*.**
+
+Lorsque *Docker* utilise le cache lors d'une étape de *build* vous verrez alors le message *Using cache* et l'étape est alors passée instantanément.
+
+Les étapes suivantes sont effectuées par le démon *Docker* afin de déterminer s'il peut ou non utiliser le cache :
+
+- pour chaque image du processus de construction (*build*), le démon va regarder toutes les images dérivées de cette image (images filles) et il va regarder si l'une de ces images contient **exactement la même instruction**. Si une image est trouvée, alors le cache est utilisé.
+
+- pour les instructions *COPY* et *ADD*, et **uniquement pour celles-ci**, le démon va comparer les *checksums* de chaque fichier pour voir s'ils correspondent tous (un *checksum* est un *hash* du contenu du fichier qui permet d'être certain que le fichier est exactement identique, en effet, si un seul bit d'un fichier est différent son *checksum* sera différent). Le cache n'est utilisé que si tous les *checksums* correspondent entre une image fille et les fichiers qui seraient ajoutés par l'instruction.
+
+Cela signifie que si nous avons :
+
+```dockerfile
+FROM ubuntu
+RUN apt-get update && apt-get -y dist-upgrade
+COPY ./app.js /app/
+CMD [ "node", "/app/app.js" ]
+```
+
+L'instruction `RUN` ne sera pas exécutée à chaque *build* et ce **même si des mises à jour du système plus récentes existent.**
+
+Le démon voit que l'instruction *RUN* est exactement identique lors des *build* suivants et il utilise le cache.
+
+Testez par vous même, une fois dans le dossier, faites deux fois :
+
+```bash
+docker build -t test .
+```
+
+Pour ne pas utiliser de cache il faut faire :
+
+**Notez que vous pouvez interdire l'utilisation du cache par le démon avec l'option `--no-cache`.**
+
+Par exemple :
+
+```bash
+docker build --no-cache -t test .
+```
+
+#### Optimisation du cache
+
+Voici les choses les plus importantes à retenir sur le cache :
+
+**Seules les instructions *RUN*, *COPY* et *ADD* créent des nouvelles couches et augmentent la taille d'une image.** Toutes les autres instructions ne font que créer des images intermédiaires temporaires et n'augmentent donc pas la taille de l'image finale.
+
+Il faut donc éviter de multiplier les commandes *RUN*, et essayez de regrouper toutes les commandes nécessaires dans une seule instruction *RUN*, par exemple :
+
+```dockerfile
+FROM ubuntu
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    git \
+    nodejs \
+    && rm -rf /var/lib/apt/lists/*
+```
+
+Il est alors recommandé de mettre une installation par ligne et de les mettre par ordre alphabétique pour s'y retrouver plus facilement.
+
+**Il est obligatoire de mettre `apt-get update` et `apt-get install` dans la même instruction `RUN`.** Dans le cas contraire vous aurez de graves problèmes de cache.
+
+Pour les images utilisant *Ubuntu* ou *Debian*, il est recommandé de supprimer */var/lib/apt/lists* qui contient le cache d'*APT* avec tous les paquets disponibles afin de réduire la taille de l'image.
+
+`ENV DEBIAN_FRONTEND=noninteractive` permet de spécifier au gestionnaire de paquet *Debian* (*APT*) que nous sommes dans un environnement non interactif pour l'installation. Cela évite les prompts demandés par certains programmes lors de l'installation (par exemple *Git*).
+
