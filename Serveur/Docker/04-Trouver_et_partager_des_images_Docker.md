@@ -70,3 +70,111 @@ Si vous cliquez sur une des versions (sur une des lignes), vous serez redirigé 
 Vous trouverez ensuite toujours des explications sur les versions des images, ici dans *Images Variants*.
 
 Vous aurez accès à une documentation, ici qui est sur [Github](https://github.com/nodejs/docker-node/blob/main/README.md#how-to-use-this-image).
+
+
+### Publier ses images sur Docker Hub
+
+#### Les *repositories* publics ou privés
+
+Sur *Docker Hub*, une fois que vous avez créé votre compte gratuit, rendez vous dans *Repositories*.
+
+Vous avez le droit à un seul *repository* privé gratuit, en revanche vous avez le droit à autant de *repository* publics que vous souhaitez.
+
+#### Publier une image sur un *repository*
+
+Pour publier une image, il faut commencer par se connecter :
+
+```sh
+docker login
+```
+
+Il faut entrer les identifiants que vous avez entrés lors de la création de votre compte.
+
+Suivant votre environnement votre mot de passe sera stocké de manière chiffrée (par exemple dans *keychain* sur *MacOS*) ou dans un fichier de configuration en *Base64* dans *$HOME/.docker/config.json*.
+
+Si vous vous connectez à *Docker Hub* depuis une machine partagée ou un serveur, il est très important de se déconnecter une fois terminé :
+
+```sh
+docker logout
+```
+
+Dans le cas contraire vous vous exposez au vol de votre mot de passe.
+
+Une fois connecté, il faut recréer un *tag* adapté à votre *repository*. Il doit être de la forme *utilisateur/repository* et éventuellement avec une version :*version*.
+
+L'utilisateur doit être l'utilisateur que vous avez créé sur *Docker hub*.
+
+Par exemple :
+
+```sh
+docker build -t jean/mon-app:1.0.0 .
+```
+
+Une fois votre image construite et correctement taguée, il suffit de la pusher, c'est-à-dire la publier sur *Docker Hub* pour la rendre accessible :
+
+```sh
+docker image push jean/mon-app:1.0.0
+```
+
+Vous pouvez ensuite tout supprimer :
+
+```sh
+docker system prune -a
+```
+
+Puis télécharger localement l'image que vous avez publiée :
+
+```sh
+docker image pull jean/mon-app:1.0.0
+```
+
+#### Chiffrer ses identifiants *GNU/Linux*
+
+Si vous êtes sur une distribution Debian, comme Ubuntu par exemple, suivez ces étapes pour pouvoir chiffrer vos identifiants Docker :
+
+```sh
+docker logout
+```
+
+Puis :
+
+```sh
+sudo apt install pass
+```
+
+Puis :
+
+```sh
+gpg2 --gen-key
+```
+
+Entrez bien votre nom et votre email lorsqu'ils sont demandés. Puis faites :
+
+```bash
+wget https://github.com/docker/docker-credential-helpers/releases/download/v0.6.3/docker-credential-pass-v0.6.3-amd64.tar.gz && tar -xf docker-credential-pass-v0.6.3-amd64.tar.gz && chmod +x docker-credential-pass && sudo mv docker-credential-pass /usr/local/bin/
+```
+
+Dans la commande suivante, entrez le même nom passé à gpg2
+
+```bash
+pass init "VOTRE NOM
+```
+
+Puis :
+
+```bash
+nano ~/.docker/config.json
+```
+
+Puis :
+
+```json
+{
+    "credsStore": "pass"
+}
+```
+
+Puis :
+```bash
+docker login
+```
