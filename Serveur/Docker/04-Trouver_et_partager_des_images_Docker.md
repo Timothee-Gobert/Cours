@@ -178,3 +178,41 @@ Puis :
 ```bash
 docker login
 ```
+### Les commandes save et load
+
+#### La commande `docker image save`
+
+La commande `docker image save` permet de sauvegarder une ou plusieurs images dans une archive *tar*.
+
+Les archives sont un moyen de partager facilement des images sans passer par un *repository*.
+
+Par défaut, l'archive est envoyée sur le flux de sortie standard (*STDOUT*), il faut donc utiliser l'option `-o` ou `--output` pour la sauvegarder dans un fichier.
+
+Par exemple :
+
+```sh
+docker image save -o mon_image.tar mon_image
+```
+
+A noter que vous pouvez bien sûr compresser l'archive, par exemple avec *gzip* :
+
+```sh
+docker save mon_image | gzip > mon_image.tar.gz
+```
+
+#### La commande `docker image load`
+
+La commande `docker image load` permet de charger une image depuis une archive passée en entrée standard.
+
+Vous pouvez utiliser une redirection :
+
+```sh
+docker image load < mon_image.tar
+```
+
+Et vous pouvez également utiliser l'option `-i` ou `--input` :
+
+```sh
+docker image load -i mon_image.tar
+```
+
