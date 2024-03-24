@@ -216,3 +216,38 @@ Et vous pouvez également utiliser l'option `-i` ou `--input` :
 docker image load -i mon_image.tar
 ```
 
+### Les commandes export et import
+
+#### La commande `docker container export`
+
+La commande `docker container export` permet d'exporter le système de fichiers d'un conteneur dans une archive *tar*.
+
+Attention ! Cette commande n'exporte pas les volumes associés au conteneur, que nous étudierons en détails dans un prochain chapitre.
+
+Par défaut, l'archive est envoyée sur le flux de sortie standard (*STDOUT*), il faut donc utiliser l'option `-o` ou `--output` pour la sauvegarder dans un fichier :
+
+```sh
+docker container export -o conteneur_fs.tar mon_conteneur
+```
+
+Vous pouvez également utiliser une redirection :
+
+```sh
+docker container export mon_conteneur > conteneur_fs.tar
+```
+
+#### La commande `docker image import`
+
+La commande `docker image import` permet d'importer le système de fichiers d'une archive *tar* pour créer une image.
+
+Elle accepte également les URLs, et vous pouvez donc récupérer des archives distantes. Si l'archive est compressée, le démon va automatiquement la décompresser et l'extraire.
+
+```sh
+docker image import http://exemple.com/exampleimage.tgz
+```
+
+Vous pouvez également utiliser une archive locale :
+
+```sh
+docker image import conteneur_fs.tar
+```
