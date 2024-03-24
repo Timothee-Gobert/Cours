@@ -1450,3 +1450,147 @@ Pour avoir le détails pour chaque éléments et non des totaux agrégés utilis
 docker system df -v
 ```
 
+## Récapitulatif et approfondissement
+
+Pour bien avoir en tête le fonctionnement des images avant d'aborder le prochain chapitre sur la création d'images, nous allons revoir quelques éléments et approfondir l'isolation des conteneurs.
+
+### Récapitulatif sur `docker run`
+
+**La commande `docker run` va commencer par créer un conteneur,** qui revient à :
+- créer un système de fichiers isolé pour le conteneur, ainsi qu'un réseau privé et un arbre des processus isolé.
+- créer une couche avec les droits d'écriture activés (*writable container layer*) au-dessus de la couche de l'image en lecture seule.
+- exécuter la commande prévue dans l'image en utilisant la configuration par défaut spécifiée. La configuration peut être relative à l'exécution en premier plan ou en arrière plan, à l'identification du conteneur, aux paramètres réseaux et à des limites d'utilisation des ressources (*CPU*, mémoire etc). Nous verrons justement toutes ces configurations dans le prochain chapitre.
+
+Par défaut également, la sortie d'erreur (*STDERR*) et la sortie standard (*STDOUT*) sont attachées à votre terminal pour que vous puissiez voir les flux de sortie de votre conteneur dans votre terminal directement.
+
+Par défaut, c'est comme si vous faisiez en fait :
+
+```bash
+docker run -a stdin -a stdout image
+```
+
+### L'isolation des conteneurs
+
+Nous allons faire quelques tests sur des conteneurs pour bien comprendre l'isolation.
+
+#### Tester l'isolation des systèmes de fichiers
+
+Nous allons vérifier l'isolation des systèmes de fichier des conteneurs.
+
+**Nous allons créer deux conteneurs à partir de la même image et vérifier qu'une modification sur le système de fichiers d'un des conteneurs ne modifie ni le système de fichiers de l'autre conteneur, ni celui de la machine hôte.**
+
+Autrement dit, nous allons vérifier l'isolation des conteneurs, du moins la partie système de fichiers !
+
+```bash
+docker run -it alpine
+```
+
+Puis créez un fichier dans le dossier *home* :
+
+```bash
+touch /home/test
+```
+
+Vérifiez que le fichier est présent :
+
+```bash
+ls /home
+```
+
+Coupez le conteneur :
+
+```bash
+exit
+```
+
+Relancez un nouveau conteneur :
+
+```bash
+docker run -it alpine
+```
+
+Vérifiez la présence du fichier :
+
+```bash
+ls /home
+```
+
+Le fichier "test" n'est plus là !
+
+La raison est simple, c'est que ce ne sont pas les mêmes conteneurs comme nous l'avons vu dans la leçon précédente !
+
+Si vous faites :
+
+```bash
+docker ps -a
+```
+
+Vous verrez deux conteneurs différents !
+
+#### Le conteneur est juste un processus
+
+Nous allons montrer que contrairement à une machine virtuelle, un conteneur est simplement un processus qui est lancé par *dockerd* et qui partage le noyau *Linux* de la machine hôte.
+
+Le test suivant ne fonctionnera que sur une machine hôte *Linux* car il faudrait se connecter à la *VM Linux* sur *MacOS* ou *Windows* pour exécuter ces commandes.
+
+Nous allons commencer par démarrer un conteneur en tâche de fond, par exemple *redis* :
+
+```bash
+docker run -d redis
+```
+
+Grâce à cette commande nous lançons un conteneur utilisant l'image officielle *redis* de *Docker Hub* en arrière-plan.
+
+```bash
+Unable to find image 'redis:latest' locally
+latest: Pulling from library/redis
+bb79b6b2107f: Pull complete
+1ed3521a5dcb: Pull complete
+5999b99cee8f: Pull complete
+f99a38f44786: Pull complete
+d6fc863042e2: Pull complete
+9bd1af4eae13: Pull complete
+Digest: sha256:33ca074e6019b451235735772a9c3e7216f014aae8eb0580d7e94834fe23efb3
+Status: Downloaded newer image for redis:latest
+8f48ca284fffdef055fe1819784b9b78044f475306cd1d21d6aa8a978bd2fec2
+```
+
+Vous pouvez vérifier que le conteneur est en cours d'exécution :
+
+```bash
+docker container ls
+```
+
+Vous verrez que le conteneur basé sur l'image *redis* est en cours d'exécution.
+
+Nous pouvons vérifier qu'il existe bien un processus lancé sur la machine hôte pour le conteneur en faisant :
+
+```bash
+sudo ps -ef | grep redis
+```
+
+Vous aurez quelque chose comme :
+
+```bash
+redis       1388       1  0 oct.21 ?       00:02:50 /usr/bin/redis-server 127.0.0.1:6379
+guest-c+  225973  225956  0 12:39 ?        00:00:00 redis-server *:6379
+```
+Cela montre bien que nous avons des processus lancés pour le conteneur *redis* que nous avons démarré sur le système hôte !
+
+Si vous quittez un des processus sur la machine hôte cela coupera le conteneur.
+
+Essayez :
+
+```bash
+sudo killall redis-server
+```
+
+Puis vous pourrez constater que le conteneur n'est plus en cours d'exécution :
+
+```bash
+docker container ls
+```
+
+Le conteneur n'est plus listé dans les conteneurs en cours d'exécution !
+
+Cela démontre bien que **les conteneurs *Docker* sont des processus spéciaux sur le système hôte !** (Ou sur une machine virtuelle *Linux* dans le cas de *Windows* et de *MacOS*).
