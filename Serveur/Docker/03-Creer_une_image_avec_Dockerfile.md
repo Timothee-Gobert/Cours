@@ -715,3 +715,86 @@ docker run -it --entrypoint="/bin/sh" test
 ```
 
 Dans ce cas ce ne sera plus la commande */bin/ping* mais */bin/sh* qui sera exécutée. 
+
+### Les instructions ARG, ENV, LABEL et la commande inspect
+
+#### L'instruction `ARG`
+
+**L'instruction `ARG` permet de définir des variables qui seront utilisables par l'utilisateur lançant les conteneurs.**
+
+Autrement dit, `ARG` permet de fournir des valeurs lors du *build* en les passant comme valeurs de variables définies dans le *Dockerfile*.
+
+Par exemple, si nous avons :
+
+```dockerfile
+ARG env
+```
+
+L'utilisateur peut ensuite faire lors du lancement :
+
+```bash
+docker build --build-arg env=prod
+```
+
+Notez qu'il est possible de définir des valeurs par défaut dans le ``` :
+
+```dockerfile
+ARG env=dev
+```
+
+**Attention ! Il ne faut pas utiliser `ARG` pour passer des secrets (clés, mots de passe etc).** Ce n'est pas la manière sécurisée de le faire, que nous verrons plus tard.
+
+#### L'instruction `ENV`
+
+**L'instruction `ENV` permet de définir des variables d'environnement.**
+
+La syntaxe est la suivante :
+
+```dockerfile
+ENV CLE="Une valeur"
+```
+
+Vous pouvez utiliser plusieurs instructions `ENV` :
+
+```dockerfile
+ENV CLE1="Une valeur1"
+ENV CLE2="Une valeur2"
+```
+
+Ou une seule en déclarant les variables d'environnement en les séparant par des espaces :
+
+```dockerfile
+ENV CLE1="Une valeur1" CLE2="Une valeur2"
+```
+
+**La différence avec `ARG` est que les variables d'environnement sont persistées dans l'image après le *build*.** A l'inverse les `ARG` ne sont pas persistés.
+
+#### L'instruction `LABEL`
+
+**L'instruction `LABEL` permet d'ajouter des métadonnées à une image.**
+
+C'est-à-dire des informations sur le contenu, l'auteur, la version etc de l'image.
+
+Vous pouvez mettre autant de labels que souhaités, vous pouvez les écrire sur plusieurs lignes, et/ou dans plusieurs instructions `LABEL` :
+
+```dockerfile
+LABEL version="2.3.1"
+LABEL auteur="jean@gmail.com"
+```
+
+Ou dans une seule instruction :
+
+```dockerfile
+LABEL version="2.3.1"       auteur="jean@gmail.com"
+```
+
+Aucune des deux formes n'a d'impact sur la taille ou le nombre de couches (*layers*), utilisez l'une ou l'autre forme suivante votre préférence.
+
+#### Inspecter une image
+
+**La commande pour inspecter une image est `docker image inspect`.**
+
+Elle permet d'obtenir toute la configuration de *Docker* pour sa création. Elle permet notamment d'obtenir tous les *hashs* des couches de l'image.
+
+Elle permet également d'accéder aux variables d'environnement qui ont été définies.
+
