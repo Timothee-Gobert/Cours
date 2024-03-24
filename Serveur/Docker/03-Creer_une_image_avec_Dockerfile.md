@@ -798,3 +798,74 @@ Elle permet d'obtenir toute la configuration de *Docker* pour sa création. Elle
 
 Elle permet également d'accéder aux variables d'environnement qui ont été définies.
 
+### Docker commit, logs, tags, history
+
+#### La commande `docker container commit`
+
+**La commande `docker container commit` permet de créer une image à partir des modifications effectués dans un conteneur.**
+
+Autrement dit, cela permet d'exécuter un conteneur à partir d'une image, puis de faire des modifications (installations, mises à jour, copie de fichier etc) et enfin de créer une nouvelle image contenant ces modifications.
+
+En pratique cette commande est très rarement utilisée. Nous passons par un *Dockerfile*, nous ne détaillerons donc pas plus.
+
+#### La commande `docker container logs`
+
+La commande `docker container logs` permet d'afficher les logs d'un conteneur.
+
+Une option intéressante est `--follow` ou `-f` afin de suivre les logs d'un conteneur pendant son exécution. C'est très pratique pour déboguer.
+
+Une autre option est `-timestamps` ou `-t` qui permet d'obtenir un *timestamp* pour chaque ligne de log.
+
+#### La commande `docker image tag`
+
+**La commande docker image tag permet de créer un tag pour une image.**
+
+En effet, une même image peut avoir plusieurs tags et lorsque vous construisez vos images vous pouvez vouloir garder des versions antérieures.
+
+La syntaxe est :
+
+```bash
+docker tag SOURCE:TAG CIBLE:TAG
+```
+
+Nous verrons que par convention, les tags des images sont souvent *repository/nom:version*.
+
+Par exemple : *fedora/httpd:2.3.1*.
+
+#### La commande `docker image history`
+
+La commande `docker image history` permet de lister les couches ou les images qui utilisées pour la construction de l'image. Cela permet de voir comment une image a été créée et quelles instructions ont été exécutées.
+
+Si vous le faites sur une image *build* localement vous aurez tous les couches intermédiaires utilisées pour le *build* qui seront des images.
+
+Par exemple :
+
+```bash
+IMAGE               CREATED             CREATED BY                                      SIZE
+2c5e53379716        32 minutes ago      /bin/sh -c #(nop)  CMD ["node" "/app/app.js"]   0B
+45ccf9c8f11f        32 minutes ago      /bin/sh -c #(nop) COPY file:8a58f07ded43d233…   24B
+319f66e51754        33 minutes ago      /bin/sh -c apt-get update && apt-get install…   169MB
+77db8a47a99c        36 minutes ago      /bin/sh -c #(nop)  ENV DEBIAN_FRONTEND=nonin…   0B
+d70eaf7277ea        6 days ago          /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B
+```
+
+Si l'image n'a pas été *build* localement vous n'aurez pas les images intermédiaires mais seulement les couches.
+
+Si vous faites :
+
+```bash
+docker image history ubuntu
+```
+
+Vous aurez ainsi par exemple :
+
+```bash
+IMAGE               CREATED             CREATED BY                                      SIZE
+d70eaf7277ea        7 days ago          /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B
+<missing>           7 days ago          /bin/sh -c mkdir -p /run/systemd && echo 'do…   7B
+<missing>           7 days ago          /bin/sh -c [ -z "$(apt-get indextargets)" ]     0B
+<missing>           7 days ago          /bin/sh -c set -xe   && echo '#!/bin/sh' > /…   811B
+<missing>           7 days ago          /bin/sh -c #(nop) ADD file:435d9776fdd3a1834…   72.9MB
+```
+Les *missing* signifient qu'il s'agit de couches intermédiaires mais pas d'images disponibles localement.
+
