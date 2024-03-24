@@ -1061,3 +1061,392 @@ docker container exec test mkdir //app
 ``` 
 
 Pensez-y si vous rencontrez d'autres problèmes de chemins.
+
+## Copier des fichiers et inspecter un conteneur
+
+### Copier des fichiers depuis ou vers un conteneur
+
+**Pour copier des fichiers et des dossiers entre un conteneur et le système de fichiers de la machine hôte, il existe la commande `docker container cp`.**
+
+La syntaxe est la suivante :
+
+```bash
+docker cp SOURCE DESTINATION
+```
+
+**Si vous voulez copier dans le sens hôte -> conteneur :**
+
+```bash
+docker cp CHEMIN_SOURCE CONTENEUR:CHEMIN_DESTINATION
+```
+
+Par exemple :
+
+```bash
+docker cp ./test conteneur1:/home/jean
+```
+
+Le conteneur peut comme d'habitude être désigné par son nom ou son *ID*.
+
+Notez bien que les deux points permettent de séparer la désignation du conteneur et le chemin source ou de destination sur celui-ci.
+
+**Si vous voulez copier dans le sens conteneur -> hôte :**
+
+```bash
+docker cp CONTENEUR:CHEMIN_SOURCE CHEMIN_DESTINATION
+```
+
+Exemple :
+
+```bash
+docker cp conteneur1:/home/jean ./test
+```
+
+**A noter que le conteneur peut être en cours d'exécution (*UP*), en pause ou stoppé.**
+
+**Attention ! La commande considère les chemins du conteneur comme étant absolu.** Cela signifie que *dossierx/fichiery* est interprété comme */dossierx/fichiery*. Nous vous conseillons cependant d'utiliser que des chemins absolus pour plus de clarté.
+
+En revanche, les chemins sur la machine hôte peuvent être relatifs ou absolus.
+
+### Inspecter les changements dans le système de fichiers d'un conteneur
+
+Vous pouvez vérifier les fichiers qui ont été modifiés dans un conteneur en faisant :
+
+```bash
+docker container diff CONTENEUR
+```
+
+La lettre `A` signifie qu'un fichier ou un dossier a été ajouté.
+
+La lettre `D` signifie qu'un fichier ou un dossier a été supprimé.
+
+La lettre `C` signifie qu'un fichier ou un dossier a été modifié.
+
+Si vous avez toujours le conteneur *redis* vous pouvez donc faire :
+
+```bash
+docker container diff redis
+```
+
+Vous aurez par exemple :
+
+```bash
+C /root
+A /root/.rediscli_history
+A /root/.bash_history
+```
+
+### Inspecter les processus dans un conteneur en cours d'exécution
+
+Comme nous le savons, les processus dans un conteneur sont isolés. Ils ont leur propre *PID* dans le conteneur et on ne peut pas voir les processus des autres conteneurs ou ceux de la machine hôte depuis celui-ci.
+
+Vous pouvez le vérifier en utilisant la commande `docker container top` **sur un conteneur en cours d'exécution, pour lister tous les processus d'un conteneur :**
+
+```bash
+docker container top redis
+```
+
+**Cette commande va lister les processus du conteneur spécifiés du point de vue de la machine hôte.**
+
+Autrement dit, vous aurez le *PID*, le *PPID*, l'utilisateur etc des processus du conteneur sur la machine hôte.
+
+Pour voir la différence, et se placer du point de vue du conteneur, faites :
+
+```bash
+docker exec -it redis bash
+```
+
+Pour obtenir un *shell bash*. Installez ensuite le programme pour pouvoir utiliser *ps* pour lister les processus :
+
+```bash
+apt update && apt install -y procps
+```
+
+Faites ensuite :
+
+```bash
+ps -ef
+```
+
+Pour lister tous les processus du conteneur. Vous verrez alors que le *PID* de *redis* est 1 et qu'il n'a pas de *PPID*. Même chose pour *bash* qui aura un *PID* différent.
+
+**Ce qu'il faut retenir de cette démonstration est que l'isolation des conteneurs vaut à l'intérieur de ceux-ci.** Un conteneur, comme nous l'avons déjà dit, ne peut pas voir les processus des autres conteneurs ou de la machine hôte, il est isolé.
+
+### Obtenir toutes les options de configuration d'un conteneur
+
+Pour obtenir toute la configuration d'un conteneur nous pouvons utiliser la commande :
+
+```bash
+docker container inspect CONTENEUR
+```
+
+Ainsi, par exemple :
+
+```bash
+docker container inspect redis
+```
+
+Donnera :
+
+```bash
+[
+    {
+        "Id": "d87afef9e736f80d927d21928c3311a6939eb0ff72e97214f4c665cbabec67f0",
+        "Created": "2020-10-22T17:11:09.54773927Z",
+        "Path": "docker-entrypoint.sh",
+        "Args": [
+            "redis-server"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 313214,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2020-10-22T17:11:11.633121423Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:bd571e6529f32461648680c82e2540f9db4b3bb92709ae5d19dd347531c98f19",
+        "ResolvConfPath": "/var/lib/docker/containers/d87afef9e736f80d927d21928c3311a6939eb0ff72e97214f4c665cbabec67f0/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/d87afef9e736f80d927d21928c3311a6939eb0ff72e97214f4c665cbabec67f0/hostname",
+        "HostsPath": "/var/lib/docker/containers/d87afef9e736f80d927d21928c3311a6939eb0ff72e97214f4c665cbabec67f0/hosts",
+        "LogPath": "/var/lib/docker/containers/d87afef9e736f80d927d21928c3311a6939eb0ff72e97214f4c665cbabec67f0/
+        d87afef9e736f80d927d21928c3311a6939eb0ff72e97214f4c665cbabec67f0-json.log",
+        "Name": "/redis",
+        "RestartCount": 0,
+        "Driver": "overlay2",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "default",
+            "PortBindings": {},
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "CapAdd": null,
+            "CapDrop": null,
+            "Capabilities": null,
+            "Dns": [],
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "KernelMemory": 0,
+            "KernelMemoryTCP": 0,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": false,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/asound",
+                "/proc/acpi",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "GraphDriver": {
+            "Data": {
+                "LowerDir": "/var/lib/docker/overlay2/7446b2fabe67a6254e37ffe9ecfaddf558b7af79a2d6772a1f986f20ea53f408-init/
+                diff:/var/lib/docker/overlay2/d76f0feb8300628f0c2cb0f3767d940be8c9a99737f4c4b4146e685c1cd2fe3b/diff:
+                /var/lib/docker/overlay2/e8f581ddb7c8428adf469eaec7792a057e8df8e85d20a8ecefb8eba42f903026/diff:
+                /var/lib/docker/overlay2/21a0d0dfe8ac6e2c231904d9bce7d244d20d10bb08ea279cc07d6f4ebe7ce8b6/diff:
+                /var/lib/docker/overlay2/b192eba16ad9e6bd769632e41076c2bc0e25a2df0abad3d2b5c8aac2c37070d0/diff:
+                /var/lib/docker/overlay2/0aded6db51a97269ef13a5819d4b7f584e99653c786e45050bdf4a6fefa99b37/diff:
+                /var/lib/docker/overlay2/06e13d54a73166c8a1be92e942bdcda89bfbcd9e5e8c5aa3a3dba9679145ae73/diff",
+                "MergedDir": "/var/lib/docker/overlay2/7446b2fabe67a6254e37ffe9ecfaddf558b7af79a2d6772a1f986f20ea53f408/merged",
+                "UpperDir": "/var/lib/docker/overlay2/7446b2fabe67a6254e37ffe9ecfaddf558b7af79a2d6772a1f986f20ea53f408/diff",
+                "WorkDir": "/var/lib/docker/overlay2/7446b2fabe67a6254e37ffe9ecfaddf558b7af79a2d6772a1f986f20ea53f408/work"
+            },
+            "Name": "overlay2"
+        },
+        "Mounts": [
+            {
+                "Type": "volume",
+                "Name": "7b8d8c02a87143658420a4686b45fdfe9e9b015e1b76e2dfce9a912ab836784d",
+                "Source": "/var/lib/docker/volumes/7b8d8c02a87143658420a4686b45fdfe9e9b015e1b76e2dfce9a912ab836784d/_data",
+                "Destination": "/data",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            }
+        ],
+        "Config": {
+            "Hostname": "d87afef9e736",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "6379/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "GOSU_VERSION=1.12",
+                "REDIS_VERSION=6.0.8",
+                "REDIS_DOWNLOAD_URL=http://download.redis.io/releases/redis-6.0.8.tar.gz",
+                "REDIS_DOWNLOAD_SHA=04fa1fddc39bd1aecb6739dd5dd73858a3515b427acd1e2947a66dadce868d68"
+            ],
+            "Cmd": [
+                "redis-server"
+            ],
+            "Image": "redis",
+            "Volumes": {
+                "/data": {}
+            },
+            "WorkingDir": "/data",
+            "Entrypoint": [
+                "docker-entrypoint.sh"
+            ],
+            "OnBuild": null,
+            "Labels": {}
+        },
+        "NetworkSettings": {
+            "Bridge": "",
+            "SandboxID": "63f982a7474a923bbb459394c109ae14018867809513c1c80596fed88b9f4070",
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "Ports": {
+                "6379/tcp": null
+            },
+            "SandboxKey": "/var/run/docker/netns/63f982a7474a",
+            "SecondaryIPAddresses": null,
+            "SecondaryIPv6Addresses": null,
+            "EndpointID": "c1b4fa9b06e1f4d2e651f8e5321f3606c20b65fcd413b961e43fa2c4025699f0",
+            "Gateway": "172.17.0.1",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "172.17.0.2",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "MacAddress": "02:42:ac:11:00:02",
+            "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "NetworkID": "82fa097c5057bc256251d863c033451c430c15c4908fd917a98641a29c6114f4",
+                    "EndpointID": "c1b4fa9b06e1f4d2e651f8e5321f3606c20b65fcd413b961e43fa2c4025699f0",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.2",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "MacAddress": "02:42:ac:11:00:02",
+                    "DriverOpts": null
+                }
+            }
+        }
+    }
+]
+```
+
+Bien sûr nous verrons les options au fur et à mesure de nos besoins, mais cette commande est à utiliser pour vérifier une option.
+
+### Visualiser l'utilisation des ressources par les conteneurs
+
+Pour visualiser la consommation de toutes les ressources par les conteneurs en cours d'exécution il faut faire :
+
+```bash
+docker container stats
+```
+
+Vous aurez les informations sur l'utilisation du *CPU*, de la mémoire, sur les transferts entrants et sortants sur son interface réseau (reçus / envoyés), l'utilisation du disque (tout ce qu'il a lu / écrit) et enfin le nombre de processus créés (*PIDS*).
+
+Par exemple :
+
+![](/00-assets/images/Docker/image-2_11_1.png)
+
+### Visualiser l'espace disque utilisé
+
+Pour visualiser l'espace disque utilisé sur la machine hôte par les images, les conteneurs et les volumes, vous pouvez faire :
+
+```bash
+docker system df
+```
+
+Pour avoir le détails pour chaque éléments et non des totaux agrégés utilisez l'option `-v` pour verbose :
+
+```bash
+docker system df -v
+```
+
