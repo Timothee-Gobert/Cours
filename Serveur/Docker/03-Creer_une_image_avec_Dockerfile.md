@@ -868,4 +868,3 @@ d70eaf7277ea        7 days ago          /bin/sh -c #(nop)  CMD ["/bin/bash"]    
 <missing>           7 days ago          /bin/sh -c #(nop) ADD file:435d9776fdd3a1834…   72.9MB
 ```
 Les *missing* signifient qu'il s'agit de couches intermédiaires mais pas d'images disponibles localement.
-
