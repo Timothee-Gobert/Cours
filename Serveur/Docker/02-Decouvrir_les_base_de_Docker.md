@@ -389,3 +389,325 @@ PING google.fr (216.58.213.67): 56 data bytes
 64 bytes from 216.58.213.67: seq=16 ttl=116 time=18.390 ms
 64 bytes from 216.58.213.67: seq=17 ttl=116 time=20.201 ms
 ```
+## Obtenir de l'aide, lister et supprimer des images et des conteneurs
+
+### Structure des commandes et obtenir de l'aide
+
+Entrez simplement :
+
+```bash
+docker
+```
+
+Qui lance en fait `docker help`.
+
+Vous aurez alors la liste des commandes de base sous *Commands*, qui ont cette syntaxe :
+
+```bash
+docker commands [...options]
+```
+
+Un exemple est `docker ps -a` qui permet de lister tous les conteneurs.
+
+Vous aurez également la liste des commandes de gestion par sujet qui sont appelées *Management Commands*. Leur syntaxe est :
+
+```bash
+docker commande sous-command [...options]
+```
+
+Un exemple est `docker container ls -a` qui permet de lister tous les conteneurs.
+
+**Vous remarquerez que plusieurs commandes sont en doublons, comme par exemple *docker ps* et *docker container ls*.**
+
+La raison est historique, à mesure que *Docker* s'est complexifié et que le nombre de commandes du *CLI* a explosé, les commandes ont étés divisées en groupes pour plus de clarté.
+
+Certaines commandes, parmi les plus utilisées sont maintenues (du moins pour l'instant) en commande de base car plus rapides.
+
+Nous vous recommandons d'utiliser d'abord les commandes au format long pour vous y habituer avant de passer aux commandes raccourcies.
+
+**Pour obtenir de l'aide sur une commande spécifique , il suffit d'utiliser l'option `--help` :**
+
+```bash
+docker container ls --help
+```
+
+Vous aurez alors le détail de la commande avec toutes les options :
+
+```bash
+Usage:	docker container ls [OPTIONS]
+
+List containers
+
+Aliases:
+  ls, ps, list
+
+Options:
+  -a, --all             Show all containers (default shows just running)
+  -f, --filter filter   Filter output based on conditions provided
+      --format string   Pretty-print containers using a Go template
+  -n, --last int        Show n last created containers (includes all
+                        states) (default -1)
+  -l, --latest          Show the latest created container (includes all
+                        states)
+      --no-trunc        Don't truncate output
+  -q, --quiet           Only display numeric IDs
+  -s, --size            Display total file sizes
+```
+
+### Lister les conteneurs et les images
+
+Il est très utile de pouvoir lister les conteneurs et les images afin de savoir l'état de votre environnement *Docker*.
+
+#### Lister les conteneurs
+
+Pour lister les conteneurs **en cours d'exécution** vous pouvez utiliser deux commandes :
+
+```bash
+docker container ls
+```
+
+Et un alias qui est :
+
+```bash
+docker ps
+```
+
+Pour lister tous les conteneurs, y compris ceux qui sont seulement créés ou qui ne sont plus en cours d'exécution (*exited*). Il faut utiliser l'option `-a` ou `--all`.
+
+```bash
+docker container ls -a
+```
+
+Ou :
+
+```bash
+docker ps -a
+```
+
+Vous obtiendrez alors quelque chose comme :
+
+![](/00-assets/images/Docker/image-2_08_1.png)
+
+Vous retrouverez le début de l'*ID* des conteneurs, l'image utilisée, la commande lancée lors de l'exécution du conteneur, la date de création du conteneur, son statut, les ports (que nous verrons dans un prochain chapitre) et enfin un nom aléatoire généré par *Docker* pour pouvoir faciliter l'utilisation des commandes du *CLI*.
+
+#### Lister les images
+
+Pour lister les images locales vous pouvez utiliser deux commandes :
+
+```bash
+docker images
+```
+
+Ou :
+
+```bash
+docker image ls
+```
+
+Ce qui peut donner par exemple :
+
+![](/00-assets/images/Docker/image-2_08_2.png)
+
+Vous retrouverez le nom de l'image, son *tag* (version), son *ID*, la date de création de l'image et la taille décompressée.
+
+Le plus souvent, vous listerez les images suivant les versions comme nous le verrons, par exemple vous pourrez lister toutes les versions des images de *MongoDB* que vous avez localement en faisant :
+
+```bash
+docker image ls mongo
+```
+
+### Supprimer un ou plusieurs containers
+#### Supprimer un conteneur arrêté
+
+Pour supprimer un conteneur qui n'est pas en cours d'exécution (avec le statut *UP*) vous pouvez faire :
+
+```bash
+docker container rm NOM_OU_ID
+```
+
+Mais si le conteneur est en cours d'exécution vous aurez un message d'erreur.
+
+Lancez un conteneur en arrière-plan avec le nom *redis* :
+
+```bash
+docker run --name redis -d redis
+```
+
+Essayez de le supprimer :
+
+```bash
+docker container rm redis
+```
+
+Vous aurez le message d'erreur suivant :
+
+```bash
+Error response from daemon: You cannot remove a running container 15e7ada9de7cc51ad6656f3f245672d9a18059083264165b9a60078ef941791c. Stop the container before attempting removal or force remove
+```
+
+Le démon *Docker* indique qu'il faut couper le conteneur avant de le supprimer.
+
+#### Supprimer un conteneur en cours d'exécution
+
+Vous pouvez **forcer la suppression avec l'option `--force` ou `-f` :**
+
+```bash
+docker container rm -f redis
+```
+
+**Vous pouvez aussi supprimer plusieurs conteneurs d'un coup en passant leur ID ou leur nom en arguments.**
+
+Par exemple, lancez trois conteneurs :
+
+```bash
+docker run --name redis1 -d redis
+docker run --name redis2 -d redis
+docker run --name redis3 -d redis
+```
+
+Puis supprimez les :
+
+```bash
+docker container rm -f redis1 redis2 redis3
+```
+
+Vérifiez que les conteneurs sont bien supprimés en faisant :
+
+```bash
+docker container ls
+```
+
+#### Supprimer tous les conteneurs arrêtés
+
+Pour supprimer tous les conteneurs arrêtés vous pouvez directement faire :
+
+```bash
+docker container prune
+```
+
+Vous aurez alors un message de confirmation :
+
+```bash
+WARNING! This will remove all stopped containers.
+Are you sure you want to continue? [y/N]
+```
+
+Il faut entrer `y` puis la touche `Entrée` pour confirmer.
+
+Vous aurez ensuite la liste de tous les *ID* des conteneurs supprimés ainsi que la place récupérée.
+
+La mémoire disque récupérée est souvent faible grâce au mécanisme des couches superposées (système de fichiers *UnionFS* que nous avons vu dans le premier chapitre).
+
+En effet, un conteneur utilise la couche de l'image en lecture seule et ajoute une couche en écriture par dessus, seule cette couche est supprimée lorsque vous supprimez le conteneur.
+
+### Supprimer une ou plusieurs images
+
+#### Supprimer une ou plusieurs images sans conteneur en cours d'exécution
+
+Vous pouvez supprimer une image avec la commande :
+
+```bash
+docker image rm NOM_OU_ID
+```
+
+Par exemple :
+
+```bash
+docker image rm alpine
+```
+
+Supprimera les images *alpine* présentes.
+
+Vous pouvez bien sûr passer plusieurs noms ou *ID* d'images à supprimer :
+
+```bash
+docker image rm alpine nginx
+```
+
+#### Supprimer une ou plusieurs images avec un conteneur en cours d'exécution
+
+Lancez un conteneur en arrière plan :
+
+```bash
+docker run --name redis -d redis
+```
+
+Essayez ensuite de le supprimer :
+
+```bash
+docker image rm redis
+```
+
+Vous aurez l'erreur suivante :
+
+```bash
+Error response from daemon: conflict: unable to remove repository reference "redis" (must force) - container d6f1d731d932 is using its referenced image bd571e6529f3
+```
+
+**Il n'est pas possible de supprimer une image qui est utilisée par un conteneur en cours d'exécution.**
+
+Vous pouvez **forcer la suppression avec l'option `--force` ou `-f` :**
+
+```bash
+docker image rm -f redis
+```
+
+Dans ce cas, l'image n'est pas supprimée mais elle n'est plus suivie (sa version, *tag*, est supprimé, et elle n'est plus liée au *repository*, c'est-à-dire au serveur dont elle provient). Autrement dit, elle devient *dangling*.
+
+Vous pouvez le voir en faisant :
+
+```bash
+docker images
+```
+
+Vous aurez :
+
+```bash
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+<none>              <none>              bd571e6529f3        8 days ago          104MB
+```
+
+#### Supprimer une image *dangling*
+
+Les images *dangling* sont les images qui ne sont pas versionnées par un *tag*.
+
+Pour supprimer les images *dangling* et **qui ne sont pas utilisées par un conteneur en cours d'exécution**, il suffit de faire :
+
+```bash
+docker image prune
+```
+
+#### Supprimer toutes les images locales
+
+**Pour supprimer l'ensemble des images locales qui n'ont pas de conteneur en cours d'exécution associé il faut utiliser l'option `-a` :**
+
+```bash
+docker image prune -a
+```
+
+Vous aurez le message de confirmation suivant :
+
+```bash
+WARNING! This will remove all images without at least one container associated to them.
+Are you sure you want to continue? [y/N]
+```
+
+### Tout supprimer
+
+Pour supprimer :
+- tous les conteneurs qui ne sont pas en cours d'exécution
+- tous les réseaux qui ne sont pas utilisés par au moins un conteneur en cours d'exécution
+- toutes les images *dangling* qui ne sont pas taguées et qui ne sont pas utilisées par au moins un conteneur en cours d'exécution
+- tous les caches utilisés pour la création d'images Docker.
+
+Il suffit de faire :
+
+```bash
+docker system prune
+```
+
+Pour en plus supprimer les images qui sont *taguées*, donc toutes les images sauf celles utilisées par un conteneur en cours d'exécution, vous pouvez utiliser l'option `--all` ou `-a` :
+
+```bash
+docker system prune -a
+```
