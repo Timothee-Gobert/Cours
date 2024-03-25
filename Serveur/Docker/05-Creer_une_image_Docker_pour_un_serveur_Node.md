@@ -41,3 +41,44 @@ app.get('*', (req, res) => res.status(200).json('Hello World!'));
 
 app.listen(80);
 ```
+
+### Création du Dockerfile
+
+#### Mise en place du *Dockerfile*
+
+Dans le *Dockerfile* nous mettons pour le moment :
+
+```dockerfile
+FROM node:alpine
+WORKDIR /app
+COPY . .
+RUN npm install
+CMD [ "nodemon", "/app/app.js" ]
+```
+
+La première instruction `FROM` permet de récupérer la dernière version de *Node.js* basée sur une image *alpine*. Comme nous l'avons vu, la distribution *alpine* est souvent recommandée car elle est très légère et sécurisée.
+
+La seconde instruction `WORKDIR` permet de configurer le répertoire de travail pour les instructions suivantes. Elle permet également de créer le dossier s'il n'existe pas comme c'est le cas ici.
+
+La troisième instruction `COPY`, permet de copier tout le contenu du contexte de *build* (contenu du dossier où est le *Dockerfile* par défaut) dans le **WORKDIR**.
+
+La dernière instruction permet de lancer *nodemon*. C'est un outil de développement pour *Node.js* qui permet de recharger l'application à chaque changement.
+
+*Sur Windows uniquement*, il se peut que le rechargement automatique ne fonctionne pas avec cette commande il faut donc remplacer par `CMD [ "nodemon", "src/app.js", "-L"]` . Cette option permet d'utiliser le *legacyWatch* qui peut être nécessaire pour Windows.
+
+#### Construire l'image
+
+Il ne nous reste plus qu'à construire l'image :
+
+```sh
+docker build -t myapp .
+```
+
+Nous pouvons essayer de lancer un conteneur sur l'image :
+
+```sh
+docker container run myapp
+```
+
+Mais cela ne fonctionne pas ! Il va falloir corriger plusieurs problèmes, ce qui va vous permettre de maîtriser les problèmes les plus communs lorsque l'on débute avec *Docker*. 
+
