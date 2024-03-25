@@ -315,3 +315,146 @@ Vous pouvez supprimer tous les réseaux d'un coup :
 ```sh
 docker network prune
 ```
+
+### Connecter un serveur Node.js et une bdd MongoDB
+
+#### Objectif
+
+Notre objectif va être de connecter deux conteneurs : un premier conteneur utilisera l'image officiel *MongoDB* avec un volume nommé, comme nous l'avons appris, un second conteneur utilisera notre image de serveur *Node.js* que nous allons modifier.
+
+L'application sera très triviale. Elle va simplement enregistrer en base de données la valeur d'un compteur. Ce compteur sera incrémenté à chaque fois que l'utilisateur fait une requête *HTTP GET* sur le port 80 (en se rendant sur *localhost* dans un navigateur).
+
+Voici le schéma de ce que nous voulons faire :
+
+![](/00-assets/images/Docker/image-7_38_1.png)
+
+#### Création du conteneur avec la base de données
+
+Avant de créer le conteneur, nous devons créer le volume nommé pour notre base de données :
+
+```sh
+docker volume create mydb
+```
+
+Ensuite, nous pouvons lancer notre conteneur en mode détaché.
+
+Nous n'oublions pas de lui donner un nom (pour que nous puissions le connecter plus tard au réseau que nous créerons, et pour pouvoir utiliser la résolution *DNS* de *Docker*).
+
+Nous faisons un *mount* de type *volume* car il s'agit d'une base de données :
+
+```sh
+docker run --name db --mount src=mybd,target=/data/db -d mongo
+```
+
+Nous pouvons vérifier que le conteneur est bien en cours d'exécution :
+
+```sh
+docker container ls
+```
+
+#### Création de notre réseau *bridge* personnalisé
+
+Nous commençons par créer notre réseau :
+
+```sh
+docker network create mynet
+```
+
+Nous connectons ensuite notre base de données à celle-ci :
+
+```sh
+docker network connect mynet db
+```
+
+Petit bonus, déconnectons notre *db* du réseau *bridge* par défaut :
+
+```sh
+docker network disconnect bridge db
+```
+
+Inspectons ensuite les réseaux :
+
+```sh
+docker network inspect mynet
+docker network inspect bridge
+```
+
+Vous devez avoir maintenant 0 conteneur sur le réseau *bridge* par défaut et 1 conteneur connecté sur le réseau *mynet*.
+
+#### Initialisation compteur dans la base de données
+
+Connectons nous maintenant à la base de données avec le client *MongoDB* :
+
+```sh
+docker exec -it db mongosh
+```
+
+Utilisons la base de données *test* :
+
+```sh
+use test
+```
+
+Insérons un document dans une collection *count* que nous créons :
+
+```sql
+db.count.insertOne({count: 0})
+```
+
+Vérifions que le document est bien présent :
+
+```sql
+db.count.findOne()
+```
+
+Quittons :
+
+```sh
+exit
+```
+
+#### Serveur *Node.js*
+
+Nous allons modifier brièvement notre image pour pouvoir connecter notre application *Node.js* à notre base de données *MongoDB*.
+
+Pour ce faire, nous allons simplement installer le *driver* officiel de *MongoDB*.
+
+Modifiez le fichier *package.json* pour ajouter la ligne : `"mongodb": "^6.1.0"`.
+
+Vous aurez donc :
+
+```json
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongodb": "^6.1.0",
+    "nodemon": "^3.0.1"
+  }
+}
+```
+
+Reconstruisez l'image :
+
+```sh
+docker build -t node-server .
+```
+
+Lancez enfin le conteneur à partir de notre image en lui donnant un nom, en créant un *bind mount* pour pouvoir obtenir le *live reload* de *nodemon*, en publiant bien le port 80 et le connectant au réseau que nous avons créé :
+
+```sh
+docker container run --name server --mount type=bind,src="$(pwd)"/src,target=/app/src -p 80:80 --network mynet node-server
+```
+
+Il faut que vous soyez dans le dossier où se trouve l'image car sinon le chemin passé en *src* pour le *bind mount* ne sera pas le bon.
+
+Vous pouvez vérifier que le port *80* est bien publié en faisant :
+
+```sh
+docker container port server
+```
+
+Vous aurez comme retour :
+
+```sh
+80/tcp -> 0.0.0.0:80
+```
