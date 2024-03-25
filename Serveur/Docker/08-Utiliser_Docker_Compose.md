@@ -244,3 +244,127 @@ Refaites :
 ```sh
 docker compose up
 ```
+
+### Utilisation d'images personnalisées avec Docker Compose
+
+Dans cette leçon nous allons voir comment `Docker Compose` s'utilise avec des images personnalisées. Autrement dit, comme il s'utilise avec des *Dockerfiles*.
+
+#### Utilisation avec un *Dockerfile*
+
+Commencez par créer un *Dockerfile* dans le même dossier :
+
+```dockerfile
+FROM alpine
+CMD ["/bin/sh"]
+```
+
+Ensuite, modifiez le fichier *docker-compose.yml* pour l'utiliser :
+
+```yaml
+version: '3.9'
+services:
+  a:
+    image: alpine
+    command: ['ls']
+  b:
+    build: .
+```
+
+Nous avons maintenant deux services : un premier, le service **a**, qui utilise l'image officielle *alpine*, et un second qui utilise notre *Dockerfile*.
+
+En effet, l'option de configuration *build* permet de définir le chemin du contexte de *build*. Il n'y a rien besoin d'autre si le *Dockerfile* et dans le même dossier.
+
+Si le *Dockerfile* **a** un autre nom et / ou si le contexte de *build* est dans un autre dossier, il faut utiliser la configuration plus détaillée, par exemple :
+
+```yaml
+build:
+ context: ./dossier
+ dockerfile: Dockerfile.dev
+```
+
+Créons un dossier *backend* et plaçons y notre *Dockerfile*. Nous devons maintenant écrire :
+
+```yaml
+version: '3.9'
+services:
+  a:
+    image: alpine
+    command: ['ls']
+  b:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+```
+
+#### Construire les images avec `docker compose build`
+
+**La commande `docker compose build` permet de construire toutes les images spécifiées dans le fichier de configuration (dans les configurations *build*) et de les taguer pour une future utilisation.**
+
+Essayez de faire :
+
+```sh
+docker compose build
+```
+
+Et listez ensuite les images :
+
+```sh
+docker image ls
+```
+
+L'image sera taguée comme ceci : **compose_b**, à savoir nom du dossier contenant le fichier *docker-compose.yml* puis le nom du service.
+
+#### Passer des arguments et des labels durant le *build*
+
+Nous avons déjà étudié l'instruction *ARG* pour passer des arguments et *LABEL* pour indiquer des labels dans des images personnalisées.
+
+Il est possible de la même manière de passer des arguments ou des labels durant le *build* de l'image dans un fichier de configuration `Docker Compose`. En utilisant simplement *args* et *labels* dans la configuration du *build*.
+
+Par exemple, si nous avons dans notre *Dockerfile* :
+
+```dockerfile
+FROM alpine
+ARG FOLDER
+RUN mkdir $FOLDER
+CMD ["/bin/sh"]
+```
+
+Vous pouvez passer l'argument dans le fichier de configuration de `Docker Compose` :
+
+```yaml
+version: '3.9'
+services:
+  a:
+    image: alpine
+    command: ['ls']
+  b:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - FOLDER=test
+```
+
+Vous pouvez tester :
+
+```sh
+docker compose build
+```
+
+Vous pouvez également passer des labels :
+
+```yaml
+version: '3.9'
+services:
+  a:
+    image: alpine
+    command: ['ls']
+  b:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        - FOLDER=test
+      labels:
+        - email=jean@gmail.com
+```
