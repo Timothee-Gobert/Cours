@@ -167,3 +167,71 @@ docker run -it myapp
 
 Lorsque nous allons sur *localhost* il ne se passe rien !
 
+### Publier et exposer des ports
+
+#### L'isolation par défaut du réseau d'un conteneur
+
+Par défaut, le réseau d'un conteneur est isolé.
+
+Il a une interface réseau avec une adresse *IP*, une passerelle, une table de routage, un service *DNS* etc. Autrement dit, c'est comme s'il s'agissait d'une machine avec un réseau propre.
+
+Cela signifie que par défaut, lorsque l'on crée un conteneur avec `docker create`, ou qu'on l'exécute directement avec `docker run`, **tous les ports du conteneur sont fermés.**
+
+**Pour rendre un ou plusieurs ports disponibles à un service extérieur à *Docker* il faut les publier.**
+
+**Pour publier un port il faut utiliser l'option `--publish` ou `-p`.**
+
+C**ela va ajouter une règle dans le pare-feu et va lier un port du conteneur à un port sur la machine hôte.**
+
+La syntaxe est : `-p PORT_HOTE:PORT_CONTENEUR`.
+
+Par exemple :
+
+```sh
+-p 8000:80
+```
+
+Permet de connecter le port *TCP 80* du conteneur au port *8000* de la machine hôte.
+
+Dans notre exemple, si nous relançons le conteneur en faisant :
+
+```sh
+docker run -it -p 80:80 test
+```
+
+Nous pouvons maintenant afficher la page sur *localhost*.
+
+Essayez de lancer le conteneur en modifiant la liaison des ports hôte / conteneur, par exemple :
+
+```sh
+docker run -it -p 8080:80 test
+```
+
+Cette fois le port sur la machine hôte sera *8080*, vous pourrez voir l'application sur *localhost:8080*.
+
+#### L'instruction `EXPOSE`
+
+**L'instruction `EXPOSE` permet d'informer *Docker* qu'un conteneur écoute sur les ports spécifiés lors de son exécution.**
+
+Par exemple :
+
+```sh
+EXPOSE 80
+```
+
+Signifie que le conteneur écoute le port 80 en *TCP* (voir le cours *Node.js* pour les protocoles *TCP / UDP*).
+
+Pour préciser *UDP* il faut faire :
+
+```sh
+EXPOSE 80/udp
+```
+
+Il y a très peu de chance que vous utilisiez *UDP* donc vous pouvez l'ignorer pour le moment.
+
+**Attention !** L'instruction `EXPOSE` ne publie pas le port spécifié. Il faut toujours passer l'option `-p`.
+
+Cela permet de documenter quels ports doivent être ouverts pour exécuter le conteneur avec `-p`.
+
+Autrement dit, cela permet d'informer l'utilisateur du conteneur quels ports il doit publier. 
+
