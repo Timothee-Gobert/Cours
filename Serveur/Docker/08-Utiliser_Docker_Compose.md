@@ -37,3 +37,210 @@ Pour vérifier que Docker Compose est bien installé :
 ```sh
 docker compose version
 ```
+### Première utilisation de Docker Compose
+
+#### Le langage *YAML*
+
+Le *YAML* (pour *YAML Ain't Markup Language* ou "YAML n'est pas un langage de balisage") est un langage permettant de représenter des informations élaborées tout en conservant une grande lisibilité. Il repose principalement sur l'indentation.
+
+C'est un langage utilisé le plus souvent pour des fichiers de configuration.
+
+Le langage *YAML* est extrêmement utilisé dans le monde du *devops* : *Docker*, tous les outils de *CI*, *ansible* et tant d'autres utilisent ce langage simple.
+
+Nous allons voir les principaux éléments de la syntaxe de ce langage car tout ce que nous verrons à partir de maintenant utilisera du *YAML* :
+
+`#` permet de commenter une ligne s'il est placé au début d'une ligne. S'il est avant une chaîne de caractère il signifie nombre littéral.
+
+`~` signifie valeur nulle.
+
+`-` permet de créer des listes. Chaque élément d'une liste doit être précédé par `-` puis un espace. Il doit y avoir un élément par ligne.
+
+`clé: valeur` permet de déclarer un map clé / valeur.
+
+L'indentation par des espaces permet de créer une hiérarchie, par exemple :
+
+```yaml
+paul:
+nom: Paul Dupont
+emploi: Developer
+```
+
+Une structure plus complexe :
+
+```yaml
+- paul:
+  nom: Paul Dupont
+  emploi: Developer
+  languages:
+    - javascript
+    - css
+    - html
+```
+
+#### Première utilisation : `docker compose up`
+
+Commencez par créer un nouveau dossier, par exemple *compose* :
+
+```sh
+mkdir compose
+cd compose
+```
+
+Dans ce dossier, créez un fichier *docker-compose.yml* ou *docker-compose.yaml* (les deux noms d'extensions sont possibles, par contre le nom du fichier est important) :
+
+```yaml
+version: "3.9"
+services:
+  myalpine:
+    image: alpine
+```
+
+Ici nous définissons un service *myalpine*. Le nom des services est totalement libre. La recommandation est d'utiliser un nom descriptif de leur rôle, par exemple *api*, *db* etc.
+
+La clé *image* permet de spécifier sur quelle image est basée le service. Ici, nous utilisons l'image *alpine*.
+
+Sauvegardez et faites :
+
+```sh
+docker compose up
+```
+
+Vous aurez alors :
+
+```sh
+Creating network "compose_default" with the default driver
+Pulling myalpine (alpine:)...
+latest: Pulling from library/alpine
+188c0c94c7c5: Pull complete
+Digest: sha256:c0e9560cda118f9ec63ddefb4a173a2b2a0347082d7dff7dc14272e7841a5b5a
+Status: Downloaded newer image for alpine:latest
+Creating compose_myalpine_1 ... done
+Attaching to compose_myalpine_1
+compose_myalpine_1 exited with code 0
+```
+
+Chaque ligne est importante :
+
+*Creating network "compose_default"* indique que *Docker* crée un réseau *bridge* par défaut (qui n'est propre à *Docker Compose* et n'est pas le réseau *bridge* que nous avions par défaut). Le nom du réseau est le nom du dossier où se trouve le fichier *docker-compose.yml* postfixé avec *_default*.
+
+Vous pouvez retrouver ce nouveau réseau en faisant :
+
+```sh
+docker network ls
+```
+
+Ensuite, *Docker Compose* va cherche l'image indiquée pour le service *myalpine*.
+
+Il va *pull* l'image sur *Docker Hub* comme `docker run` le ferait.
+
+Il va ensuite démarrer un conteneur basé sur cette image *Creating compose_myalpine_1*. Le nom du conteneur est le nom du dossier, puis le nom du service et enfin un chiffre qui s'incrémente si nous lançons plusieurs conteneurs pour un service (nous verrons cela avec *swarm*).
+
+Enfin, comme avec `docker run`, *Docker Compose* va attacher le conteneur lancé au terminal pour avoir les sorties d'erreur et standard.
+
+Dans notre exemple il quitte immédiatement car aucune commande n'est passée.
+
+#### Lancer une commande sur un service avec `docker compose run`
+
+**La commande `docker compose run` permet d'exécuter une commande par un service.**
+
+Par exemple :
+
+```sh
+docker compose run myalpine
+```
+
+Va démarrer un conteneur pour le service *myalpine* et exécuter la commande par défaut (qui est *sh* pour l'image *alpine*).
+
+La commande va utiliser toute la configuration définie pour le service (pour le moment nous n'en avons pas) à l'exception des ports, pour éviter d'éventuelles collisions avec des ports déjà ouverts.
+
+Vous pouvez remplacer la commande par défaut de l'image en passant une autre commande en argument :
+
+```sh
+docker compose run myalpine ls
+```
+
+Pour l'image *alpine*, la commande par défaut est *sh*. Vous remplacez donc *sh* par `ls`.
+
+#### Lister les conteneurs lancés avec `Docker compose`
+
+Vous pouvez lister tous les conteneurs en cours d'exécution en faisant :
+
+```sh
+docker container ls
+```
+
+Mais si vous voulez uniquement les conteneurs lancés par `Docker Compose` vous pouvez faire :
+
+```sh
+docker compose ps
+```
+
+Vous pouvez également lui passer l'option `-a` pour voir également les conteneurs lancés par `docker compose run`.
+
+#### Stopper les conteneurs lancés avec `Docker compose`
+
+Vous pouvez stopper tous les conteneurs lancés par `Docker compose` avec la commande :
+
+```sh
+docker compose down
+```
+
+La commande **va automatiquement supprimer tous les conteneurs stoppés,** comme si vous les aviez lancés avec l'option `--rm`.
+
+Il va également supprimer les réseaux.
+
+Pour supprimer également les volumes créés par `Docker Compose`, anonymes et nommés, il suffit de spécifier l'option `-v` :
+
+```sh
+docker compose down -v
+```
+
+A noter que les volumes anonymes ne sont jamais réutilisés par `Docker Compose` comme nous le verrons. Il en lance des nouveaux à chaque fois si vous en déclarez dans votre configuration.
+
+#### Premières configurations
+
+Les configurations des services sont appliquées à chaque démarrage de conteneur pour ces services.
+
+Cela revient à exécuter `docker run` avec toutes les options définies en configuration, ce qui est un énorme gain de temps !
+
+##### *command*
+
+La configuration *command* permet de remplacer la commande par défaut de l'image.
+
+Essayez en faisant :
+
+```yaml
+version: "3.9"
+services:
+myalpine:
+  image: alpine
+  command: ls
+```
+
+Refaites :
+
+```sh
+docker compose up
+```
+
+Pour les commandes de plus d'un mot, il vaut mieux utiliser l'autre syntaxe que nous connaissons : *command: ["npm", "run", "start"]*.
+
+##### *entrypoint*
+
+La configuration *entrypoint* permet de remplacer l'*entrypoint* par défaut de l'image. Nous n'allons pas revoir la distinction avec la commande que nous avons vu en détails dans un chapitre précédent.
+
+Essayez en faisant :
+
+```yaml
+version: "3.9"
+services:
+myalpine:
+  image: alpine
+  entrypoint: ls
+```
+
+Refaites :
+
+```sh
+docker compose up
+```
