@@ -206,3 +206,112 @@ ping alpine2
 ```
 
 La raison est qu'un `--link` est unidirectionnel. Il faudrait créer un `--link` également pour le premier conteneur. C'est pour ces complexités que *Docker* a décidé d'abandonner `--link` et de passer à des réseaux personnalisés. 
+
+### Créer ses réseaux bridge
+
+#### Les réseaux *bridges* créés par l'utilisateur
+
+Nous avons vu que *Docker* fournit un réseau *bridge* par défaut auquel tous les conteneurs se connectent.
+
+**Ce réseau *bridge* par défaut ne doit pas être utilisé.** *Docker* signale en effet qu'il devrait être déprécié, mais qu'il est nécessaire de le conserver pour des raisons de compatibilité.
+
+Nous pouvons également créer nos propres réseaux *bridge*, ces réseaux sont bien meilleurs pour les raisons suivantes :
+- ils permettent **une résolution *DNS* automatique entre les conteneurs**. En utilisant le réseau *bridge* par défaut, les conteneurs ne peuvent interagir qu'en utilisant leur adresse *IP* (comme nous l'avons vu dans la leçon précédente). Sur un réseau *bridge* que nous créons, les conteneurs peuvent utiliser leur nom pour se trouver sur le réseau.
+- ils permettent **une meilleure isolation**. Si vous ne spécifiez pas un réseau pour un conteneur il se connecte au réseau *bridge* par défaut (comme nous l'avons vu également). Cela diminue la sécurité, car des conteneurs qui n'appartiennent pas aux mêmes applications ou services peuvent communiquer à travers ce réseau. Avec des réseaux personnalisés nous spécifions quels conteneurs sont sur quels réseaux et donc pouvons définir exactement quels conteneurs peuvent communiquer entre eux.
+- ils permettent **de connecter ou déconnecter des conteneurs lors de l'exécution**. Ce n'est pas possible avec le réseau par défaut.
+- ils permettent une configuration différente pour chaque réseau. Ce que ne permet pas le réseau par défaut, car il y en a qu'un seul.
+
+Aussi, n'utilisez que des réseaux *bridge* personnalisés ! Nous verrons d'ailleurs qu'avec *Docker compose* ils sont encore plus simples à configurer.
+
+#### Créer un réseau *bridge* personnalisé
+
+Pour créer un réseau, il suffit d'utiliser :
+
+```sh
+docker network create
+```
+
+Par défaut, un réseau créé de cette manière sera de type *bridge*.
+
+Nous allons pouvoir montrer la résolution *DNS* automatique avec un réseau personnalisé.
+
+Commençons par créer un réseau :
+
+```sh
+docker network create mynet
+```
+
+Vérifions que nous le voyons bien :
+
+```sh
+docker network ls
+```
+
+Passons ensuite à la création de nouveaux conteneurs, en spécifiant cette fois-ci qu'ils sont connectés au réseau que nous venons de créer **grâce à l'option** `--network`.
+
+```sh
+docker container run --network mynet --name alpine1 -d alpine ping google.fr
+```
+
+Ce premier conteneur va simplement envoyer des requêtes en continu à *google.fr*.
+
+Démarrons maintenant un second conteneur :
+
+```sh
+docker container run --network mynet --name alpine2 -it alpine sh
+```
+
+Essayons de contacter *alpine1* :
+
+```sh
+ping alpine1
+```
+
+Génial ! Grâce à la résolution *DNS* automatique de *Docker*, le nom *alpine1* est résolu automatiquement en une adresse *IP* et permet la communication avec l'autre conteneur.
+
+Vérifions maintenant dans un nouveau terminal le réseau par défaut :
+
+```sh
+docker network inspect bridge
+```
+
+Vous verrez que nos deux conteneurs n'y sont plus connectés par défaut : *"Containers": {},*.
+
+En effet, du moment que nous spécifions un autre réseau, les conteneurs ne se connectent plus au réseau *bridge* par défaut.
+
+Par contre, ils sont bien connectés sur notre réseau *bridge* personnalisé :
+
+```sh
+docker network inspect mynet
+```
+
+Vous retrouverez bien nos deux conteneurs dans la clé *Containers*, vous retrouverez d'ailleurs les noms des conteneurs :
+
+![](/00-assets/images/Docker/image-7_37_1.png)
+
+Nous pouvons enfin vérifier, dans le terminal où *alpine2* n'est pas en cours d'exécution qu'*alpine1* peut également communiquer avec *alpine2* :
+
+```sh
+docker exec -it alpine1 ping alpine2
+```
+
+#### Supprimer un ou plusieurs réseaux
+
+Pour supprimer un réseau, sur lequel aucun conteneur en cours d'exécution n'est connecté, il suffit de faire :
+
+```sh
+docker network rm
+```
+
+Par exemple, pour supprimer le réseau que nous venons de créer il faut faire :
+
+```sh
+docker container stop alpine1 alpine2
+docker network rm mynet
+```
+
+Vous pouvez supprimer tous les réseaux d'un coup :
+
+```sh
+docker network prune
+```
