@@ -500,3 +500,37 @@ Le code précédent permet simplement de connecter le client *MongoDB* lors du l
 Sur les requêtes *HTTP GET* sur la route `/` il incrémente le compteur dans la base de données et retourne le résultat au format *JSON* pour que le navigateur puisse l'afficher.
 
 Vous pouvez maintenant sauvegarder et vous rendre sur *localhost* dans un navigateur et rafraîchir pour voir le compteur s'incrémenter. 
+
+### Le réseau host
+
+#### Le réseau host
+
+Si vous utilisez le réseau hôte pour un conteneur, le réseau du conteneur ne sera pas du tout isolé de l'hôte.
+
+A savoir que le conteneur et l'hôte auront les mêmes interfaces réseaux. Le conteneur n'aura donc par exemple pas sa propre adresse *IP*.
+
+Si vous utilisez ce réseau, il n'y a plus besoin de publier les ports (ce n'est même pas possible) car ce sont les ports de l'hôte.
+
+Lancez par exemple un conteneur en mode détaché, avec l'option `--rm` pour le supprimer lorsqu'il sera stoppé, avec le nom *nginx1* et en spécifiant le réseau hôte :
+
+```sh
+docker container run --rm -d --network host --name nginx1 nginx
+```
+
+Vérifiez que le conteneur est bien en cours d'exécution :
+
+```sh
+docker container ls
+```
+
+Si ce n'est pas le cas c'est qu'un autre conteneur a son port publié sur le port 80 de l'hôte. Supprimez les autres conteneurs et relancez la commande pour créer le conteneur.
+
+Vous pourrez directement accéder à *nginx*. Rendez vous simplement sur *localhost*.
+
+Stoppez le conteneur :
+
+```sh
+docker container stop nginx1
+```
+
+Ce réseau est rarement utilisé et il n'est disponible que sur *GNU/Linux*. Cela ne fonctionnera pas si votre hôte est sur *Windows* ou *MacOs*. 
