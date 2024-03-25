@@ -174,3 +174,55 @@ Vous pouvez ensuite vérifier que les données sont toujours présentes sur l'h�
 
 **Si le dossier cible sur le conteneur où vous montez le dossier de l'hôte, contient des données, alors ils seront cachés.** Ils ne seront pas perdus mais vous ne pourrez plus les voir tant que le montage existe.
 
+### Utilisation d'un bind mount dans notre exemple
+
+#### Le problème : les modifications des fichiers ne sont pas propagés au conteneur
+
+Revenons à notre application d'exemple.
+
+Si vous faites :
+
+```sh
+docker run -p 80:80 myapp
+```
+
+Puis que vous modifiez des fichiers dans *app.js*, la nouvelle version ne sera pas dans le conteneur.
+
+Il faudra reconstruire une nouvelle fois l'image et créer un nouveau conteneur.
+
+Cette situation ne permet pas de développer correctement, impossible de reconstruire l'image à chaque changement !
+
+#### Solution : un bind mount !
+
+Nous allons mettre en place une liaison entre les fichiers de notre application (ici uniquement *app.js*) et notre conteneur grâce à un *bind mount*.
+
+Pour commencer créons un dossier *src* et déplaçons y le fichier *app.js*.
+
+Ensuite, modifions le *Dockerfile* et plus spécifiquement l'instruction *CMD* pour prendre en compte le nouveau chemin :
+
+```dockerfile
+FROM node:alpine
+WORKDIR /app
+COPY ./package.json .
+RUN npm install
+COPY . .
+ENV PATH=$PATH:/app/node_modules/.bin
+CMD [ "nodemon", "src/app.js" ]
+```
+
+Nous pouvons reconstruire l'image :
+
+```sh
+docker build -t myapp .
+```
+
+Nous démarrons un conteneur avec la nouvelle version de l'image, sans oublier de publier le port 80 et avec le `--mount` dont nous avons parlé :
+
+```sh
+docker run -p 80:80 --mount type=bind,source="$(pwd)/src",target=/app/src myapp
+```
+
+Essayez de modifier *app.js* sur l'hôte, vous verrez *nodemon* redémarrer dans le terminal.
+
+Vous pourrez constater à chaque fois les changements sur *localhost*, bien sûr en rafraichissant. 
+
