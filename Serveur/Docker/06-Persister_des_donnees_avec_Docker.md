@@ -74,3 +74,103 @@ Ils permettent de stocker de manière temporaire des données d'état ou des inf
 
 Nous les étudierons brièvement dans une leçon. Ils ne sont disponibles pour le moment que sur les machines hôtes *GNU/Linux*. 
 
+### Les bind mounts
+
+#### Cas d'utilisations recommandés pour les *bind mounts*
+
+**Il faut voir un *bind mount* comme une liaison dans les deux sens entre conteneur et hôte pour un dossier (et son contenu) ou un fichier.**
+
+Les volumes sont la manière recommandée de stocker des données avec *Docker*, les *bind mounts* doivent donc être utilisés uniquement dans les cas suivants :
+- partager des fichiers de configuration entre l'hôte et les conteneurs.
+- partager le code source **lors du développement** pour permettre le *live reload*. 
+
+#### Créer un *bind mount* avec `--mount`
+
+**Le fichier ou le dossier qui est monté doit être désigné par un chemin absolu sur la machine hôte.**
+
+Il existe deux manières de créer un *bind mount* sur un conteneur avec le *CLI*.
+
+La première est avec `-v` ou `--volume`, nous ne la montrerons pas car elle est déconseillée par *Docker*. Pour plusieurs raisons : d'une part car elle porte à confusion avec le type de montage (*volume*, *bind mount* et *tmpfs*), d'autre part car elle est trop concise et porte à confusion.
+
+La seconde est `--mount` qui est plus claire et plus sûre, c'est donc celle que nous étudierons.
+
+L'option `--mount` accepte **une série de paires clé-valeur qui sont séparés par des virgules**, l'ordre des paires n'est pas important :
+- **type** permet de spécifier le type de montage souhaité : *bind mount*, *volume* ou *tmpfs*. Les valeurs possibles sont donc *bind*, *volume* et *tmpfs*. Ici il faut donc mettre *bind*.
+- **source** ou **src** permet de spécifier la source. Il s'agit du chemin absolu sur l'hôte du fichier ou du dossier qui doit être monté dans le conteneur.
+- **destination**, **dst** ou **target** permet de spécifier la cible qui doit être le chemin où les fichiers et les dossiers seront montés dans le conteneur.
+- **readonly** permet de rendre le montage en lecture seule. Le conteneur ne pourra alors pas écrire sur celui-ci. Ce cas d'utilisation est rare.
+
+#### Premier exemple
+
+Dans un dossier créez un autre dossier *data* :
+
+```sh
+mkdir data
+```
+
+Placez-y ensuite un fichier :
+
+```sh
+cd data
+echo 123 > hello.txt
+```
+
+Créez ensuite un conteneur avec un *bind mount* sur le dossier que nous venons de créer :
+
+```sh
+docker container run -it --name alpine1 --mount type=bind,source="$(pwd)",target=/data alpine sh
+```
+
+Notez que `$(pwd)` est une substitution de commande qui va être remplacée par la valeur de la variable d'environnement *pwd*, qui contient le chemin absolu du répertoire courant. (*Pour en savoir plus voyez le cours Linux*).
+
+Nous montons donc le dossier *data* de la machine hôte que nous avons créé dans le dossier */data* sur le conteneur.
+
+Notez que ce dossier peut savoir le nom que vous voulez, il n'a pas à correspondre au nom sur la machine hôte.
+
+*Sur Windows avec Git Bash uniquement*, il se peut que le montage ne fonctionne pas en mettant */data*. Il faut mettre *//data* (car Git Bash le transforme sinon en `C:\\data`).
+
+Vérifiez que le dossier data est bien accessible dans le conteneur :
+
+```sh
+cat /data/hello.txt
+```
+
+Quittez ensuite le conteneur avec *exit*.
+
+Vous pouvez vérifier le montage dans le conteneur :
+
+```sh
+docker container inspect alpine1
+```
+
+Cherchez dans toutes les informations de configuration sur le conteneur la partie *Mounts*. Vous aurez par exemple :
+
+```js
+Mounts": [
+  {
+    "Type": "bind",
+    "Source": "/home/erwan/data",
+    "Destination": "/data",
+    "Mode": "",
+    "RW": true,
+    "Propagation": "rprivate"
+    }
+],
+```
+
+Remarquez bien que le volume *data* de l'hôte est bien monté sur */data* dans le conteneur.
+
+*RW* signifie *Read Write*. La valeur serait *false* si nous avions monté le volume en lecture seul. Mais c'est très rare, la plupart du temps vous aurez *true*.
+
+La propagation est un sujet très avancé que vous n'étudierons pas.
+
+Supprimez maintenant les conteneurs :
+
+```sh
+docker container prune
+```
+
+Vous pouvez ensuite vérifier que les données sont toujours présentes sur l'hôte. Supprimer un conteneur n'entraîne pas la suppression des données sur l'hôte.
+
+**Si le dossier cible sur le conteneur où vous montez le dossier de l'hôte, contient des données, alors ils seront cachés.** Ils ne seront pas perdus mais vous ne pourrez plus les voir tant que le montage existe.
+
