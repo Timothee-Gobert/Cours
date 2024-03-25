@@ -469,3 +469,133 @@ docker container rm nginx2
 docker volume rm
 ```
 
+### Partager des volumes entre des conteneurs et effectuer des sauvegardes
+
+#### Partager un volume entre plusieurs conteneurs
+
+Pour les applications avec des services répliqués (c'est-à-dire plusieurs instances de la même application permettant d'éviter les *downtimes*), il est courant de partager un *volume* entre eux.
+
+Pour ce faire, il suffit de préciser le même volume entre les services.
+
+Commençons par un peu de nettoyage :
+
+```sh
+docker container kill nginx1
+docker container prune
+docker volume prune
+```
+
+Nous allons créer un volume et le partager entre plusieurs instances :
+
+```sh
+docker volume create data
+```
+
+Ouvrez un premier terminal :
+
+```sh
+docker container run -it --rm --mount source=data,target=/data alpine sh
+```
+
+L'option `--rm` permet de supprimer le conteneur une fois que celui-ci est stoppé. Donc si vous quittez le conteneur il sera automatiquement supprimé. C'est très pratique pour ce genre de tests !
+
+Créez un fichier dans */data* :
+
+```sh
+echo 123 > /data/test
+```
+
+Ouvrez un autre terminal ou quittez le conteneur et faites :
+
+```sh
+docker container run -it --rm --mount source=data,target=/data alpine sh
+```
+
+Constatez que le volume monté est bien partagé entre les deux conteneurs :
+
+```sh
+cat data/test
+```
+
+Notez qu'il est également possible de passer l'option `--volumes-from` pour monter les volumes d'un conteneur sur un autre conteneur.
+
+Par exemple :
+
+```sh
+docker volume prune
+docker volume create data
+docker container run -d --name conteneur1 --mount source=data,target=/data nginx
+```
+
+Puis pour utiliser le même volume sur un autre conteneur :
+
+```sh
+docker container run -it --rm --volumes-from conteneur1 alpine sh
+```
+
+Si vous faites ensuite :
+
+```sh
+echo 123 > /data/test.txt
+ls
+```
+
+Vous verrez bien */data* dans lequel est monté le même volume que pour *conteneur1*.
+
+#### Effectuer une sauvegarde des volumes d'un conteneur
+
+Pour sauvegarder tous les volumes utilisés par un conteneur en cours d'exécution, il suffit de créer un *bind mount* temporaire et de créer une sauvegarde du volume :
+
+```sh
+docker container run --rm --volumes-from conteneur1 --mount type=bind,src="$(pwd)",target=/backup alpine tar -cf /backup/backup.tar /data
+```
+
+`--volumes-from conteneur1` va monter tous les volumes montés dans le *conteneur1* sur le nouveau conteneur *alpine* que nous lançons.
+
+`--mount type=bind,src="$(pwd)",target=/backup` va créer un *bind mount* entre le répertoire de travail (*$(pwd)* est une substitution de commande, cf cours Linux) et un dossier */backup* sur le conteneur.
+
+*tar -cf /backup/backup.tar /data* va prendre le volume */data* monté sur notre nouveau conteneur, (et qui est le même que celui du *conteneur1*), et créer une archive dans */backup/backup.tar* sur le conteneur.
+
+Or grâce au *bind mount*, le dossier *backup* est lié au répertoire de travail sur l'hôte. Après la suppression du conteneur (option `--rm`) les fichiers et dossiers situés dans */backup* sur le conteneur sont donc conservés sur l'hôte. En l'occurrence *backup.tar*.
+
+Cela peut paraître très complexe au premier abord, aussi testez bien et revenez y plusieurs fois.
+
+Pour tester ce qui a été archivé, vous pouvez faire sur l'hôte :
+
+```sh
+tar -tvf backup.tar
+```
+
+**Si vous ne voulez pas utiliser `--volume-from`, vous pouvez également opter pour la forme plus longue :**
+
+```sh
+docker container run --rm --mount source=data,target=/data --mount type=bind,source="$(pwd)",target=/backup -it alpine tar -czf /backup/backup.tar.gz /data
+```
+
+L'effet est le même.
+
+A noter que cette fois-ci, en plus d'archiver le volume nous le compressons avec *gzip* (option `-z` de la commande tar, *cf cours Linux)*.
+
+#### Effectuer une restauration d'un volume
+
+Pour restaurer une archive compressée ou non compressée dans un nouveau volume, il suffit de faire :
+
+```sh
+docker run --mount type=volume,source=restore,target=/data --mount type=bind,source="$(pwd)",target=/backup -it alpine tar -xf /backup/backup.tar --strip-components 1 -C /data
+```
+
+`--mount type=volume,source=restore,target=/data` permet de créer un nouveau volume *restore* qui va être monté sur */data* dans le conteneur. Autrement dit, le volume *restore*, qui est au départ vide, se verra copier les fichiers et les dossiers contenus dans */data* sur le conteneur.
+
+`--mount type=bind,source=$"(pwd)",target=/backup` permet de créer un *bind mount* qui va monter le répertoire courant de l'hôte avec le contenu de */backup* sur le conteneur. Autrement dit, cela va copier le contenu du répertoire courant dans le dossier */backup* du conteneur (en réalité ce n'est pas une copie, juste une liaison mais c'est plus facile de le voir comme une copie).
+
+`tar -xf /backup/backup.tar -C /data` va décompresser */backup/backup.tar* dans le conteneur et mettre le résultat dans */data*. `--strip-components 1` permet de ne pas avoir un dossier *data* dans */data* mais directement son contenu.
+
+Or comme */data* est lié au volume *restore*, cela revient à copier le résultat de la décompression dans le volume !
+
+Notez que vous pouvez donner n'importe quel nom au volume *restore*. Ici c'est pour faciliter la compréhension mais le plus souvent on l'appellera par exemple *appdata*.
+
+Maintenant que vous avez un volume avec les données restaurées, vous pouvez le monter sur n'importe quel conteneur :
+
+```sh
+docker container run -it --rm --mount source=restore,target=/data alpine sh
+```
