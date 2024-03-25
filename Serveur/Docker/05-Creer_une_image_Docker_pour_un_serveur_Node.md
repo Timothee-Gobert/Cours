@@ -235,3 +235,127 @@ Cela permet de documenter quels ports doivent être ouverts pour exécuter le co
 
 Autrement dit, cela permet d'informer l'utilisateur du conteneur quels ports il doit publier. 
 
+### Optimisation et .dockerignore
+
+#### Modifier l'ordre des instructions
+
+Pour le moment, à chaque fois que nous reconstruisons l'image suite à un changement, l'instruction `RUN npm install` n'utilise pas le cache, ce qui entraîne une installation complète.
+
+Dans une application classique vous aurez quelques dizaines de dépendances et il faut donc absolument que le cache soit utilisé pour ne pas avoir à réinstaller toutes les dépendances à chaque nouveau *build* !
+
+Pourquoi le cache est invalidé ? Tout simplement car rappelez-vous : `COPY` compare les *checksums* des fichiers. Comme nous modifions un fichier l'instruction ne peut utiliser le cache et une nouvelle image intermédiaire est créée.
+
+Ensuite, comme il n'y a pas d'image fille avec l'instruction `RUN npm install` pour cette nouvelle image, le cache n'est pas non plus utilisé pour l'instruction `RUN`.
+
+Il faut donc faire en sorte que l'instruction `COPY` avant l'instruction `RUN` ne soit pas invalidée à chaque changement dans les fichiers de notre application !
+
+Pour ce faire, nous allons faire :
+
+```dockerfile
+FROM node:alpine
+WORKDIR /app
+COPY ./package.json .
+RUN npm install
+COPY . .
+ENV PATH=$PATH:/app/node_modules/.bin
+CMD [ "nodemon", "/app/app.js" ]
+```
+
+Notez que nous faisons deux instructions `COPY`.
+
+Dans la première, **nous copions uniquement le fichier *package.json*.**
+
+Cela signifie que le cache ne sera invalidé **que si le fichier *package.json* est modifié.**
+
+Ensuite, nous exécutons les installations de dépendances et après seulement nous copions le reste de l'application !
+
+En définitive, les 4 premières instructions pourront maintenant utiliser le cache même si nous modifions les fichiers de l'application, et c'est ce que nous voulions.
+
+Rendez-vous dans *app.js* et modifiez le message de retour. Faites un *build* de l'image à chaque fois :
+
+```sh
+docker build -t test .
+```
+
+Vous verrez maintenant que les quatres premières instructions utilisent bien le cache :
+
+```sh
+Sending build context to Docker daemon  4.786MB
+Step 1/7 : FROM node:alpine
+  ---> 1e8b781248bb
+Step 2/7 : WORKDIR /app
+  ---> Using cache
+  ---> 783a9c60e848
+Step 3/7 : COPY ./package.json .
+  ---> Using cache
+  ---> 3ef039395cd6
+Step 4/7 : RUN npm install
+  ---> Using cache
+  ---> 31a48b7c6698
+```
+
+Notez que nous n'en avons pas du tout terminé ! Nous avons résolu quasiment tous les problèmes mais il en reste un de taille : à chaque fois que nous modifions l'application il faut reconstruire l'image.
+
+*nodemon*, qui permet de détecter les changements et relancer l'application avec les modifications pendant le développement ne sert donc pour le moment à rien.
+
+Il nous faut des connaissances supplémentaires pour palier ce problème que nous apprendrons justement dans le chapitre suivant.
+
+#### Le fichier *.dockerignore*
+
+Si vous connaissez *Git*, le fonctionnement du fichier *.dockerignore* est très similaire.
+
+Ce fichier est lu par le *Docker CLI* avant qu'il envoie le contexte au démon.
+
+**Il faut que ce fichier soit dans le dossier racine du contexte.** La plupart du temps au même niveau que le *Dockerfile*.
+
+Ce fichier permet de spécifier les fichiers et les dossiers qui doivent être ignorés par *Docker*. Ils ne seront pas envoyés au démon et *Docker* n'en aura aucune connaissance.
+
+Cela permet d'enlever des fichiers volumineux (par exemple *node_modules*) ou sensibles (des clés, des secrets etc) pour les instructions `ADD` et `COPY`.
+
+La syntaxe est la suivante :
+
+`#` permet d'insérer un commentaire.
+
+`*/temp*` permet d'exclure les fichiers et les dossiers qui commencent par *temp* dans les dossiers enfants du répertoire racine du contexte. Par exemple, */app/temp_fichier*, */temp/temporaire/* etc seront exclus. Par contre */app/dossier/temp* ne le sera pas.
+
+`*/*/temp*` permet d'exclure les fichiers et les dossiers qui commencent par *temp* dans les dossiers qui sont à deux niveaux du répertoire racine du contexte. Donc */dossierA/dossierB/temp* sera exclus mais pas *app/temp*.
+
+`fichier?` permet d'exclure tous les dossiers et les fichiers dans le dossier racine du contexte qui commence par *fichier* et sont suivis d'un caractère alphanumérique. Par exemple */fichierA* ou *fichier1* seront exclus.
+
+`**` signifie n'importe quel niveau de dossier. Donc par exemple `**/*.txt` permet d'exclure tous les fichiers terminant par *.txt* dans n'importe quel dossier du contexte.
+
+`!` signifie exception. Cela permet par exemple de ne pas exclure un fichier qui serait normalement exclus suivant les règles précédentes :
+
+```
+**/*.txt
+!README.txt
+```
+
+Ici tous les fichiers *.txt* sont exclus par la première règle. Mais la deuxième ligne permet d'ajouter une exception pour le fichier *README.txt* qui sera alors inclus dans le contexte.
+
+**L'ordre des règles est très important dans le *.dockerignore*. C'est toujours la dernière règle qui l'emporte pour chaque *match*.** Donc, ceci ne fonctionnerait pas :
+
+```
+!README.txt
+**/*.txt
+```
+
+#### Quelques rappels sur les commandes
+
+Pour lancer notre application en mode détaché (pour reprendre la main dans le terminal) :
+
+```sh
+docker run -d --name appnode -p 80:80 myapp
+```
+
+Pour obtenir un terminal sur notre conteneur en cours d'exécution :
+
+```sh
+docker exec -it appnode sh
+```
+
+Pour voir la consommation des ressources de nos conteneurs en cours d'exécution :
+
+```sh
+docker container stats
+```
