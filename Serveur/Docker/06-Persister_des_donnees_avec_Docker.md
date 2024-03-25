@@ -829,3 +829,42 @@ Dans *Compass* entrez cette fois-ci :
 mongodb://localhost:27018
 ```
 
+### Utiliser TMPFS
+
+#### Cas d'utilisations recommandés pour les *TMPFS*
+
+Les *TMPFS* ne sont pas persistés. Ils permettent de garder des données en mémoire vive uniquement. Les principaux cas d'utilisation sont :
+- données secrètes (mots de passe, secrets pour des paires de clés ou pour de l'encryption symétrique etc).
+- données d'état qui seraient trop volumineuses pour être persistées ou trop coûteuse en performance pour être écrites sur disque.
+
+#### Lancer un conteneur avec un *TMPFS* monté
+
+Il suffit cette fois-ci de mettre *type=tmpfs* :
+
+```sh
+docker run --name tmp --mount type=tmpfs,target=/data -it alpine sh
+```
+
+Créer un fichier dans */data* :
+
+```sh
+echo 123 > /data/test
+```
+
+Quittez le conteneur :
+
+```sh
+exit
+```
+
+Relancez-le :
+
+```sh
+docker start -ai tmp
+```
+
+Il n'y aura plus de données dans */data* car le conteneur a été stoppé :
+
+```sh
+ls /data
+```
