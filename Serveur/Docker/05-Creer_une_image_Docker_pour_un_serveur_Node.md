@@ -82,3 +82,88 @@ docker container run myapp
 
 Mais cela ne fonctionne pas ! Il va falloir corriger plusieurs problèmes, ce qui va vous permettre de maîtriser les problèmes les plus communs lorsque l'on débute avec *Docker*. 
 
+### Corriger le PATH
+
+#### Le problème du *path*
+
+Lorsque vous essaierez de lancer un conteneur basé sur votre image, vous aurez :
+
+```sh
+Error: Cannot find module '/app/nodemon'
+```
+
+Cette erreur signifie que *node* ne sait pas où se trouve le programme */app/nodemon* et qu'il ne peut donc pas le lancer.
+
+Il y a beaucoup de manières de résoudre cette erreur. Nous allons en voir quelques unes.
+
+#### Installer *nodemon* en global dans l'image
+
+Une manière serait par exemple d'installer *nodemon* en global pour que la dépendance soit accessible dans le *PATH* par défaut :
+
+```dockerfile
+FROM node:alpine
+WORKDIR /app
+COPY . .
+RUN npm install -g nodemon && npm install
+CMD [ "nodemon", "/app/app.js" ]
+```
+
+#### Modifier la variable d'environnement *PATH*
+
+Une autre manière, est d'ajouter le *PATH* contenant *nodemon* :
+
+```dockerfile
+FROM node:alpine
+WORKDIR /app
+COPY . .
+RUN npm install
+ENV PATH=$PATH:/app/node_modules/.bin
+CMD [ "nodemon", "/app/app.js" ]
+```
+
+Dans ce cas, nous redéfinissons la variable d'environnement *PATH* du conteneur, en concaténant sa valeur actuelle (*$PATH*) avec le chemin vers les binaires du dossier des dépendances de *node*.
+
+#### Utiliser *npm*
+
+Encore une autre manière est d'utiliser le *CLI* de *npm* pour lancer *nodemon*. Il n'aura pas de problème de *PATH* dans ce cas.
+
+Pour ce faire, il suffit d'ajouter un *script start* dans le *package.json* :
+
+```json
+{
+  "scripts": {
+    "start": "nodemon /app/app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "nodemon": "^3.0.1"
+  }
+}
+```
+
+Et d'utiliser ensuite ce *script* dans le *Dockerfile* :
+
+```dockerfile
+FROM node:alpine
+WORKDIR /app
+COPY . .
+RUN npm install
+CMD [ "npm", "start" ]
+```
+
+Notez que la version à privilégier est la modification du *PATH* car en utilisant un *script* le processus qui lancera *nodemon* est *npm*. Lorsque vous quitterez le conteneur avec *CTRL + C* vous aurez une erreur car le signal d'interruption sera envoyé à *npm* et le processus enfant *nodemon* ne recevra pas le bon signal et renverra alors une erreur.
+
+Nous avons réglé le problème du *path*. Nous reconstruisons donc notre image :
+
+```sh
+docker build -t myapp .
+```
+
+Mais cela ne fonctionne toujours pas :
+
+```sh
+docker run -it myapp
+```
+
+Lorsque nous allons sur *localhost* il ne se passe rien !
+
