@@ -458,3 +458,45 @@ Vous aurez comme retour :
 ```sh
 80/tcp -> 0.0.0.0:80
 ```
+
+### Configuration du serveur
+
+#### Modification du code du serveur
+
+Modifiez le fichier *src/app.js* :
+
+```js
+const express = require('express');
+const { MongoClient } = require('mongodb');
+const app = express();
+let count;
+
+const client = new MongoClient('mongodb://db');
+async function run() {
+  try {
+    await client.connect();
+    await client.db('admin').command({ ping: 1 });
+    console.log('CONNEXION DB OK !');
+    count = client.db('test').collection('count');
+  } catch (err) {
+    console.log(err.stack);
+  }
+}
+run().catch(console.dir);
+
+app.get('/', (req, res) => {
+  count
+    .findOneAndUpdate({}, { $inc: { count: 1 } }, { returnNewDocument: true, upsert: true })
+    .then((doc) => {
+      res.status(200).json(doc ? doc.count : 0);
+    });
+});
+
+app.listen(80);
+```
+
+Le code précédent permet simplement de connecter le client *MongoDB* lors du lancement du serveur *Node.js* qui utilise le *framework Express*.
+
+Sur les requêtes *HTTP GET* sur la route `/` il incrémente le compteur dans la base de données et retourne le résultat au format *JSON* pour que le navigateur puisse l'afficher.
+
+Vous pouvez maintenant sauvegarder et vous rendre sur *localhost* dans un navigateur et rafraîchir pour voir le compteur s'incrémenter. 
