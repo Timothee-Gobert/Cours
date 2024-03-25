@@ -599,3 +599,233 @@ Maintenant que vous avez un volume avec les données restaurées, vous pouvez le
 ```sh
 docker container run -it --rm --mount source=restore,target=/data alpine sh
 ```
+
+### Utiliser un volume pour une base de données
+
+#### L'image officielle *mongo*
+
+Allez chercher l'image officielle de *mongo* sur *Docker Hub*, ensuite trouvez la version *latest* et cliquez dessus.
+
+Vous serez redirigé sur le *Dockerfile* de l'image *mongo* sur *Github*.
+
+Nous allons simplement voir un extrait qui nous intéresse ici :
+
+```dockerfile
+# … extrait ...
+VOLUME /data/db /data/configdb
+
+COPY docker-entrypoint.sh /usr/local/bin/
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+EXPOSE 27017
+CMD ["mongod"]
+```
+
+`VOLUME /data/db /data/configdb` permet de créer deux volumes et de les monter sur */data/db* et */data/configdb* lors de la création d'un conteneur à partir de l'image.
+
+`COPY docker-entrypoint.sh /usr/local/bin/` permet de copier le *script shell docker-entrypoint.sh* sur */usr/local/bin/* dans l'image.
+
+`ENTRYPOINT ["docker-entrypoint.sh"]` permet d'exécuter le script *sh* copié au lancement d'un conteneur.
+
+`EXPOSE 27017` permet de préciser que le service va être lancé sur le port *27017* du conteneur.
+
+`CMD ["mongod"]` permet de lancer le démon *mongod* lors de l'exécution du conteneur.
+
+Faisons un premier test :
+
+```sh
+docker container run -it mongo sh
+```
+
+Vérifiez bien la présence de */data/db* et */data/configdb* :
+
+```sh
+ls data
+```
+
+Quittez :
+
+```sh
+exit
+```
+
+Puis vérifiez la création de volumes :
+
+```sh
+docker volume ls
+```
+
+Vous verrez deux volumes anonymes qui ont été automatiquement créés.
+
+Un peu de nettoyage :
+
+```sh
+docker container prune
+docker volume prune
+```
+
+#### Lancer une instance *mongod* et s'y connecter
+
+Nous allons lancer en mode détaché un conteneur *mongo* :
+
+```sh
+docker container run -d --name mongodb mongo
+```
+
+Comme nous l'avons vu cela va lancer *mongod* qui est le démon *MongoDB*.
+
+Vous pouvez voir que la base de données est bien initialisée et tourne :
+
+```sh
+docker container logs mongodb
+```
+
+Vous pouvez maintenant utiliser le client sur le conteneur en cours d'exécution :
+
+```sh
+docker container exec -it mongodb mongosh
+```
+
+Les commandes suivantes ne sont pas importantes, elles nous permettent simplement d'ajouter des données dans la base *MongoDB* pour tester la persistance des volumes avec une base de données.
+
+Commençons par créer et utiliser une nouvelle *db* :
+
+```sh
+use test
+```
+
+Insérons ensuite un *document* :
+
+```sql
+db.user.insertOne({name: "jean"})
+```
+
+Vérifions que le document est bien inséré :
+
+```sql
+db.user.findOne()
+```
+
+Quittons :
+
+```sh
+exit
+```
+
+Ensuite, supprimons le conteneur et les volumes anonymes :
+
+```sh
+docker container stop mongodb
+docker container prune
+docker volume prune
+```
+
+Les volumes anonymes contiennent les données mais ce n'est pas pratique, nous allons voir maintenant comment utiliser des volumes nommés ! Ce sera toujours le cas.
+
+#### Persister les données avec un volume
+
+Nous allons relancer un conteneur *mongo*, mais cette fois-ci en utilisant un volume nommé :
+
+```sh
+docker container run -d --name mongodb --mount source=mydb,target=/data/db mongo
+```
+
+Ici comme le volume *mydb* n'existe pas, il sera automatiquement créé par *Docker*. Il faut absolument le monter dans */data/db* et pas autre part car c'est ce chemin qui est utilisé par le démon *mongod*.
+
+Nous pouvons vérifier maintenant que nous avons bien un volume nommé :
+
+```sh
+docker volume ls
+```
+
+Nous pouvons refaire notre test :
+
+```sh
+docker container exec -it mongodb mongosh
+```
+
+Commençons par créer et utiliser une nouvelle *db* :
+
+```sh
+use test
+```
+
+Insérons ensuite un *document* :
+
+```sql
+db.user.insertOne({name: "jean"})
+```
+
+Vérifions que le document est bien inséré :
+
+```sql
+db.user.findOne()
+```
+
+Quittons :
+
+```sh
+exit
+```
+
+Supprimons le conteneur :
+
+```sh
+docker container stop mongodb
+docker container prune
+```
+
+Relançons, enfin un dernier conteneur en utilisant le même volume :
+
+```sh
+docker container run -d --name mongodb --mount source=mydb,target=/data/db mongo
+```
+
+Vérifions la persistance des données :
+
+```sh
+docker container exec -it mongodb mongosh
+```
+
+Puis allons sur la bonne base de données :
+
+```sh
+use test
+```
+
+Vérifions enfin la présence du document :
+
+```sql
+db.user.findOne()
+```
+
+Quittons :
+
+```sh
+exit
+```
+
+#### Utiliser *MongoDB Compass*
+
+Si vous connaissez *MongoDB*, vous serez ravi d'apprendre qu'il est simple d'utiliser *mongo* avec *Compass* et *Docker*.
+
+Créez un conteneur en publiant le port :
+
+```sh
+docker container run -d --name mongodb --mount source=mydb,target=/data/db -p 27017:27017 mongo
+```
+
+Vous pouvez ensuite aller dans *Compass*, faire *New connection* et cliquez simplement sur connecter sans rien rentrer. Comme c'est le port par défaut en *localhost* cela fonctionnera.
+
+Si vous avez déjà *mongod* qui tourne sur votre machine locale, il suffit de modifier le port hôte sur lequel le conteneur sera lié :
+
+```sh
+docker container run -d --name mongodb --mount source=mydb,target=/data/db -p 27018:27017 mongo
+```
+
+Dans *Compass* entrez cette fois-ci :
+
+```sh
+mongodb://localhost:27018
+```
+
