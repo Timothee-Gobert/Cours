@@ -226,3 +226,246 @@ Essayez de modifier *app.js* sur l'hôte, vous verrez *nodemon* redémarrer dans
 
 Vous pourrez constater à chaque fois les changements sur *localhost*, bien sûr en rafraichissant. 
 
+### Les volumes
+
+#### Cas d'utilisations recommandés pour les volumes
+
+**Les volumes sont la manière recommandée de stocker des données avec *Docker*.**
+
+Ils permettent :
+- d'utiliser le *Docker CLI*.
+- de partager des données entre plusieurs conteneurs en cours d'exécution.
+- d'utiliser un espace de stockage totalement géré par *Docker* et donc de ne pas dépendre du système hôte. Ils fonctionneront quel que soit l'hôte et il n'y a pas à se préoccuper des chemins comme avec les *bind mounts*.
+- ils permettent de stocker les données sur un hôte distant. Les volumes ne sont pas forcément stockés sur la machine hôte.
+- ils permettent de facilement sauvegarder, restaurer ou migrer des données.
+- ils ont des performances élevées et sont contrôlés par Docker ce qui est absolument nécessaires pour des bases de données.
+
+#### Création des volumes
+
+Les volumes peuvent être créer en utilisant le *CLI* avec la commande :
+
+```sh
+docker volume create
+```
+
+Ils peuvent également être créé par *Docker* lors de la création d'un conteneur ou d'un service.
+
+Les volumes peuvent être anonyme ou vous pouvez définir un nom lors de la création.
+
+Par exemple si vous faites :
+
+```sh
+docker volume create
+```
+
+Vous aurez en réponse seulement l'*ID* du volume, par exemple :
+
+```
+c496de105865487ab8f3b9136bbf191905c0f05c55a96add8e3560c23eb99350
+```
+
+Mais si vous faites :
+
+```sh
+docker volume create data
+```
+
+Le conteneur aura le nom data et il sera ensuite plus simple d'interagir avec celui-ci, et surtout de savoir à quoi il correspond.
+
+#### Lister les volumes
+
+Pour lister tous les volumes *Docker* existants, faites simplement :
+
+```sh
+docker volume ls
+```
+
+Vous aurez alors dans notre cas :
+
+```sh
+DRIVER    VOLUME NAME
+local     c496de105865487ab8f3b9136bbf191905c0f05c55a96add8e3560c23eb99350
+local     data
+```
+
+Ici nous avons un volume anonyme et un volume nommé.
+
+#### Inspecter des volumes
+
+Pour inspecter un volume il suffit de faire :
+
+```sh
+docker volume inspect ID_NOM
+```
+
+Par exemple :
+
+```sh
+docker volume inspect data
+```
+
+Le résultat sera alors par exemple :
+
+```json
+[
+    {
+        "CreatedAt": "2020-11-04T11:35:40+01:00",
+        "Driver": "local",
+        "Labels": {},
+        "Mountpoint": "/var/lib/docker/volumes/data/_data",
+        "Name": "data",
+        "Options": {},
+        "Scope": "local"
+    }
+]
+```
+
+Nous retrouvons bien sur *GNU/Linux* l'emplacement pour les volumes dont nous avons parlé.
+
+#### Monter des volumes
+
+Il existe deux manières de monter un volume sur un conteneur avec le *CLI*.
+
+La première est avec `-v` ou `--volume`, nous ne la montrerons pas car elle est déconseillée par *Docker*.
+
+La seconde est `--mount` qui est plus claire et plus sûre.
+
+##### Monter un volume avec `--mount`
+
+L'option `--mount` accepte **une série de paires clé-valeur qui sont séparés par des virgules,** l'ordre des paires n'est pas important :
+- **type** permet de spécifier le type de montage souhaité : *bind mount*, *volume* ou *tmpfs*. Les valeurs possibles sont donc *bind*, *volume* et *tmpfs*.
+- **source** ou **src** permet de spécifier la source. Cela peut être le nom du volume. Si vous voulez créer un volume anonyme vous pouvez ne rien spécifier.
+- **destination**, **dst** ou **target** permet de spécifier la cible qui doit être le chemin où les fichiers et les dossiers seront montés dans le conteneur.
+- **readonly** permet de rendre le volume monté en lecture seule.
+
+##### Comportement du montage suivant que le volume est vide ou non
+
+**Si le volume que vous montez est vide** et si la cible dans le conteneur contient des dossiers et des fichiers, ils seront copiés dans le volume.
+
+**Si le volume que vous montez contient des données** et si la cible dans le conteneur contient des dossiers et des fichiers, ils seront cachés par le volume. Ils ne seront pas perdus mais vous ne pourrez plus les voir tant que le volume est monté.
+
+Si vous démarrez un conteneur et précisez un volume qui n'existe pas, un volume vide sera créé pour vous par *Docker*.
+
+#### Supprimer des volumes
+
+Les volumes sont prévus pour être persistés. Aussi, ils sont supprimés uniquement si vous le décidez en utilisant une des commandes que nous allons voir.
+
+##### Supprimer un volume
+
+Pour supprimer un seul volume il faut faire
+
+```sh
+docker volume rm ID_NOM
+```
+
+##### Supprimer tous les volumes
+
+Faites très attention à cette commande car les volumes ne seront pas récupérables après suppression. Aussi vérifiez bien les volumes avant de décider de tous les supprimer :
+
+```sh
+docker volume prune
+```
+
+#### Exemples
+
+Nous allons prendre quelques exemples pour vous familiariser avec les volumes.
+
+Commençons par tout supprimer :
+
+```sh
+docker volume prune
+```
+
+##### Démarrer un conteneur avec un volume nommé
+
+Nous allons commencer par démarrer un conteneur avec un volume qui n'existe pas :
+
+```sh
+docker container run -d --name nginx1 --mount source=data1,target=/app nginx
+```
+
+Nous lançons un conteneur en mode détaché avec pour nom *nginx1*.
+
+Nous montons un volume qui a pour nom *data1* et nous ciblons */app* dans le conteneur.
+
+*Docker* va créer un volume *data1* automatiquement, le monter sur le dossier */app* dans le conteneur. Comme */app* n'existe pas il va également le créer automatiquement.
+
+Si vous ne précisez pas le *type* lors de l'utilisation de `--mount`, *Docker* va utiliser par défaut *type=volume*.
+
+Vous pouvez vérifier tout cela :
+
+```sh
+docker volume ls
+docker container exec nginx1 ls
+```
+
+Vérifiez également que le volume créé est bien monté au bon endroit sur le conteneur :
+
+```sh
+docker container inspect nginx1
+```
+
+Cherchez dans toutes les informations de configuration sur le conteneur la partie *Mounts*. Vous aurez par exemple :
+
+```json
+Mounts": [
+  {
+      "Type": "volume",
+      "Name": "data1",
+      "Source": "/var/lib/docker/volumes/data1/_data",
+      "Destination": "/app",
+      "Driver": "local",
+      "Mode": "z",
+      "RW": true,
+      "Propagation": ""
+  }
+],
+```
+Remarquez bien que le volume *datat1* est bien monté sur */app*.
+
+`RW` signifie *Read Write*. La valeur serait *false* si nous avions monté le volume en lecture seul. Mais c'est très rare, la plupart du temps vous aurez *true*.
+
+Supprimez le conteneur et remarquez que le volume est toujours persisté :
+
+```sh
+docker container kill nginx1
+docker container prune
+docker volume ls
+```
+
+Vous pouvez essayer de le remonter sur un autre conteneur, cela fonctionnera sans problème :
+
+```sh
+docker container run -d --name nginx2 --mount source=data1,target=/app nginx
+```
+
+##### Démarrer un conteneur avec un volume anonyme
+
+Vous pouvez aussi créer un conteneur avec un volume anonyme, par exemple pour faire rapidement quelques tests et vous pourrez le supprimer ensuite :
+
+```sh
+docker container run --mount target=/data -it alpine sh
+```
+
+Vérifiez que vous avez bien un dossier */data* :
+
+```sh
+ls
+```
+
+Magique ! *Docker* a également créé un volume automatiquement pour vous et l'a monté dans */data*.
+
+Vous pouvez le voir en faisant :
+
+```sh
+docker volume ls
+```
+
+Stoppez le conteneur et supprimez le volume :
+
+```sh
+docker container kill nginx2
+docker container rm nginx2
+docker volume rm
+```
+
