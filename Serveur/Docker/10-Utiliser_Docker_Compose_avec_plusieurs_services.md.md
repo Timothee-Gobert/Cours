@@ -154,3 +154,114 @@ environment:
   - WATCHPACK_POLLING=true
 ```
 
+### Mise en place de l'API Node.js
+
+#### Initialisation de l'application
+
+Dans *api*, nous initialisons notre *package.json* :
+
+```sh
+npm init -y
+```
+
+Nous installons ensuite les dépendances nécessaires :
+
+```sh
+npm i express nodemon mongodb
+```
+
+Nous créons ensuite un dossier *src* dans lequel nous plaçons un fichier *index.js* :
+
+```js
+const express = require('express');
+const { MongoClient } = require('mongodb');
+let count;
+const uri = process.env.NODE_ENV === 'production' ?
+`mongodb://${ process.env.MONGO_USERNAME }:${ process.env.MONGO_PWD }@db` :
+`mongodb://db`;
+
+const client = new MongoClient(uri);
+async function run() {
+  try {
+    await client.connect();
+    await client.db('admin').command({ ping: 1 });
+    console.log('CONNEXION DB OK !');
+    count = client.db('test').collection('count');
+  } catch (err) {
+    console.log(err.stack);
+  }
+}
+run().catch(console.dir);
+
+const app = express();
+
+app.get('/api/count', (req, res) => {
+  count.findOneAndUpdate({}, { $inc: { count: 1 } }, { returnNewDocument: true, upsert: true }).then((doc) => {
+    res.status(200).json(doc ? doc.count : 0);
+  })
+})
+
+app.all('*', (req, res) => {
+  res.status(404).end();
+})
+
+app.listen(80);
+```
+
+Nous réutilisons le même code que pour le chapitre précédent, en créant simplement la route */api/count*.
+
+#### Création du *Dockerfile*
+
+Nous créons le fichier *api/Dockerfile* :
+
+```dockerfile
+FROM node:alpine
+WORKDIR /app
+COPY package.json .
+RUN npm install
+COPY . .
+EXPOSE 80
+CMD [ "npm", "start" ]
+```
+
+Nous créons le script correspondant dans *package.json*:
+
+```json
+"scripts": {
+  "start": "nodemon ./src/index.js",
+}
+```
+
+#### Modification de *docker-compose.dev.yml*
+
+Nous modifions notre configuration pour *Docker Compose* :
+
+```yaml
+version: "3.9"
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    volumes:
+      - type: bind
+        source: ./client
+        target: /home/node
+      - type: volume
+        target: /home/node/node_modules
+    ports:
+      - 3000:3000
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./api/src
+        target: /app/src
+    ports:
+      - 3001:80
+```
+
+Nous devons avant de pouvoir tester, mettre en place le service pour la base de données.
+
