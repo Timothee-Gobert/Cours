@@ -265,3 +265,104 @@ services:
 
 Nous devons avant de pouvoir tester, mettre en place le service pour la base de données.
 
+### Mise en place du service pour la base de données
+
+#### Modification de *docker-compose.dev.yml*
+
+Nous modifions notre configuration pour *Docker Compose* pour ajouter notre service de base de données *MongoDB* :
+
+```yaml
+version: "3.9"
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    volumes:
+      - type: bind
+        source: ./client
+        target: /home/node
+      - type: volume
+        target: /home/node/node_modules
+    ports:
+      - 3000:3000
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./api/src
+        target: /app/src
+    ports:
+      - 3001:80
+  db:
+    image: mongo:7
+    volumes:
+      - type: volume
+        source: dbtest
+        target: /data/db
+volumes:
+  dbtest:
+```
+
+#### Création de la collection et du document
+
+Nous lançons la base de données :
+
+```sh
+docker compose -f  docker-compose.dev.yml run db
+```
+
+Puis nous nous connectons au client *MongoDB* :
+
+```sh
+docker container exec -it ID mongosh
+```
+
+Nous utilisons la bonne *db* :
+
+```sql
+use test
+```
+
+Nous insérons un document :
+
+```sql
+db.count.insertOne({count: 0})
+```
+
+Puis nous quittons :
+
+```sql
+exit
+```
+
+Pour éviter de le faire à chaque fois et pour éviter que les membres de votre équipe ne doivent utiliser un *README*, vous pouvez aussi simplement modifier *api/src/index.js* et plus particulièrement la méthode de connexion :
+
+```js
+MongoClient.connect(MongUrl, async (err, client) => {
+  if (err) {
+    console.log(err);
+  } else {
+    console.log('CONNEXION DB OK !');
+    count = client.db('test').collection("count");
+    if ((await count.countDocuments()) === 0) {
+      count.insertOne({ count: 0 });
+    }
+  }
+});
+```
+
+Nous verrons plus tard comment utiliser des scripts d'initialisation pour la base de données.
+
+Nous pouvons maintenant vérifier que nos services fonctionnent bien :
+
+```sh
+docker compose -f docker-compose.dev.yml up
+```
+
+Nous testons ensuite notre *API* en ouvrant un navigateur et en allant sur *localhost:3001/api/count*.
+
+Nous testons également que l'application *React* est disponible : *localhost:3000*. 
+
