@@ -533,3 +533,91 @@ Ici *data3* ne sera pas créé par `Docker Compose`. Il utilisera le volume déj
 ERROR: Volume data3 declared as external, but could not be found. Please create the volume manually using `docker volume create --name=data3` and try again.
 ```
 
+### Utiliser des variables d'environnement avec Docker Compose
+
+#### Utiliser des variables d'environnement
+
+Vous pouvez utiliser des variables d'environnement dans votre *Dockerfile* ou votre fichier *docker-compose.yml*, par exemple pour définir une version d'image :
+
+```yaml
+backend:
+  image: "node-app:${NODE_APP_VERSION}"
+```
+
+En plus de vos propres variables, de nombreuses images officielles requièrent de passer des valeurs pour des variables d'environnement. Nous l'avons déjà vu dans un exemple pour définir le mot de passe pour l'image officielle de *postgres*. Nous le verrons dans les leçons suivantes avec l'image officielle *mongo*.
+
+#### Définir la valeur des variables d'environnement avec *environment*
+
+Le premier moyen pour définir des variables d'environnement est d'utiliser la clé de configuration *environment* :
+
+```yaml
+backend:
+  environment:
+    - NODE_APP_VERSION=2.2.3
+```
+
+#### Utiliser un fichier externe avec env_file et .env
+
+Par défaut, *Docker Compose* va lire les variables d'environnement dans le fichier *.env* situé au même niveau que le *docker-compose.yml*.
+
+Vous pouvez ainsi avoir un fichier *.env* avec par exemple :
+
+```sh
+NODE_APP_VERSION=2.2.3
+NODE_ENV=dev
+DEBUG=1
+```
+
+Si vous voulez spécifier un fichier différent il faut utiliser la clé de configuration *env_file*. Par exemple :
+
+```yaml
+backend:
+  env_file:
+    - config/env.dev
+```
+
+#### Définir la valeur des variables d'environnement avec *Docker CLI*
+
+Vous pouvez déclarer des variables d'environnement lors du lancement avec `docker compose` en utilisant l'option `-e` :
+
+```sh
+docker compose run -e USER=paul up
+```
+
+Vous pouvez ne pas définir de valeur s'il s'agit d'une variable d'environnement qui a déjà une valeur disponible dans votre *env* (*cf cours **Linux***) :
+
+```sh
+docker compose run -e USER up
+```
+
+Vous pouvez enfin directement préciser l'emplacement du fichier pour les variables d'environnement à utiliser :
+
+```sh
+docker compose --env-file .config/.env.dev up
+```
+
+Cela vous permet d'avoir par exemple un fichier de variables d'environnement pour la production, par exemple dans *config/env.prod* et un fichier pour le développement *config/env.dev* par exemple.
+
+#### L'ordre de priorité
+
+Normalement vous utiliserez soit *environment* soit un fichier externe et vous ne devrez pas rencontrer de problème, mais ayez en tête l'ordre de priorité de résolution de la valeur des variables d'environnement par *Docker Compose*.
+
+Lorsque vous utilisez une variable d'environnement, *Docker Compose* va utiliser cet ordre :
+1. Le fichier *docker-compose.yml*.
+2. Les variables d'environnement de votre *shell*.
+3. Le fichier des variables d'environnement défini, par exemple *.env.dev*.
+4. Le fichier *Dockerfile* (si vous avez défini des valeurs dans des instructions `ENV`).
+
+S'il ne trouve pas la valeur de la variable à tous ces endroits, et dans cet ordre, la variable sera non définie.
+
+#### Définir le nom de son projet pour *Docker Compose*
+
+Nous avons vu que *Docker Compose* préfixe tout (les réseaux, les volumes nommés, les conteneurs lancés etc) avec le nom du dossier contenant le fichier *docker-compose.yml*.
+
+*Docker* considère qu'il s'agit du nom du projet par défaut. Maintenant que vous connaissez les variables d'environnement sachez que vous pouvez définir le nom de votre projet avec la variable `COMPOSE_PROJECT_NAME`.
+
+Par exemple, vous pouvez mettre dans votre fichier *.env* :
+
+```sh
+COMPOSE_PROJECT_NAME=monprojet
+```
