@@ -476,3 +476,77 @@ Nous n'avons plus qu'à lancer :
 docker compose -f docker-compose.dev.yml up
 ```
 
+### Mise en place de la configuration de production
+
+#### Configuration de l'environnement de production pour client
+
+Nous allons commencer par le dossier *client* en créant un fichier *Dockerfile.prod* :
+
+```dockerfile
+FROM node:alpine as build
+WORKDIR /app
+COPY package.json .
+RUN npm install
+COPY . .
+RUN npm run build
+
+FROM nginx:latest
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+```
+
+C'est la même configuration que nous avions dans le chapitre précédent.
+
+Nous passons ensuite au *docker-compose.prod.yml* :
+
+```yaml
+version: "3.9"
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+```
+
+Nous pouvons essayer de lancer le service :
+
+```sh
+docker compose -f docker-compose.prod.yml up
+```
+
+### Configuration de l'environnement de production pour l'*API*
+
+Nous modifions le *docker-compose.prod.yml* pour mettre en place notre nouveau service :
+
+```yaml
+version: "3.9"
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    env_file:
+      - ./api/.env
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+```
+
+Nous créons le fichier d'environnement pour nos variables d'environnement dans *api/.env* :
+
+```sh
+MONGO_USERNAME=paul
+MONGO_PWD=123
+```
+
+Nous ajoutons un *.dockerignore* pour ne pas copier le fichier dans l'image :
+
+```sh
+.env
+```
