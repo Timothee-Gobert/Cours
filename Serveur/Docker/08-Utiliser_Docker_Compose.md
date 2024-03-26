@@ -1242,3 +1242,98 @@ Notez que vous pouvez modifier la configuration du redémarrage d'un conteneur d
 docker container update --restart unless-stopped ID
 ```
 
+### Les autres commandes de docker-compose
+
+#### Afficher les logs
+
+Pour afficher les logs de tous les services lancés par *Docker Compose* vous pouvez faire :
+
+```sh
+docker compose logs
+```
+
+Si vous voulez suivre le fichier de log, et donc afficher les logs en temps réel, il faut utiliser l'option `-f` ou `--follow` :
+
+```sh
+docker compose logs -f
+```
+
+#### Afficher les services en cours d'exécution
+
+Pour afficher l'ensemble des conteneurs lancés pour les services par *Docker Compose*, il suffit de faire :
+
+```sh
+docker compose top
+```
+
+#### Supprimer les conteneurs stoppés
+
+Pour supprimer les conteneurs stoppés qui avaient été lancés par *Docker Compose*, il suffit de faire :
+
+```sh
+docker compose rm
+```
+
+Pour ne pas avoir à confirmer, vous pouvez passer l'option `-f` ou `--force` :
+
+```sh
+docker compose rm -f
+```
+
+Pour stopper et supprimer les conteneurs, vous pouvez faire :
+
+```sh
+docker compose rm -s
+```
+
+Et pour n'avoir aucune confirmation à faire :
+
+```sh
+docker compose rm -sf
+```
+
+Si vous voulez aussi supprimer les volumes anonymes attachés aux conteneurs :
+
+```sh
+docker compose rm -v
+```
+
+Donc pour stopper les conteneurs, supprimer les volumes anonymes attacher et ne pas avoir à entrer de confirmation :
+
+```sh
+docker compose rm -svf
+```
+
+#### Vérifier le mapping des ports d'un service
+
+Pour vérifier qu'un port est bien publié sur un service vous pouvez faire :
+
+```sh
+docker compose port SERVICE PORT
+```
+
+Par exemple :
+
+```sh
+docker compose port server 80
+```
+
+Qui vous affichera `0.0.0.0:80` s'il est bien publié, sinon rien.
+
+#### Afficher la configuration de *Docker Compose*
+
+Pour afficher la configuration qui sera lancée, notamment avec les valeurs des variables d'environnement, vous pouvez faire :
+
+```sh
+docker compose config
+```
+
+#### Télécharger les dernières versions des images
+
+Pour télécharger l'ensemble des images utilisées par vos services dans votre *docker-compose.yml*, vous pouvez faire :
+
+```sh
+docker compose pull
+```
+
+Cela peut être utile pour mettre à jour les images *latest* qui sont disponibles localement. 
