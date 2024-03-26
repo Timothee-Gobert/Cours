@@ -309,3 +309,80 @@ docker compose down -v
 ```
 
 Notre environnement de développement est maintenant parfaitement opérationnel : nous avons le *live reload* et les tests, nous pouvons partager l'image à toute notre équipe et elle fonctionnera sans problème pour eux. 
+
+### Mise en place de l'environnement de production
+
+#### Utilisation de *NGINX*
+
+Nous allons utiliser *NGINX* (prononcez *engine-x*) qui est le serveur Web le plus utilisé au monde.
+
+Il s'agit d'un serveur *opensource* développé en *C* extrêmement performant. Comme *Node.js*, il s'agit d'un environnement asynchrone où chaque requête n'est pas traitée par un *thread* dédié. Cela lui permet de gérer un grand nombre de connexions de manière optimale.
+
+En deux mots, *nginx* est un serveur très performant et extrêmement optimisé (il consomme peu de mémoire par requête) contrairement à des serveurs plus anciens comme *Apache*.
+
+Notez que *nginx* n'est pas un serveur permettant de faire des *APIs*, il n'est donc pas à comparer à *Node.js*, *Java* etc.
+
+**On l'utilise comme point d'entrée** qui va ensuite diriger les requêtes sur les bons serveurs / services (*reverse proxy*), qui va répartir la charge entre plusieurs serveurs (*load balancing*), ou qui va permettre d'optimiser les performances (terminaison *TLS*, mise en cache, compression, limitation des requêtes (*rate limiting*), persistance des sessions etc).
+
+#### Création d'un *Dockerfile* pour la production
+
+Nous allons créer un fichier *Dockerfile.prod* que nous allons utiliser pour créer l'image de production de notre application : à savoir l'image contenant le *build* et qui est servie de manière optimisée :
+
+```dockerfile
+FROM node:alpine as build
+WORKDIR '/app'
+COPY package.json .
+RUN npm install
+COPY . .
+RUN ["npm", "run", "build"]
+
+FROM nginx
+COPY --from=build /app/build /usr/share/nginx/html
+EXPOSE 80
+```
+
+Ici nous utilisons un *multi-stage build*, c'est-à-dire une construction d'image en plusieurs étapes.
+
+Dans un *multi-stage build* vous pouvez utiliser plusieurs instructions `FROM`. Chaque instruction `FROM` est une étape de la construction (*build stage*).
+
+Il est possible de facilement copier le résultat d'un *build* entre des étapes différentes de la construction.
+
+C'est ce que nous faisons ici : nous récupérons le *build* de l'application *React* depuis */app/build*, qui a été généré par la première étape, et nous le copions dans la deuxième étape, à l'emplacement nécessaire pour que *nginx* serve le *build*.
+
+Cela permet ici de passer à une image de plus de 430 Mo à seulement 130 Mo et quelques : nous n'avons pas *Node.js*, tout le code source et tous les modules. Dans une application "classique", la différence serait encore plus flagrante, avec une consommation souvent de l'ordre de 10 fois moins d'espace disque.
+
+Nous construisons ensuite l'image en précisant que nous utilisons le fichier *Dockerfile* de production avec l'option `-f` :
+
+```sh
+docker build -t reactprod -f Dockerfile.prod  .
+```
+
+Nous n'avons plus qu'à lancer l'image dans un conteneur :
+
+```sh
+docker run -p 80:80 --name nginx -d --restart always reactprod
+```
+
+Vous pouvez maintenant voir votre application dans un navigateur sur http://localhost/.
+
+Sur votre serveur vous auriez simplement à mettre l'image et à lancer la commande précédente.
+
+#### Création d'un fichier pour *Docker Compose*
+
+Nous allons créer un fichier *docker-compose.prod.yml* :
+
+```yaml
+version: "3.9"
+services:
+  reactprod:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "80:80"
+```
+Il n'y a plus qu'à lancer l'application avec *Docker Compose* :
+
+```sh
+docker compose -f docker-compose.prod.yml up
+```
