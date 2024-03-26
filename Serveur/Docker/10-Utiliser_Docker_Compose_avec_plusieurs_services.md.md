@@ -366,3 +366,113 @@ Nous testons ensuite notre *API* en ouvrant un navigateur et en allant sur *loca
 
 Nous testons également que l'application *React* est disponible : *localhost:3000*. 
 
+### Mise en place du reverse proxy nginx
+
+#### Création du *Dockerfile.dev*
+
+Nous allons créer notre *Dockerfile.dev* dans le dossier *reverseproxy* :
+
+```dockerfile
+FROM nginx:latest
+COPY ./conf/dev.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+```
+
+Nous allons utiliser un fichier de configuration que nous copions au bon emplacement pour que *nginx* l'utilise.
+
+#### Création du fichier de configuration pour le développement
+
+Nous allons créer un dossier *conf* dans lequel nous allons créer un fichier *dev.conf* :
+
+```js
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://client:3000;
+    }
+
+    location /api {
+        proxy_pass http://api;
+    }
+
+    location /sockjs-node {
+        proxy_pass http://client:3000;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+**server** permet de déclarer la configuration pour un serveur virtuel. Les serveurs virtuels se distinguent par nom ou suivant les ports qu'ils écoutent. Ici nous n'aurons besoin que d'un unique serveur virtuel.
+
+**listen 80;** permet de configurer le serveur *nginx* pour qu'il écoute les requêtes sur le port 80.
+
+**location /** permet de comparer l'*URI* des requêtes entrantes avec **/**. Il match ici avec toutes les requêtes.
+
+Mais lorsqu'il y a plusieurs blocs *location*, *nginx* sélectionne celui qui a le préfixe le plus long. Dans notre configuration, cela signifie que toutes les requêtes seront envoyées sur http://client:3000; sauf celles dont les *URI* commencent par */api* ou par */sockjs-node*.
+
+**proxy_pass** permet simplement de passer la requête au serveur indiqué.
+
+**proxy_set_header** permet de modifier les en-têtes (*headers*) des requêtes *HTTP*.
+
+Suivants les standards *HTTP* certains *headers* ne sont pas passés par défaut par le proxy aux serveurs. Ces *headers* sont appelés *hop-by-hop*.
+
+Il faut donc les déclarer manuellement pour le passer au serveur *client*. C'est ce que nous faisons pour les *headers Upgrade* et *Connection*.
+
+Sans cela, les *Web Sockets* ne fonctionneraient pas, et le serveur de développement de *Webpack* ne pourrait pas demander au navigateur de recharger la page.
+
+#### Modification de *docker-compose.dev.yml*
+
+Nous n'avons plus qu'à modifier *docker-compose.dev.yml* :
+
+```yaml
+version: "3.9"
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    volumes:
+      - type: bind
+        source: ./client
+        target: /home/node
+      - type: volume
+        target: /home/node/node_modules
+    ports:
+      - 3000:3000
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: ./api/src
+        target: /app/src
+    ports:
+      - 3001:80
+  db:
+    image: mongo:7
+    volumes:
+      - type: volume
+        source: dbtest
+        target: /data/db
+  reverse-proxy:
+    build:
+      context: ./reverse-proxy
+      dockerfile: Dockerfile.dev
+    ports:
+      - 80:80
+    depends_on:
+      - api
+      - db
+volumes:
+  dbtest:
+```
+
+Nous n'avons plus qu'à lancer :
+
+```sh
+docker compose -f docker-compose.dev.yml up
+```
+
