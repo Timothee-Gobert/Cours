@@ -641,7 +641,7 @@ services:
 
 Ici, sur le réseau créé par défaut, *api* et *db* rejoindront le réseau avec les noms *api* et *db*, ce qui est extrêmement pratique pour bénéficier de la résolution des noms automatiques en *IP*.
 
-#### Utiliser des alias avec --link
+#### Utiliser des alias avec `--link`
 
 Vous pouvez définir des alias pour que vos services soient également accessible sur les réseaux *Docker* sous d'autres noms.
 
@@ -741,5 +741,149 @@ networks:
     name: frontend
   backend:
     name: backend
+```
+
+### Utiliser Docker Compose avec notre exemple
+
+#### Application d'exemple
+
+Nous allons reprendre notre application d'exemple et utiliser *Docker Compose*.
+
+Pour rappel nous avons un dossier *src* dans lequel nous avons un fichier *app.js* :
+
+```js
+const express = require('express');
+const { MongoClient } = require('mongodb');
+const app = express();
+
+const client = new MongoClient('mongodb://db');
+let count;
+
+async function run() {
+  try {
+    await client.connect();
+    await client.db('admin').command({ ping: 1 });
+    console.log('CONNEXION DB OK !');
+    count = client.db('test').collection('count');
+  } catch (err) {
+    console.log(err.stack);
+  }
+}
+run().catch(console.dir);
+
+app.get('/', (req, res) => {
+  count
+    .findOneAndUpdate({}, { $inc: { count: 1 } }, { returnNewDocument: true, upsert: true })
+    .then((doc) => {
+      res.status(200).json(doc ? doc.count : 0);
+    });
+});
+
+app.listen(80);
+```
+
+Nous avons à la racine un fichier *Dockerfile*:
+
+```dockerfile
+FROM node:alpine
+WORKDIR /app
+COPY ./package.json .
+RUN npm install
+COPY . .
+ENV PATH=$PATH:/app/node_modules/.bin
+CMD [ "nodemon", "src/app.js" ]
+```
+
+*Sur Windows uniquement*, il se peut que le rechargement automatique ne fonctionne pas avec cette commande il faut donc remplacer par *CMD [ "nodemon", "src/app.js", "-L"]* . Cette option permet d'utiliser le *legacyWatch* qui peut être nécessaire pour Windows.
+
+Et un fichier *package.json* :
+
+```json
+{
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongodb": "^6.1.0",
+    "nodemon": "^3.0.1"
+  }
+}
+```
+
+#### Création de notre service pour notre base de données
+
+Nous allons commencer par créer un fichier *docker-compose.yml*.
+
+Puis nous allons y définir notre service de base de données :
+
+```yaml
+version: '3.9'
+services:
+  db:
+    image: mongo:7
+    volumes:
+      - type: volume
+        source: mydb
+        target: /data/db
+
+volumes:
+  mydb:
+    external: true
+```
+
+Ici notre service s'appelle *db*. Il utilise l'image *mongo* officielle.
+
+Nous avons un volume nommé qui est externe (c'est-à-dire non créé par *Docker Compose*) appelé *mydb*.
+
+Nous le montons dans le chemin nécessaire pour l'image *mongo* : */data/db*.
+
+Nous devons donc créer le volume nous-mêmes :
+
+```sh
+docker volume create mydb
+```
+
+Nous pouvons ensuite lancer notre service en mode détaché :
+
+```sh
+docker compose run -d db
+```
+
+*Docker Compose* retourne alors l'*ID* du conteneur, par exemple :
+
+```
+docker-test_db_run_2031d0db2c39
+```
+
+Vous pouvez vous connecter dessus :
+
+```sh
+docker exec -it docker-test_db_run_2031d0db2c39 mongosh
+```
+
+Une fois sur le *CLI mongo* nous pouvons utiliser la base de données de test :
+
+```sql
+use test
+```
+
+Nous pouvons ensuite recréer notre collection et notre document :
+
+```sql
+db.count.insertOne({count: 0});
+db.count.findOne()
+```
+
+Nous pouvons quitter :
+
+```sh
+exit
+docker compose down
+```
+
+*Docker Compose* stoppe et supprime le conteneur lancé pour le service et supprime le réseau par défaut :
+
+```sh
+Stopping docker-test_db_run_4af54c203c46 ... done
+Removing docker-test_db_run_4af54c203c46 ... done
+Removing network docker-test_default
 ```
 
