@@ -621,3 +621,125 @@ Par exemple, vous pouvez mettre dans votre fichier *.env* :
 ```sh
 COMPOSE_PROJECT_NAME=monprojet
 ```
+
+### Utiliser des réseaux avec Docker Compose
+
+#### Création d'un réseau par défaut
+
+Nous avons vu que *Docker Compose* créait un réseau *bridge* par défaut et qu'il le nommait *nomduprojet_default*.
+
+**Tous les services définis dans le *docker-compose.yml* rejoignent ce réseau avec leur nom définis dans ce fichier.** Par exemple :
+
+```yaml
+version: '3.9'
+services:
+  api:
+    image: node
+  db:
+    image: mongo:7
+```
+
+Ici, sur le réseau créé par défaut, *api* et *db* rejoindront le réseau avec les noms *api* et *db*, ce qui est extrêmement pratique pour bénéficier de la résolution des noms automatiques en *IP*.
+
+#### Utiliser des alias avec --link
+
+Vous pouvez définir des alias pour que vos services soient également accessible sur les réseaux *Docker* sous d'autres noms.
+
+Par exemple :
+
+```yaml
+version: '3.9'
+services:
+  api:
+    image: node
+  db:
+    image: mongo:7
+    links:
+      - 'db:database'
+      - 'db:mongo'
+```
+
+Ici, le service *mongo* pourra être accessible sur le réseau par défaut sous les noms *db*, mais aussi *database* et *mongo*.
+
+#### Créer d'autres réseaux
+
+En plus du réseau par défaut, il est possible de définir d'autres réseaux. Dans ce cas,il faut les déclarer au plus au niveau comme pour les volumes nommés, puis les utiliser dans les services.
+
+Prenons un exemple :
+
+```yaml
+version: '3.9'
+services:
+  proxy:
+    image: nginx
+    networks:
+      - frontend
+  app:
+    image: nginx
+    networks:
+      - frontend
+      - backend
+  api:
+    image: node
+    networks:
+      - backend
+  db:
+    image: mongo:7
+    networks:
+      - backend
+networks:
+  frontend:
+  backend:
+```
+
+Ici nous avons créé deux réseaux : *frontend* et *backend* qui sont de type *bridge* par défaut avec *Docker Compose*.
+
+Nos services sont connectés à l'un, à l'autre, ou aux deux grâce à la clé de configuration *networks*.
+
+#### Changer le nom du réseau par défaut
+
+Comme vous le savez, le réseau par défaut est préfixé par le nom de l'application.
+
+Il est possible de changer son nom par défaut en faisant :
+
+```yaml
+version: '3.9'
+services:
+  api:
+    image: node
+  db:
+    image: mongo:7
+networks:
+  default:
+    name: monreseau
+```
+
+Il est possible de configurer également les réseaux créés de la même manière :
+
+```yaml
+version: '3.9'
+services:
+  proxy:
+    image: nginx
+    networks:
+      - frontend
+  app:
+    image: nginx
+    networks:
+      - frontend
+      - backend
+  api:
+    image: node
+    networks:
+      - backend
+  db:
+    image: mongo:7
+    networks:
+      - backend
+networks:
+  frontend:
+    name: frontend
+  backend:
+    name: backend
+```
+
