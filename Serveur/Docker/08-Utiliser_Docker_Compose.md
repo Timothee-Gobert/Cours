@@ -1156,3 +1156,89 @@ L'application est maintenant authentifiée :
 docker compose up
 ```
 
+### Les configurations depends_on et restart
+
+#### La configuration *depends_on*
+
+**La configuration *depends_on* permet de spécifier qu'un service dépend d'autres services.**
+
+Cela entraîne les comportements suivants :
+
+`docker compose up` va démarrer les services qui sont des dépendances d'autres services avant.
+
+`docker compose up SERVICE` va inclure automatiquement le démarrage de toutes les dépendances du service.
+
+`docker compose down` va d'abord stopper les dépendances avant les autres services.
+
+Prenons un exemple :
+
+```yaml
+version: "3.9"
+services:
+  node:
+    image: node
+    depends_on:
+      - db
+      - redis
+  redis:
+    image: redis
+  db:
+    image: mongo:7
+```
+
+Ici, les bases de données *redis* et *mongo* seront démarrées avant node car node les a déclarés en dépendances.
+
+**Attention ! *depends_on* n'attend pas que les services soient prêts, il ne fait aucun test.** Il garantit uniquement que les conteneurs soient en cours d'exécution avant que le conteneur qui a des dépendances ne soit lancé.
+
+#### La configuration *restart*
+
+Par défaut, les conteneurs ne sont pas redémarrés si ils sont stoppés : que ce soit à cause d'une erreur, manuellement ou si le démon *dockerd* est arrêté (redémarrage de la machine physique, erreur du démon etc).
+
+Il est possible de changer ce comportement en spécifiant pour chaque service, quelle est la politique de redémarrage pour celui-ci. Pour cela, il faut utiliser la clé de configuration *restart*.
+
+Les valeurs possibles sont :
+- **none :** celle par défaut. Les conteneurs ne sont pas redémarrés, y compris en cas d'erreur.
+- **on-failure :** permet de redémarrer le conteneur en cas d'erreur.
+- **always :** redémarre tout le temps le conteneur. S'il est stoppé manuellement (`docker container stop`), il n'est redémarré **que si le démon *dockerd* est redémarré.**
+- **unless-stopped :** redémarre tout le temps le conteneur. S'il est stoppé manuellement (`docker container stop`), il n'est jamais redémarré.
+
+En reprenant notre exemple, nous pourrions faire :
+
+```yaml
+version: '3.9'
+services:
+  db:
+    image: mongo:7
+    volumes:
+      - type: volume
+        source: mydb
+        target: /data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
+    restart: 'unless-stopped'
+  server:
+    build: .
+    ports:
+      - 80:80
+    volumes:
+      - type: bind
+        source: ./src
+        target: /app/src
+    environment:
+      - MONGO_PWD
+      - MONGO_USERNAME
+    depends_on:
+      - db
+    restart: 'unless-stopped'
+volumes:
+  mydb:
+    external: true
+```
+
+Notez que vous pouvez modifier la configuration du redémarrage d'un conteneur déjà en cours d'exécution en faisant :
+
+```sh
+docker container update --restart unless-stopped ID
+```
+
