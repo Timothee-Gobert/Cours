@@ -200,3 +200,112 @@ services:
       - type: volume
         target: /home/node/node_modules
 ```
+
+### Lancer les tests pendant le développement
+
+#### Lancer les tests pendant le développement
+
+Dans certaines équipes, l'approche *TDD* (*Test Driven Development*) est de mise : il faut d'abord écrire les tests pour chaque fonctionnalité et ensuite écrire le code source pour les valider.
+
+Dans une telle approche nous voulons lancer continuellement tous ou certains tests à chaque sauvegarde lors du développement.
+
+Pour ce faire, nous allons créer un second service pour les tests !
+
+Nous modifions notre fichier *docker-compose.yml* :
+
+```yaml
+version: "3.9"
+services:
+  client:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - type: bind
+        source: ./
+        target: /home/node
+      - type: volume
+        target: /home/node/node_modules
+  test:
+    build: .
+    volumes:
+      - type: bind
+        source: ./
+        target: /home/node
+      - type: volume
+        target: /home/node/node_modules
+    command: ["npm", "run", "test"]
+```
+
+Nous avons un second service avec les mêmes montages, ce qui va permettre d'avoir les mises à jour à chaque sauvegarde et le relancement automatique des tests.
+
+Nous testons :
+
+```sh
+docker compose up --build
+```
+
+Les tests sont biens relancés automatiquement si nous modifions le code, nous pouvons ajouter des tests dans *App.test.js* et ils sont bien pris en compte et lancés automatiquement.
+
+Il reste un dernier problème : les services sont attachés à notre terminal mais ils n'ont pas de *TTY* et le *STDIN* (entrée standard) n'est pas liée à notre terminal. Cela fait que nous pouvons voir les sorties standard et d'erreur (*STDERR*, *STDOUT*), mais nous ne pouvons rien taper. Nous n'avons pas de *shell* interactif.
+
+La solution et d'activer le *TTY* et la liaison avec l'entrée standard, exactement comme si nous lancions un conteneur avec `docker run -it`.
+
+Pour cela, nous devons activer les options *tty* et *stdin_open* :
+
+```yaml
+version: "3.9"
+services:
+  client:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - type: bind
+        source: ./
+        target: /home/node
+      - type: volume
+        target: /home/node/node_modules
+  test:
+    build: .
+    volumes:
+      - type: bind
+        source: ./
+        target: /home/node
+      - type: volume
+        target: /home/node/node_modules
+    tty: true
+    stdin_open: true
+    command: ["npm", "run", "test"]
+```
+
+Nous coupons et nous relançons :
+
+```sh
+docker compose down -v
+docker compose up --build
+```
+
+Nous ouvrons un autre terminal.
+
+Nous récupérons le nom ou l'*ID* du conteneur lancé pour le service *test* :
+
+```sh
+docker container ls
+```
+
+Nous attachons notre second terminal :
+
+```sh
+docker container attach NOM_OU_ID
+```
+
+Nous avons maintenant un terminal qui est connecté à un *shell interactif* ! Nous pouvons donc taper des commandes relatives aux tests sans soucis.
+
+Nous pouvons enfin couper proprement, en supprimant le volume anonyme :
+
+```sh
+docker compose down -v
+```
+
+Notre environnement de développement est maintenant parfaitement opérationnel : nous avons le *live reload* et les tests, nous pouvons partager l'image à toute notre équipe et elle fonctionnera sans problème pour eux. 
