@@ -153,3 +153,50 @@ Pour y remédier, il faut ajouter l'option `WATCHPACK_POLLING` à la commande. C
 docker run -it -p 3000:3000 -e WATCHPACK_POLLING=true --mount type=bind,src="$(pwd)",dst=/app myreact
 ```
 
+### Mise en place de Docker Compose
+
+#### Création du fichier *docker-compose.yml*
+
+Nous créons le fichier pour *Docker Compose* :
+
+```yaml
+version: '3.9'
+services:
+  client:
+    build: .
+    ports:
+      - '3000:3000'
+    volumes:
+      - type: bind
+        source: ./
+        target: /home/node
+      - type: volume
+        target: /home/node/node_modules
+```
+
+Nous pouvons ensuite simplement lancer notre application en développement :
+
+```sh
+docker compose up
+```
+
+#### Version pour Windows
+
+Pour Windows, il faut modifier le fichier *docker-compose.yml* :
+
+```yaml
+version: "3.9"
+services:
+  client:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - type: bind
+        source: ./
+        target: /home/node
+      - type: volume
+        target: /home/node/node_modules
+```
