@@ -887,3 +887,272 @@ Removing docker-test_db_run_4af54c203c46 ... done
 Removing network docker-test_default
 ```
 
+### Mettre en place le service pour le serveur
+
+#### Création du service pour notre serveur
+
+Nous modifions notre fichier *docker-compose.yml* pour créer le service pour notre serveur :
+
+```yaml
+version: '3.9'
+services:
+  db:
+    image: mongo:7
+    volumes:
+      - type: volume
+        source: mydb
+        target: /data/db
+  server:
+    build: .
+    ports:
+      - 80:80
+    volumes:
+      - type: bind
+        source: ./src
+        target: /app/src
+
+volumes:
+  mydb:
+    external: true
+```
+
+Nous pouvons ensuite lancer notre application :
+
+```sh
+docker compose up
+```
+
+Nous pouvons ensuite nous rendre sur *localhost* dans un navigateur.
+
+#### Mise en place d'une authentification pour *MongoDB*
+
+Nous devons supprimer notre volume pour le recréer avec l'authentification activée :
+
+```sh
+docker compose down
+docker volume rm mydb
+```
+
+Nous le recréons :
+
+```sh
+docker volume create mydb
+```
+
+##### Initialisation de la base de données avec l'authentification activée
+
+Nous modifions notre fichier *docker-compose.yml* pour utiliser les variables d'environnement spécifiées par l'image officielle *mongo* pour activer l'authentification :
+
+```yaml
+version: '3.9'
+services:
+  db:
+    image: mongo:7
+    volumes:
+      - type: volume
+        source: mydb
+        target: /data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
+  server:
+    build: .
+    ports:
+      - 80:80
+    volumes:
+      - type: bind
+        source: ./src
+        target: /app/src
+
+volumes:
+  mydb:
+    external: true
+```
+
+Pour trouver les configurations possibles il suffit de se rendre sur *Docker Hub* sur la page de l'image. Vous aurez toujours une documentation précisant les options et les cas d'utilisation possibles.
+
+Nous créons ensuite un fichier *.env* pour passer les valeurs :
+
+```sh
+MONGO_INITDB_ROOT_USERNAME=jean
+MONGO_INITDB_ROOT_PASSWORD=123456
+```
+
+Nous lançons enfin notre application
+
+```sh
+docker compose up -d
+```
+
+Nous nous connectons au client *mongo* :
+
+```sh
+docker compose exec db mongosh
+```
+
+Nous passons sur la base de données *test* :
+
+```sh
+use test
+```
+
+Nous essayons d'insérer un document :
+
+```sql
+db.count.insertOne({count: 0});
+```
+
+Nous avons cette fois bien une erreur :
+
+```json
+WriteCommandError({
+        "ok" : 0,
+        "errmsg" : "command insert requires authentication",
+        "code" : 13,
+        "codeName" : "Unauthorized"
+})
+```
+
+Il faut nécessairement s'authentifier pour exécuter des commandes.
+
+Nous pouvons alors nous authentifier dans la console :
+
+```sql
+use admin
+db.auth({user: 'jean', pwd: '123456'})
+```
+
+La console retourne alors `1`, ce qui signifie que l'authentification s'est bien déroulée.
+
+Nous pouvons maintenant créer notre document :
+
+```sql
+use test
+db.count.insertOne({count: 0});
+```
+
+##### Création d'un utilisateur dans la base de données *MongoDB* pour notre application
+
+Nous allons ensuite créer un utilisateur pour notre application serveur. Cet utilisateur *MongoDB* pourra uniquement lire et écrire dans la base de données test mais il ne pourra pas gérer les bases de données et les utilisateurs.
+
+```sql
+use admin
+db.createUser({user: 'nodeapp', pwd: '123456', roles:[{role: 'readWrite', db: 'test'}]})
+```
+
+Nous avons en retour la confirmation :
+
+```json
+Successfully added user: {
+        "user" : "nodeapp",
+        "roles" : [
+                {
+                        "role" : "readWrite",
+                        "db" : "test"
+                }
+        ]
+}
+```
+
+Maintenant que l'authentification est activée, l'application ne pourra plus se connecter :
+
+```sh
+docker compose up
+```
+
+Puis rendez vous sur *localhost* dans un navigateur.
+
+Dans votre terminal vous aurez alors l'erreur suivante :
+
+```sh
+MongoError: command findAndModify requires authentication
+```
+
+Il faut que nous authentifions notre application serveur.
+
+```sh
+docker compose down
+```
+
+##### Authentification du serveur
+
+Nous allons utiliser des variables d'environnement pour passer au serveur les identifiants de la base de données lors du lancement.
+
+Pour ce faire, nous allons modifier *src/app.js* :
+
+```js
+const express = require('express');
+const { MongoClient } = require('mongodb');
+const app = express();
+
+const client = new MongoClient(`mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PWD}@db`);
+
+let count;
+
+async function run() {
+  try {
+    await client.connect();
+    await client.db('admin').command({ ping: 1 });
+    console.log('CONNEXION DB OK !');
+    count = client.db('test').collection('count');
+  } catch (err) {
+    console.log(err.stack);
+  }
+}
+run().catch(console.dir);
+
+app.get('/', (req, res) => {
+  count
+    .findOneAndUpdate({}, { $inc: { count: 1 } }, { returnNewDocument: true, upsert: true })
+    .then((doc) => {
+      res.status(200).json(doc ? doc.count : 0);
+    });
+});
+
+app.listen(80);
+```
+
+Dans le fichier *.env*, nous ajoutons deux nouvelles variables :
+
+```sh
+MONGO_INITDB_ROOT_USERNAME='nodeapp'
+MONGO_INITDB_ROOT_PASSWORD=123456
+MONGO_USERNAME='nodeapp'
+MONGO_PWD=123456
+```
+Il ne nous reste plus qu'à passer ces variables lors du lancement en modifiant *docker-compose.yml* :
+
+```yaml
+version: '3.9'
+services:
+  db:
+    image: mongo:7
+    volumes:
+      - type: volume
+        source: mydb
+        target: /data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
+  server:
+    build: .
+    ports:
+      - 80:80
+    volumes:
+      - type: bind
+        source: ./src
+        target: /app/src
+    environment:
+      - MONGO_PWD
+      - MONGO_USERNAME
+volumes:
+  mydb:
+    external: true
+```
+
+L'application est maintenant authentifiée :
+
+```sh
+docker compose up
+```
+
