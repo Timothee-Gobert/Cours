@@ -368,3 +368,168 @@ services:
       labels:
         - email=jean@gmail.com
 ```
+
+### Les ports et les volumes avec Docker Compose
+
+#### Publier des ports
+
+Vous pouvez définir quels ports doivent être publiés pour un service dans le fichier de configuration *docker-compose.yml*.
+
+Pour ce faire, il suffit d'utiliser *ports*. Le format est toujours *HOTE:CONTENEUR* puis par défaut *TCP*. Vous pouvez préciser *UDP* avec */upd* :
+
+```yaml
+ports:
+  - "80:80"
+  - "8080:3000/udp"
+```
+
+Nous y reviendrons bien sûr en détails avec plusieurs exemples.
+
+#### Créer des volumes
+
+Il est possible de monter des chemins de l'hôte (*bind mount*) ou de créer des volumes anonymes ou nommés.
+
+##### Créer des bind mounts
+
+Reprenons notre exemple en créant un dossier */app* dans le *Dockerfile* :
+
+```dockerfile
+FROM alpine
+ARG FOLDER
+WORKDIR /app
+RUN mkdir $FOLDER
+CMD ["/bin/sh"]
+```
+
+Supposons que nous ayons un dossier *data* sur l'hôte que nous voulions *bind mount*, nous n'aurions qu'à faire :
+
+```yaml
+version: '3.9'
+services:
+a:
+  image: alpine
+  command: ['ls']
+b:
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+    args:
+      - FOLDER=test
+    labels:
+      - email=jean@gmail.com
+  volumes:
+    - type: bind
+      source: ./data
+      target: /app/data
+```
+
+Il est bien sûr possible de préciser plusieurs volumes. Il faut simplement que chaque volume soit un élément de liste, donc précédé par un tiret puis un espace.
+
+##### Créer des volumes anonymes
+
+Pour créer un volume anonyme il faut simplement déclarer un volume de type *volume* et de spécifier uniquement une *target* (ou *destination* / *dst*) et pas de *source*. Dans ce cas `Docker Compose` créera automatiquement un volume anonyme :
+
+```yaml
+version: '3.9'
+services:
+a:
+  image: alpine
+  command: ['ls']
+b:
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+    args:
+      - FOLDER=test
+    labels:
+      - email=jean@gmail.com
+  volumes:
+    - type: bind
+      source: ./data
+      target: /app/data
+    - type: volume
+      target: /app/data2
+```
+
+##### Créer des volumes nommés
+
+Pour créer un volume nommé, il faut déclarer dans une configuration au même niveau que services une clé *volumes* : ce sont les volumes nommés qui seront automatiquement créés par `Docker Compose`.
+
+Pour les utiliser, il suffit ensuite dans la configuration *volumes* d'un service, d'indiquer en *source* le nom du volume nommé créé :
+
+```yaml
+version: '3.9'
+services:
+a:
+  image: alpine
+  command: ['ls']
+b:
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+    args:
+      - FOLDER=test
+    labels:
+      - email=jean@gmail.com
+  volumes:
+    - type: bind
+      source: ./data
+      target: /app/data
+    - type: volume
+      target: /app/data2
+    - type: volume
+      source: data3
+      target: /app/data3
+volumes:
+  data3:
+```
+
+Ici *data3* est un volume nommé créé et qui est monté dans le service **b**.
+
+Notez bien la syntaxe particulière de *data3*:. Si vous avez plusieurs volumes nommés un faut en mettre un par ligne et ne pas oublier les `:` :
+
+```yaml
+volumes:
+  data1:
+  data2:
+  data3:
+```
+
+##### Utiliser des volumes nommés déjà créés
+
+Si vous ne voulez pas que `Docker Compose` crée un nouveau volume nommé mais utilise un existant (que vous avez créé en dehors de `Docker Compose`), il faut préciser *external: true* dans la configuration, de cette manière :
+
+```yaml
+version: '3.9'
+services:
+a:
+  image: alpine
+  command: ['ls']
+b:
+  build:
+    context: ./backend
+    dockerfile: Dockerfile
+    args:
+      - FOLDER=test
+    labels:
+      - email=jean@gmail.com
+  volumes:
+    - type: bind
+      source: ./data
+      target: /app/data
+    - type: volume
+      target: /app/data2
+    - type: volume
+      source: data3
+      target: /app/data3
+volumes:
+  data3:
+    external: true
+```
+
+Ici *data3* ne sera pas créé par `Docker Compose`. Il utilisera le volume déjà créé. Si aucun volume avec ce nom n'existe, vous aurez l'erreur suivante :
+
+```sh
+ERROR: Volume data3 declared as external, but could not be found. Please create the volume manually using `docker volume create --name=data3` and try again.
+```
+
