@@ -63,15 +63,15 @@ Pour assurer une compatibilité maximal entre éditeurs, il est donc préférabl
 ### Images
 
 On insère des images avec une syntaxe semblable aux liens hypertextes. Notez simplement le point d'exclamation avant les crochets.
-![Oncept Car Nissan](/assets/01-Markdown/nissan.jpg)
+![Oncept Car Nissan](../assets/images/Markdown/nissan.jpg)
 
 Le texte entre crochets donne uen description textuelle de l'image. Il n'est pas obligatoire, mais les crochets restent tout de même obligatoires.
 
 ### Extraits et blocs de code
 
-On peut insérer des extraits de code dans le texte, comme ceci : la classe ÈmployeeController`dérive de `Controller`.
+On peut insérer des extraits de code dans le texte, comme ceci : la classe `EmployeeController`dérive de `Controller`.
 
-Ou bien créer des blocs de code comme ceci entre back tics (ÀLTGR + 7`) :
+Ou bien créer des blocs de code comme ceci entre back tics (`ALTGR + 7`) :
 
 ```html
 <!DOCTYPE html>

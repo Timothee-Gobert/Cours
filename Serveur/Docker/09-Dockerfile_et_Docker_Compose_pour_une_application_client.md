@@ -1,8 +1,8 @@
-## Dockerfile et Docker Compose pour une application client
+# Dockerfile et Docker Compose pour une application client
 
-### Mise en place du projet d'application cliente
+## Mise en place du projet d'application cliente
 
-#### Objectif du chapitre
+### Objectif du chapitre
 
 L'objectif du chapitre est d'utiliser *Docker* avec une application client de type *SPA* (*Single Page Application*), comme *Angular*, *Vue*, *React* mais cela fonctionnerait de la même manière avec toute autre application client utilisant *Webpack*.
 
@@ -14,7 +14,7 @@ Pour l'environnement de production, il faut que l'image soit la plus petite / pe
 
 Nous allons donc voir dans ce chapitre comment faire pour obtenir cela. Nous avons choisi *React* car il n'y a rien à installer à par *Node.js* et c'est donc le plus simple, mais ce serait **exactement pareil avec *Angular* ou *Vue*** (les trois utilisant *Webpack*).
 
-#### Installation de *Node.js*
+### Installation de *Node.js*
 
 Pour installer *Node.js* quel que soit votre OS c'est très simple. Vous pouvez utiliser un exécutable en le téléchargeant [ici](https://nodejs.org/en/download/).
 
@@ -42,7 +42,7 @@ Pour changer de version faites simplement :
 nvm use 18
 ```
 
-#### Création de l'exemple
+### Création de l'exemple
 
 Nous allons utiliser le *create-react-app* qui est la librairie officielle pour créer une *SPA* *React*.
 
@@ -60,7 +60,7 @@ Vous n'avez plus qu'à ouvrir l'application dans *VS Code* :
 code frontenddocker
 ```
 
-#### Création du *Dockerfile*
+### Création du *Dockerfile*
 
 Nous allons maintenant créer notre *Dockerfile*.
 
@@ -93,9 +93,9 @@ Nous lançons ensuite notre image sans oublier de publier le port *3000* qui est
 docker run -it -p 3000:3000 --name react myreact
 ```
 
-### Mise en place du live reload
+## Mise en place du live reload
 
-#### Création d'un *bind mount* pour le *live reload*
+### Création d'un *bind mount* pour le *live reload*
 
 Comme nous l'avions vu pour notre petite application *Node.js*, il est nécessaire d'avoir un *bind mount* avec l'hôte pour que le *live reload* puisse fonctionner.
 
@@ -127,7 +127,7 @@ En outre, si jamais ils installent les dépendances localement (avec `npm instal
 
 C'est absolument nécessaire si vous voulez une image qui fonctionne sur n'importe quel environnement et ne jamais avoir de problèmes d'incompatibilité.
 
-#### Utilisation d'un double montage : *bind mount* et *volume anonyme*
+### Utilisation d'un double montage : *bind mount* et *volume anonyme*
 
 La ruse est d'utiliser un volume anonyme :
 
@@ -143,7 +143,7 @@ Le *bind mount* ne va pas supprimer le contenu du volume anonyme et le conteneur
 
 Nous avons maintenant un environnement de développement parfaitement fonctionnel ! Mais la commande est longue et laborieuse, nous allons donc mettre en place *Docker Compose* pour l'automatiser.
 
-#### Live reload sur Windows
+### Live reload sur Windows
 
 Si vous êtes sur *Windows*, il est possible que le *live reload* ne fonctionne pas. En effet, il y a un problème de synchronisation entre le système de fichiers de *Windows* et celui de *Linux*.
 
@@ -153,9 +153,9 @@ Pour y remédier, il faut ajouter l'option `WATCHPACK_POLLING` à la commande. C
 docker run -it -p 3000:3000 -e WATCHPACK_POLLING=true --mount type=bind,src="$(pwd)",dst=/app myreact
 ```
 
-### Mise en place de Docker Compose
+## Mise en place de Docker Compose
 
-#### Création du fichier *docker-compose.yml*
+### Création du fichier *docker-compose.yml*
 
 Nous créons le fichier pour *Docker Compose* :
 
@@ -180,7 +180,7 @@ Nous pouvons ensuite simplement lancer notre application en développement :
 docker compose up
 ```
 
-#### Version pour Windows
+### Version pour Windows
 
 Pour Windows, il faut modifier le fichier *docker-compose.yml* :
 
@@ -201,9 +201,9 @@ services:
         target: /home/node/node_modules
 ```
 
-### Lancer les tests pendant le développement
+## Lancer les tests pendant le développement
 
-#### Lancer les tests pendant le développement
+### Lancer les tests pendant le développement
 
 Dans certaines équipes, l'approche *TDD* (*Test Driven Development*) est de mise : il faut d'abord écrire les tests pour chaque fonctionnalité et ensuite écrire le code source pour les valider.
 
@@ -310,9 +310,9 @@ docker compose down -v
 
 Notre environnement de développement est maintenant parfaitement opérationnel : nous avons le *live reload* et les tests, nous pouvons partager l'image à toute notre équipe et elle fonctionnera sans problème pour eux. 
 
-### Mise en place de l'environnement de production
+## Mise en place de l'environnement de production
 
-#### Utilisation de *NGINX*
+### Utilisation de *NGINX*
 
 Nous allons utiliser *NGINX* (prononcez *engine-x*) qui est le serveur Web le plus utilisé au monde.
 
@@ -324,7 +324,7 @@ Notez que *nginx* n'est pas un serveur permettant de faire des *APIs*, il n'est 
 
 **On l'utilise comme point d'entrée** qui va ensuite diriger les requêtes sur les bons serveurs / services (*reverse proxy*), qui va répartir la charge entre plusieurs serveurs (*load balancing*), ou qui va permettre d'optimiser les performances (terminaison *TLS*, mise en cache, compression, limitation des requêtes (*rate limiting*), persistance des sessions etc).
 
-#### Création d'un *Dockerfile* pour la production
+### Création d'un *Dockerfile* pour la production
 
 Nous allons créer un fichier *Dockerfile.prod* que nous allons utiliser pour créer l'image de production de notre application : à savoir l'image contenant le *build* et qui est servie de manière optimisée :
 
@@ -367,7 +367,7 @@ Vous pouvez maintenant voir votre application dans un navigateur sur http://loca
 
 Sur votre serveur vous auriez simplement à mettre l'image et à lancer la commande précédente.
 
-#### Création d'un fichier pour *Docker Compose*
+### Création d'un fichier pour *Docker Compose*
 
 Nous allons créer un fichier *docker-compose.prod.yml* :
 

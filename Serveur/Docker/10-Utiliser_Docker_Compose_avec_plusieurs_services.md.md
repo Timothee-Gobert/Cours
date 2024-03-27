@@ -1,10 +1,10 @@
-## Utiliser Docker Compose avec plusieurs services
+# Utiliser Docker Compose avec plusieurs services
 
-### Introduction à l'architecture du projet
+## Introduction à l'architecture du projet
 
 L'objectif du chapitre est d'arriver à mettre en place des environnements réalistes d'une application complète pour le développement et la production.
 
-#### Environnement de développement
+### Environnement de développement
 
 Voici un petit récapitulatif de notre architecture en développement :
 
@@ -17,7 +17,7 @@ Voici un petit récapitulatif de notre architecture en développement :
 
 **Base de données :** nous aurons une base de données *MongoDB* auquelle notre serveur *Node.js* se connectera.
 
-#### Environnement de production
+### Environnement de production
 
 Voici un petit récapitulatif de notre architecture en production :
 
@@ -28,7 +28,7 @@ Voici un petit récapitulatif de notre architecture en production :
 
 **Base de données :** nous aurons une base de données *MongoDB* auquelle notre serveur *Node.js* se connectera.
 
-#### Création du projet
+### Création du projet
 
 Nous allons créer un dossier *fullstack*.
 
@@ -42,9 +42,9 @@ Nous créons ensuite un dossier *api* qui contiendra notre serveur *Node.js*, un
 
 Nous créons ensuite un fichier *docker-compose.dev.yml* et un fichier *docker-compose.prod.yml*. 
 
-### Mise en place de la configuration client
+## Mise en place de la configuration client
 
-#### Création de l'application client
+### Création de l'application client
 
 Nous supprimons le dossier *client* pour permettre l'utilisation de `create-react-app` (en effet, la librairie va se charger de créer ce dossier) :
 
@@ -92,7 +92,7 @@ Nous pouvons tester en faisant :
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-#### Modification du code source de l'application
+### Modification du code source de l'application
 
 Pour pouvoir tester l'*API* que nous allons mettre en place, nous allons modifier le code source de notre application *React*.
 
@@ -145,7 +145,7 @@ export default App;
 
 Le code précédent fait simplement une requête en utilisant l'API fetch sur notre API que nous mettrons en place juste après.
 
-#### Problème hot reload Windows
+### Problème hot reload Windows
 
 Si vous rencontrez un problème pour faire fonctionner le hot reload sur Windows. Ajoutez ceci au *service client* dans le fichier *docker-compose.dev.yml* :
 
@@ -154,9 +154,9 @@ environment:
   - WATCHPACK_POLLING=true
 ```
 
-### Mise en place de l'API Node.js
+## Mise en place de l'API Node.js
 
-#### Initialisation de l'application
+### Initialisation de l'application
 
 Dans *api*, nous initialisons notre *package.json* :
 
@@ -210,7 +210,7 @@ app.listen(80);
 
 Nous réutilisons le même code que pour le chapitre précédent, en créant simplement la route */api/count*.
 
-#### Création du *Dockerfile*
+### Création du *Dockerfile*
 
 Nous créons le fichier *api/Dockerfile* :
 
@@ -232,7 +232,7 @@ Nous créons le script correspondant dans *package.json*:
 }
 ```
 
-#### Modification de *docker-compose.dev.yml*
+### Modification de *docker-compose.dev.yml*
 
 Nous modifions notre configuration pour *Docker Compose* :
 
@@ -265,9 +265,9 @@ services:
 
 Nous devons avant de pouvoir tester, mettre en place le service pour la base de données.
 
-### Mise en place du service pour la base de données
+## Mise en place du service pour la base de données
 
-#### Modification de *docker-compose.dev.yml*
+### Modification de *docker-compose.dev.yml*
 
 Nous modifions notre configuration pour *Docker Compose* pour ajouter notre service de base de données *MongoDB* :
 
@@ -306,7 +306,7 @@ volumes:
   dbtest:
 ```
 
-#### Création de la collection et du document
+### Création de la collection et du document
 
 Nous lançons la base de données :
 
@@ -366,9 +366,9 @@ Nous testons ensuite notre *API* en ouvrant un navigateur et en allant sur *loca
 
 Nous testons également que l'application *React* est disponible : *localhost:3000*. 
 
-### Mise en place du reverse proxy nginx
+## Mise en place du reverse proxy nginx
 
-#### Création du *Dockerfile.dev*
+### Création du *Dockerfile.dev*
 
 Nous allons créer notre *Dockerfile.dev* dans le dossier *reverseproxy* :
 
@@ -380,7 +380,7 @@ EXPOSE 80
 
 Nous allons utiliser un fichier de configuration que nous copions au bon emplacement pour que *nginx* l'utilise.
 
-#### Création du fichier de configuration pour le développement
+### Création du fichier de configuration pour le développement
 
 Nous allons créer un dossier *conf* dans lequel nous allons créer un fichier *dev.conf* :
 
@@ -422,7 +422,7 @@ Il faut donc les déclarer manuellement pour le passer au serveur *client*. C'es
 
 Sans cela, les *Web Sockets* ne fonctionneraient pas, et le serveur de développement de *Webpack* ne pourrait pas demander au navigateur de recharger la page.
 
-#### Modification de *docker-compose.dev.yml*
+### Modification de *docker-compose.dev.yml*
 
 Nous n'avons plus qu'à modifier *docker-compose.dev.yml* :
 
@@ -476,9 +476,9 @@ Nous n'avons plus qu'à lancer :
 docker compose -f docker-compose.dev.yml up
 ```
 
-### Mise en place de la configuration de production
+## Mise en place de la configuration de production
 
-#### Configuration de l'environnement de production pour client
+### Configuration de l'environnement de production pour client
 
 Nous allons commencer par le dossier *client* en créant un fichier *Dockerfile.prod* :
 
@@ -515,7 +515,7 @@ Nous pouvons essayer de lancer le service :
 docker compose -f docker-compose.prod.yml up
 ```
 
-### Configuration de l'environnement de production pour l'*API*
+## Configuration de l'environnement de production pour l'*API*
 
 Nous modifions le *docker-compose.prod.yml* pour mettre en place notre nouveau service :
 
@@ -550,3 +550,177 @@ Nous ajoutons un *.dockerignore* pour ne pas copier le fichier dans l'image :
 ```sh
 .env
 ```
+
+## Fin de la mise en place de l'env de production
+
+### Mise en place de l'environnement pour la base de données
+
+Nous allons créer un fichier *db/.env* afin de pouvoir indiquer les mots de passe :
+
+```sh
+MONGO_INITDB_ROOT_USERNAME=admin
+MONGO_INITDB_ROOT_PASSWORD=password
+```
+
+Nous modifions le fichier *docker-compose.prod.yml* pour mettre en place notre nouveau service :
+
+```yaml
+version: "3.9"
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    env_file:
+      - ./api/.env
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+    depends_on:
+      - db
+  db:
+    image: mongo:7
+    volumes:
+      - type: volume
+        source: dbprod
+        target: /data/db
+    env_file:
+      - ./db/.env
+    restart: unless-stopped
+
+volumes:
+  dbprod:
+    external: true
+```
+
+Nous devons par conséquent créer le volume de production :
+
+```sh
+docker volume create dbprod
+```
+
+Nous lançons ensuite notre service de base de données :
+
+```sh
+docker compose -f docker-compose.prod.yml run -d db
+```
+
+Nous nous connectons sur le client de *MongoDB* :
+
+```sh
+docker compose exec -it db mongosh
+```
+
+Nous pouvons alors nous authentifier dans la console :
+
+```sql
+use admin
+db.auth({user: 'admin', pwd: 'password'})
+```
+
+La console retourne alors `1`, ce qui signifie que l'authentification s'est bien déroulée.
+
+```sql
+db.createUser({user: 'jean', pwd: '123', roles:[{role: 'readWrite', db: 'test'}]})
+```
+
+Nous passons sur la base de données *test* :
+
+```sql
+use test
+```
+
+Nous insérons un document :
+
+```sql
+db.count.insertOne({count: 0});
+```
+
+### Mise en place de l'environnement pour le *reverse proxy*
+
+Nous passons au *reverse proxy*, nous créons un fichier *conf/prod.conf* dans *reverseproxy*:
+
+```js
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://client;
+    }
+
+    location /api {
+        proxy_pass http://api;
+    }
+}
+```
+
+Nous créons notre *Dockerfile.prod* :
+
+```dockerfile
+FROM nginx:latest
+COPY ./conf/prod.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+```
+
+Nous modifions le fichier *docker-compose.prod.yml* pour mettre en place notre nouveau service :
+
+```yaml
+version: "3.9"
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    env_file:
+      - ./api/.env
+    environment:
+      NODE_ENV: production
+    restart: unless-stopped
+    depends_on:
+      - db
+  db:
+    image: mongo:7
+    volumes:
+      - type: volume
+        source: dbprod
+        target: /data/db
+    env_file:
+      - ./db/.env
+    restart: unless-stopped
+  reverse-proxy:
+    build:
+      context: ./reverse-proxy
+      dockerfile: Dockerfile.prod
+    ports:
+      - 80:80
+    restart: unless-stopped
+    depends_on:
+      - api
+      - db
+      - client
+volumes:
+  dbprod:
+    external: true
+```
+
+Nous testons :
+
+```sh
+docker compose -f docker-compose.prod.yml up
+```
+
+Nous pouvons vérifier si tout fonctionne dans le navigateur en nous rendant sur *localhost*.
+
+### Code de l'exemple
+
+Vous pouvez également retrouver le code du projet sur [Github](https://github.com/dymafr/dymafr-docker-chapitre10-mongodb-node-react-nginx). 

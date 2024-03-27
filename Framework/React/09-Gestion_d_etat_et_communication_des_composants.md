@@ -31,19 +31,19 @@ Créez-y les composants suivants : `TodoList.jsx`, `AddTodo.jsx`, `TodoItem.jsx`
 Dans le composant racine, mettez ce code de base :
 
 ```jsx
-import TodoList from './components/TodoList';
-import AddTodo from './components/AddTodo';
+import TodoList from "./components/TodoList";
+import AddTodo from "./components/AddTodo";
 
 function App() {
-return (
-<div className="d-flex justify-content-center align-items-center p-20">
-<div className="card container p-20">
-<h1 className="mb-20">Liste de tâches</h1>
-<AddTodo />
-<TodoList />
-</div>
-</div>
-);
+  return (
+    <div className="d-flex justify-content-center align-items-center p-20">
+      <div className="card container p-20">
+        <h1 className="mb-20">Liste de tâches</h1>
+        <AddTodo />
+        <TodoList />
+      </div>
+    </div>
+  );
 }
 
 export default App;
@@ -55,7 +55,7 @@ Dans chaque composant du dossier `components` mettez le code suivant en adaptant
 
 ```jsx
 export default function EditTodo() {
-return <h2>EditTodo</h2>;
+  return <h2>EditTodo</h2>;
 }
 ```
 
@@ -68,9 +68,9 @@ Dans le composant racine, nous aurons la liste des tâches dans l'état local ca
 Or, ces composants ont besoin de modifier / d'afficher la liste des tâches.
 
 ```jsx
-import { useState } from 'react';
-import TodoList from './components/TodoList';
-import AddTodo from './components/AddTodo';
+import { useState } from "react";
+import TodoList from "./components/TodoList";
+import AddTodo from "./components/AddTodo";
 
 function App() {
   const [todoList, setTodoList] = useState([]);
@@ -99,17 +99,16 @@ Remarquez bien que la fonction permettant d'ajouter une tâche ne modifie pas le
 
 Rappelez-vous que **l'état local doit être considéré comme en lecture seule !**
 
-Il faut donc d'abord créer un nouveau tableau avec l'opérateur *spread* puis ajouter notre nouvelle tâche à celui-ci.
+Il faut donc d'abord créer un nouveau tableau avec l'opérateur _spread_ puis ajouter notre nouvelle tâche à celui-ci.
 
-`crypto.randomUUID()` est une *API Web* qui est compatible tout navigateur et permet de générer un *UUID v4*. C'est typiquement le genre d'identifiant que vous auriez dans une base de données.
+`crypto.randomUUID()` est une _API Web_ qui est compatible tout navigateur et permet de générer un _UUID v4_. C'est typiquement le genre d'identifiant que vous auriez dans une base de données.
 
-Notez bien que nous passons cette fonction de modification au composant enfant `AddTodo` en *prop*. Ce composant pourra ensuite exécuter cette fonction pour ajouter une tâche et donc modifier l'état du composant parent.
+Notez bien que nous passons cette fonction de modification au composant enfant `AddTodo` en _prop_. Ce composant pourra ensuite exécuter cette fonction pour ajouter une tâche et donc modifier l'état du composant parent.
 
-Rappelez-vous que **le composant enfant a l'interdiction totale de modifier une *prop* directement**, c'est pour cela qu'en *React* nous passons des fonctions pour que les composants enfants puissent demander la modification de l'état. 
+Rappelez-vous que **le composant enfant a l'interdiction totale de modifier une _prop_ directement**, c'est pour cela qu'en _React_ nous passons des fonctions pour que les composants enfants puissent demander la modification de l'état.
 
-Autrement dit, **un composant enfant ne doit JAMAIS modifier l'état reçu en *prop* directement mais par l'intermédiaire d'une fonction**.
+Autrement dit, **un composant enfant ne doit JAMAIS modifier l'état reçu en _prop_ directement mais par l'intermédiaire d'une fonction**.
 
- 
 #### Modification du composant AddTodo
 
 Le composant `AddTodo` a en état local la valeur du champ avec une double liaison :
@@ -117,13 +116,13 @@ Le composant `AddTodo` a en état local la valeur du champ avec une double liais
 - lorsque nous modifions l'état avec `setValue()`, la valeur du champ est modifié grâce à la liaison `value={value}`.
 - lorsque l'utilisateur modifie la valeur du champ, l'état local est modifié grâce à `onChange={handleChange}`.
 
-Notez bien que le composant reçoit en *prop* la fonction `addTodo()` et qu'il l'invoque lorsque nous voulons ajouter une tâche, et donc modifier l'état du composant parent.
+Notez bien que le composant reçoit en _prop_ la fonction `addTodo()` et qu'il l'invoque lorsque nous voulons ajouter une tâche, et donc modifier l'état du composant parent.
 
 ```jsx
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function AddTodo({ addTodo }) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
 
   function handleChange(e) {
     const inputValue = e.target.value;
@@ -131,16 +130,16 @@ export default function AddTodo({ addTodo }) {
   }
 
   function handleKeyDown(e) {
-    if (e.key === 'Enter' && value.length) {
+    if (e.key === "Enter" && value.length) {
       addTodo(value);
-      setValue('');
+      setValue("");
     }
   }
 
   function handleClick() {
     if (value.length) {
       addTodo(value);
-      setValue('');
+      setValue("");
     }
   }
 
@@ -161,8 +160,8 @@ export default function AddTodo({ addTodo }) {
   );
 }
 ```
- 
-#### Modification du partial _themes.scss
+
+#### Modification du partial \_themes.scss
 
 ```scss
 input {
@@ -174,14 +173,14 @@ input {
 
 ## Communication d'un composant parent vers un composant enfant
 
-### Modification de *App.jsx*
+### Modification de _App.jsx_
 
 Commençons par le composant racine :
 
 ```jsx
-import { useState } from 'react';
-import TodoList from './components/TodoList';
-import AddTodo from './components/AddTodo';
+import { useState } from "react";
+import TodoList from "./components/TodoList";
+import AddTodo from "./components/AddTodo";
 
 function App() {
   const [todoList, setTodoList] = useState([]);
@@ -209,22 +208,22 @@ function App() {
 export default App;
 ```
 
-Notez bien que la fonction de suppression utilise la méthode `filter()` **qui retourne un nouveau tableau sans modifier le tableau dans la variable d'état *todoList*.** Nous respectons donc bien la règle de ne pas modifier directement l'état !
+Notez bien que la fonction de suppression utilise la méthode `filter()` **qui retourne un nouveau tableau sans modifier le tableau dans la variable d'état _todoList_.** Nous respectons donc bien la règle de ne pas modifier directement l'état !
 
-Nous passons la fonction de suppression à notre composant `TodoList` en *prop*.
+Nous passons la fonction de suppression à notre composant `TodoList` en _prop_.
 
 ### Modification de `TodoList.jsx`
 
-Dans le composant `TodoList` nous affichons un message s'il n'y a pas de tâches. S'il y a au moins un tâche dans le tableau *todoList* nous parcourons le tableau et créons un composant `TodoItem` pour chaque tâche.
+Dans le composant `TodoList` nous affichons un message s'il n'y a pas de tâches. S'il y a au moins un tâche dans le tableau _todoList_ nous parcourons le tableau et créons un composant `TodoItem` pour chaque tâche.
 
-Nous utilisons l'identifiant unique de la tâche comme *key*.
+Nous utilisons l'identifiant unique de la tâche comme _key_.
 
-Nous utilisons une *closure* pour créer une fonction anonyme retournant la fonction de suppression liée à la valeur de l'identifiant unique de la tâche.
+Nous utilisons une _closure_ pour créer une fonction anonyme retournant la fonction de suppression liée à la valeur de l'identifiant unique de la tâche.
 
->*Si vous avez besoin d'une petite mise au point sur le concept de fermeture (**closure**), n'hésitez pas à vous rendre sur la formation JavaScript.*
+> _Si vous avez besoin d'une petite mise au point sur le concept de fermeture (**closure**), n'hésitez pas à vous rendre sur la formation JavaScript._
 
 ```jsx
-import TodoItem from './TodoItem';
+import TodoItem from "./TodoItem";
 
 export default function TodoList({ todoList, deleteTodo }) {
   return todoList.length ? (
@@ -242,7 +241,7 @@ export default function TodoList({ todoList, deleteTodo }) {
   );
 }
 ```
- 
+
 ### Modification de `TodoItem.jsx`
 
 Dans le composant d'affiche de chaque tâche nous avons simplement :
@@ -268,14 +267,14 @@ export default function TodoItem({ todo, deleteTodo }) {
 
 Dans le composant racine, nous ajoutons une fonction pour passer une tâche en mode édition.
 
-En effet, quand la propriété *edit* d'une tâche vaut *true* nous voulons afficher le formulaire d'édition de cette tâche et quand elle vaut *false*, nous voulons afficher la tâche.
+En effet, quand la propriété _edit_ d'une tâche vaut _true_ nous voulons afficher le formulaire d'édition de cette tâche et quand elle vaut _false_, nous voulons afficher la tâche.
 
 Nous devons donc ajouter cette mécanique pour déclencher le mode édition.
 
 ```jsx
-import { useState } from 'react';
-import TodoList from './components/TodoList';
-import AddTodo from './components/AddTodo';
+import { useState } from "react";
+import TodoList from "./components/TodoList";
+import AddTodo from "./components/AddTodo";
 
 function App() {
   const [todoList, setTodoList] = useState([]);
@@ -323,16 +322,16 @@ function App() {
 
 export default App;
 ```
- 
+
 ### Modification de `TodoList.jsx`
 
-Dans *TodoList*, nous affichons un composant différent suivant que nous sommes en mode édition ou non.
+Dans _TodoList_, nous affichons un composant différent suivant que nous sommes en mode édition ou non.
 
-Comme d'habitude, nous faisons une *closure* et la passons en *prop* pour permettre au composant `TodoItem` de déclencher le mode édition pour une tâche donnée :
+Comme d'habitude, nous faisons une _closure_ et la passons en _prop_ pour permettre au composant `TodoItem` de déclencher le mode édition pour une tâche donnée :
 
 ```jsx
-import TodoItem from './TodoItem';
-import EditTodo from './EditTodo';
+import TodoItem from "./TodoItem";
+import EditTodo from "./EditTodo";
 
 export default function TodoList({
   todoList,
@@ -361,17 +360,17 @@ export default function TodoList({
   );
 }
 ```
- 
+
 ### Modification de `TodoItem.jsx`
 
-Dans `TodoItem`, nous passons simplement notre *prop* `editTodo` en gestionnaire d'événement pour le clic sur le bouton "Modifier" :
+Dans `TodoItem`, nous passons simplement notre _prop_ `editTodo` en gestionnaire d'événement pour le clic sur le bouton "Modifier" :
 
 ```jsx
 export default function TodoItem({ todo, deleteTodo, toggleTodo, editTodo }) {
   return (
     <li className="mb-10 d-flex justify-content-center align-items-center p-10">
       <span className="flex-fill">
-        {todo.content} {todo.done && '✅'}
+        {todo.content} {todo.done && "✅"}
       </span>
       <button className="btn btn-primary mr-15" onClick={toggleTodo}>
         Valider
@@ -386,11 +385,12 @@ export default function TodoItem({ todo, deleteTodo, toggleTodo, editTodo }) {
   );
 }
 ```
+
 ## Implémentation de l'édition
 
 ### Modification de `App.jsx`
 
-Nous ajoutons une fonction pour éditer une tâche, elle change le contenu de la tâche et passe le mode édition à *false* :
+Nous ajoutons une fonction pour éditer une tâche, elle change le contenu de la tâche et passe le mode édition à _false_ :
 
 ```jsx
 import { useState } from 'react';
@@ -452,7 +452,7 @@ function App() {
 
 export default App;
 
- 
+
 Modification de TodoList.jsx
 
 Dans le composant TodoList, nous passons en prop au composant EditTodo la fonction permettant d'éditer la tâche en la liant à l'id de la tâche encore grâce à une closure.
@@ -495,7 +495,7 @@ export default function TodoList({
   );
 }
 
- 
+
 Modification de EditTodo.jsx
 
 Le composant EditTodo est très similaire au composant pour ajouter une tâche :
@@ -552,9 +552,9 @@ export default function EditTodo({ todo, editTodo, cancelEditTodo }) {
 Nous ajoutons une fonction pour sélectionner une tâche et désélectionner les autres :
 
 ```jsx
-import { useState } from 'react';
-import TodoList from './components/TodoList';
-import AddTodo from './components/AddTodo';
+import { useState } from "react";
+import TodoList from "./components/TodoList";
+import AddTodo from "./components/AddTodo";
 
 function App() {
   const [todoList, setTodoList] = useState([]);
@@ -628,14 +628,14 @@ function App() {
 
 export default App;
 ```
- 
+
 ### Modification de `TodoList.jsx`
 
-Nous modifions le composant `TodoList` simplement pour passer en *prop* plus bas dans l'arbre la fonction permettant de sélectionner une tâche :
+Nous modifions le composant `TodoList` simplement pour passer en _prop_ plus bas dans l'arbre la fonction permettant de sélectionner une tâche :
 
 ```jsx
-import TodoItem from './TodoItem';
-import EditTodo from './EditTodo';
+import TodoItem from "./TodoItem";
+import EditTodo from "./EditTodo";
 
 export default function TodoList({
   todoList,
@@ -672,7 +672,7 @@ export default function TodoList({
   );
 }
 ```
- 
+
 ### Modification de `TodoItem.jsx`
 
 Nous modifions le composant `TodoItem` :
@@ -689,11 +689,11 @@ export default function TodoItem({
     <li
       onClick={selectTodo}
       className={`mb-10 d-flex flex-row justify-content-center align-items-center p-10 ${
-        todo.selected ? 'selected' : ''
+        todo.selected ? "selected" : ""
       }  `}
     >
       <span className="flex-fill">
-        {todo.content} {todo.done && '✅'}
+        {todo.content} {todo.done && "✅"}
       </span>
       <button
         className="btn btn-primary mr-15"
@@ -745,7 +745,7 @@ function toggleTodo(id) {
 }
 ```
 
-*React* met **dans sa queue de mise à jour,** pour le prochain rendu la nouvelle valeur de notre tâche, par exemple :
+_React_ met **dans sa queue de mise à jour,** pour le prochain rendu la nouvelle valeur de notre tâche, par exemple :
 
 ```jsx
 {
@@ -755,9 +755,9 @@ function toggleTodo(id) {
   id: "b702f80a-2d23-4f74-8388-5eebf681ffd4",
   selected: false
 }
-``` 
+```
 
-- ensuite l'événement se propage et remonte sur le *DOM*
+- ensuite l'événement se propage et remonte sur le _DOM_
 - `selectTodo()` est donc exécutée :
 
 ```jsx
@@ -772,7 +772,7 @@ function selectTodo(id) {
 }
 ```
 
-*React* met **dans sa queue de mise à jour,** pour le prochain rendu la nouvelle valeur de notre tâche, par exemple :
+_React_ met **dans sa queue de mise à jour,** pour le prochain rendu la nouvelle valeur de notre tâche, par exemple :
 
 ```jsx
 {
@@ -784,11 +784,11 @@ function selectTodo(id) {
 }
 ```
 
-Remarquez bien que *done* est à *false* !
+Remarquez bien que _done_ est à _false_ !
 
-En effet, la valeur de la tâche pour ce rendu n'a pas changé ! Rappelez-vous que les mises à jour d'état se font au prochain rendu donc dans la liste nous avons toujours l'ancienne tâche et donc *done* est à *false* !
+En effet, la valeur de la tâche pour ce rendu n'a pas changé ! Rappelez-vous que les mises à jour d'état se font au prochain rendu donc dans la liste nous avons toujours l'ancienne tâche et donc _done_ est à _false_ !
 
-Au prochain rendu, *React* exécute sa queue de mise à jour et prend la dernière mise à jour de la tâche et nous obtenons donc :
+Au prochain rendu, _React_ exécute sa queue de mise à jour et prend la dernière mise à jour de la tâche et nous obtenons donc :
 
 ```jsx
 {
@@ -800,9 +800,8 @@ Au prochain rendu, *React* exécute sa queue de mise à jour et prend la derniè
 }
 ```
 
-C'est assez complexe à comprendre au début mais c'est vraiment essentiel à comprendre pour maîtriser *React*, aussi n'hésitez pas à relire 2 / 3 fois les explications.
+C'est assez complexe à comprendre au début mais c'est vraiment essentiel à comprendre pour maîtriser _React_, aussi n'hésitez pas à relire 2 / 3 fois les explications.
 
- 
 Modification de `_themes.scss`
 
 ```scss
@@ -818,59 +817,58 @@ li {
 
 ## Présentation du hook `useContext()` et de `createContext()`
 
-## A quoi sert *Context* ?
+## A quoi sert _Context_ ?
 
-Nous avons vu jusqu'à maintenant que pour passer des informations d'un composant parent vers un composant enfant il suffisait d'utiliser des *props*.
+Nous avons vu jusqu'à maintenant que pour passer des informations d'un composant parent vers un composant enfant il suffisait d'utiliser des _props_.
 
-Mais passer des *props* peut devenir très verbeux et pénible s'il faut les passer très loin en bas de l'arbre des composants ou si plusieurs branches ont besoin des mêmes *props*.
+Mais passer des _props_ peut devenir très verbeux et pénible s'il faut les passer très loin en bas de l'arbre des composants ou si plusieurs branches ont besoin des mêmes _props_.
 
-Par exemple, nous avons besoin d'une information dans tous les composants en bleu. Nous devons donc passer en *prop* cette information 8 fois :
+Par exemple, nous avons besoin d'une information dans tous les composants en bleu. Nous devons donc passer en _prop_ cette information 8 fois :
 
-![Diagram with a tree of ten nodes, each node with two children or less. The root node contains a bubble representing a value highlighted in purple. The value flows down through the two children, each of which pass the value but do not contain it. The left child passes the value down to two children which are both highlighted purple. The right child of the root passes the value through to one of its two children - the right one, which is highlighted purple. That child passed the value through its single child, which passes it down to both of its two children, which are highlighted purple.](/00-assets/images/React/passing_data_prop_drilling.webp)
+![Diagram with a tree of ten nodes, each node with two children or less. The root node contains a bubble representing a value highlighted in purple. The value flows down through the two children, each of which pass the value but do not contain it. The left child passes the value down to two children which are both highlighted purple. The right child of the root passes the value through to one of its two children - the right one, which is highlighted purple. That child passed the value through its single child, which passes it down to both of its two children, which are highlighted purple.](../../assets/images/React/passing_data_prop_drilling.webp)
 
-***Context* permet de rendre des informations disponibles dans tous les composants enfant d'un composant même s'ils sont très éloignés.**
+**_Context_ permet de rendre des informations disponibles dans tous les composants enfant d'un composant même s'ils sont très éloignés.**
 
-![Diagram with a tree of ten nodes, each node with two children or less. The root parent node contains a bubble representing a value highlighted in orange. The value projects down directly to four leaves and one intermediate component in the tree, which are all highlighted in orange. None of the other intermediate components are highlighted.](/00-assets/images/React/passing_data_context_far.webp)
+![Diagram with a tree of ten nodes, each node with two children or less. The root parent node contains a bubble representing a value highlighted in orange. The value projects down directly to four leaves and one intermediate component in the tree, which are all highlighted in orange. None of the other intermediate components are highlighted.](../../assets/images/React/passing_data_context_far.webp)
 
+### Utilisation du _Context_
 
-### Utilisation du *Context*
+#### 1 - Créer le _Context_
 
-#### 1 - Créer le *Context*
-
-Pour créer un *Context*, on utilise un fichier pour le déclarer avec `createContext()` et on l'exporte.
+Pour créer un _Context_, on utilise un fichier pour le déclarer avec `createContext()` et on l'exporte.
 
 **On passe la valeur que l'on souhaite partager en argument.**
 
-Par convention le nom du fichier est suffixé par *Context*, par exemple `ExempleContext.js` :
+Par convention le nom du fichier est suffixé par _Context_, par exemple `ExempleContext.js` :
 
 ```jsx
-import { createContext } from 'react';
+import { createContext } from "react";
 
 export const ExempleContext = createContext(42);
 ```
 
-#### 2 - Utiliser le *Context*
+#### 2 - Utiliser le _Context_
 
-Pour ensuite l'utiliser dans n'importe quel composant il suffit de l'importer et d'utiliser le *hook* `useContext()` :
+Pour ensuite l'utiliser dans n'importe quel composant il suffit de l'importer et d'utiliser le _hook_ `useContext()` :
 
 ```jsx
-import { useContext } from 'react';
-import { ExempleContext } from './ExempleContext.js';
+import { useContext } from "react";
+import { ExempleContext } from "./ExempleContext.js";
 
 export default function UnComposant() {
   const data = useContext(ExempleContext);
 }
 ```
 
-**Comme tous les *hooks* il est obligatoire d'utiliser `useContext()` au premier niveau d'un composant (ni imbriqué dans un bloc conditionnel, ni dans une fonction).**
+**Comme tous les _hooks_ il est obligatoire d'utiliser `useContext()` au premier niveau d'un composant (ni imbriqué dans un bloc conditionnel, ni dans une fonction).**
 
-#### 3 - Fournir un autre *Context*
+#### 3 - Fournir un autre _Context_
 
-Pour fournir (*provide*) un *Context* il faut l’importer et utiliser le composant `<NomContext.provider value={valeur}>` :
+Pour fournir (_provide_) un _Context_ il faut l’importer et utiliser le composant `<NomContext.provider value={valeur}>` :
 
 ```jsx
-import ExempleContext from './ExempleContext';
-import UnComposantEnfant from './UnComposantEnfant';
+import ExempleContext from "./ExempleContext";
+import UnComposantEnfant from "./UnComposantEnfant";
 
 export default function UnComposantParnet() {
   return (
@@ -883,14 +881,14 @@ export default function UnComposantParnet() {
 
 **Cela permet de changer la valeur fournie pour tous les composants situés plus bas dans l'arbre.**
 
-*Pour comprendre le fonctionnement du **Context** vous pouvez faire le parallèle avec l'héritage des propriétés **CSS**. En **CSS**, quand vous appliquez une propriété sur un élément, par exemple `color: blue` sur une `<div>`, tous les éléments en-dessous seront bleu sauf si vous écrasez cette propriété pour un autre élément plus bas sur le **DOM**.*
+_Pour comprendre le fonctionnement du **Context** vous pouvez faire le parallèle avec l'héritage des propriétés **CSS**. En **CSS**, quand vous appliquez une propriété sur un élément, par exemple `color: blue` sur une `<div>`, tous les éléments en-dessous seront bleu sauf si vous écrasez cette propriété pour un autre élément plus bas sur le **DOM**._
 
-**Le *Context* n'est pas forcément une valeur statique vous pouvez très bien le lier à une valeur dynamique, par exemple un état :**
+**Le _Context_ n'est pas forcément une valeur statique vous pouvez très bien le lier à une valeur dynamique, par exemple un état :**
 
 ```jsx
-import ExempleContext from './ExempleContext';
-import UnComposantEnfant from './UnComposantEnfant';
-import { useState } from 'react';
+import ExempleContext from "./ExempleContext";
+import UnComposantEnfant from "./UnComposantEnfant";
+import { useState } from "react";
 
 export default function UnComposantParnet() {
   const [valeur, setValeur] = useState(42);
@@ -902,19 +900,19 @@ export default function UnComposantParnet() {
   );
 }
 ```
- 
-### Quand utiliser le *Context* ?
 
-Il ne faut pas abuser du *Context*, en *React* il n'est pas rare que des dizaines de *props* soient passées le long de l'arbre des composants sur une application complexe. Ce n'est pas une raison pour les remplacer par *Context*.
+### Quand utiliser le _Context_ ?
 
-**En effet, avec les *props* il est facile de voir d'où elles viennent et où elles vont. Elles sont donc plus facilement lisibles et maintenables.**
+Il ne faut pas abuser du _Context_, en _React_ il n'est pas rare que des dizaines de _props_ soient passées le long de l'arbre des composants sur une application complexe. Ce n'est pas une raison pour les remplacer par _Context_.
 
-**Voici des exemples d'usages recommandés du *Context* par l'équipe *React* :**
+**En effet, avec les _props_ il est facile de voir d'où elles viennent et où elles vont. Elles sont donc plus facilement lisibles et maintenables.**
 
-- **Les thèmes :** si votre application a deux ou plusieurs thèmes (par exemple un mode sombre), vous pouvez utiliser un *Context* pour indiquer le mode choisi aux composants qui ont besoin d'être adapté suivant le mode.
+**Voici des exemples d'usages recommandés du _Context_ par l'équipe _React_ :**
+
+- **Les thèmes :** si votre application a deux ou plusieurs thèmes (par exemple un mode sombre), vous pouvez utiliser un _Context_ pour indiquer le mode choisi aux composants qui ont besoin d'être adapté suivant le mode.
 - **L'utilisateur connecté :** de nombreux composants partout dans l'application ont souvent besoin d'avoir des informations sur l'utilisateur connecté. Cela permet de rendre disponible ces informations partout dans l'application.
-- ***Routing* :** la plupart des solutions de *React* pour le routing utilise en fait le *Context*. Nous verrons cela dans la suite de la formation.
-- **Gérer l'état global :** nous verrons que dans les applications importantes il peut être efficace de gérer l'état en combinant *Context* et le *hook* `useReducer()`.
+- **_Routing_ :** la plupart des solutions de _React_ pour le routing utilise en fait le _Context_. Nous verrons cela dans la suite de la formation.
+- **Gérer l'état global :** nous verrons que dans les applications importantes il peut être efficace de gérer l'état en combinant _Context_ et le _hook_ `useReducer()`.
 
 ## Exemple d'utilisation du hook `useContext()`
 
@@ -925,19 +923,19 @@ Dans notre application, créez un dossier `context` dans `src`.
 Dans ce dossier, créez le fichier `ThemeContext.js` :
 
 ```jsx
-import { createContext } from 'react';
+import { createContext } from "react";
 
-const ThemeContext = createContext('primary');
+const ThemeContext = createContext("primary");
 export default ThemeContext;
 ```
- 
+
 ### Création du composant `Button.jsx`
 
 Dans le dossier `components`, créez le fichier `Button.jsx` :
 
 ```jsx
-import { useContext } from 'react';
-import ThemeContext from '../context/ThemeContext';
+import { useContext } from "react";
+import ThemeContext from "../context/ThemeContext";
 
 export default function Button({ text, className, ...props }) {
   const theme = useContext(ThemeContext);
@@ -945,7 +943,7 @@ export default function Button({ text, className, ...props }) {
   return (
     <button
       {...props}
-      className={`btn btn-${theme} ${className ? className : ''}`}
+      className={`btn btn-${theme} ${className ? className : ""}`}
     >
       {text}
     </button>
@@ -953,11 +951,11 @@ export default function Button({ text, className, ...props }) {
 }
 ```
 
-**{ text, className, ...props } :** permet de récupérer les *props* *text* et *className* grâce à la déstructuration et de mettre le reste des *props* dans une propriété *props* grâce à l'opérateur **rest (...)**.
+**{ text, className, ...props } :** permet de récupérer les _props_ _text_ et _className_ grâce à la déstructuration et de mettre le reste des _props_ dans une propriété _props_ grâce à l'opérateur **rest (...)**.
 
->*N'hésitez pas à revoir l'opérateur **rest** -également appelé paramètres du reste-, qui ne doit pas être confondu avec l'opérateur **spread** -également appelé opérateur de décomposition-, dans la formation **JavaScript**.*
+> _N'hésitez pas à revoir l'opérateur **rest** -également appelé paramètres du reste-, qui ne doit pas être confondu avec l'opérateur **spread** -également appelé opérateur de décomposition-, dans la formation **JavaScript**._
 
-**{ ...props } :** permet de copier toutes les propriétés de l'objet *props* (grâce à l'opérateur *spread*) et de les passer comme *props* au composant natif *button*.
+**{ ...props } :** permet de copier toutes les propriétés de l'objet _props_ (grâce à l'opérateur _spread_) et de les passer comme _props_ au composant natif _button_.
 
 Notez que nous récupérons le `Context` avec le hook `useContext()`.
 
@@ -972,17 +970,17 @@ Nous l'utilisons pour dynamiquement changer la classe de nos boutons.
   border: 2px solid #2980b9;
 }
 ```
- 
+
 ### Modification du composant `AddTodo.jsx`
 
 Nous utilisons notre nouveau composant `Button` :
 
 ```jsx
-import { useState } from 'react';
-import Button from './Button';
+import { useState } from "react";
+import Button from "./Button";
 
 export default function AddTodo({ addTodo }) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
 
   function handleChange(e) {
     const inputValue = e.target.value;
@@ -990,16 +988,16 @@ export default function AddTodo({ addTodo }) {
   }
 
   function handleKeyDown(e) {
-    if (e.key === 'Enter' && value.length) {
+    if (e.key === "Enter" && value.length) {
       addTodo(value);
-      setValue('');
+      setValue("");
     }
   }
 
   function handleClick() {
     if (value.length) {
       addTodo(value);
-      setValue('');
+      setValue("");
     }
   }
 
@@ -1024,7 +1022,7 @@ export default function AddTodo({ addTodo }) {
 Nous utilisons notre nouveau composant `Button` :
 
 ```jsx
-import Button from './Button';
+import Button from "./Button";
 
 export default function TodoItem({
   todo,
@@ -1037,11 +1035,11 @@ export default function TodoItem({
     <li
       onClick={selectTodo}
       className={`mb-10 d-flex flex-row justify-content-center align-items-center p-10 ${
-        todo.selected ? 'selected' : ''
+        todo.selected ? "selected" : ""
       }  `}
     >
       <span className="flex-fill">
-        {todo.content} {todo.done && '✅'}
+        {todo.content} {todo.done && "✅"}
       </span>
       <Button
         text="Valider"
@@ -1070,14 +1068,14 @@ export default function TodoItem({
   );
 }
 ```
- 
+
 ### Modification du composant `EditTodo.jsx`
 
 Nous utilisons notre nouveau composant `Button` :
 
 ```jsx
-import { useState } from 'react';
-import Button from './Button';
+import { useState } from "react";
+import Button from "./Button";
 
 export default function EditTodo({ todo, editTodo, cancelEditTodo }) {
   const [value, setValue] = useState(todo.content);
@@ -1088,16 +1086,16 @@ export default function EditTodo({ todo, editTodo, cancelEditTodo }) {
   }
 
   function handleKeyDown(e) {
-    if (e.key === 'Enter' && value.length) {
+    if (e.key === "Enter" && value.length) {
       editTodo(value);
-      setValue('');
+      setValue("");
     }
   }
 
   function handleClick() {
     if (value.length) {
       editTodo(value);
-      setValue('');
+      setValue("");
     }
   }
 
@@ -1117,24 +1115,24 @@ export default function EditTodo({ todo, editTodo, cancelEditTodo }) {
   );
 }
 ```
- 
+
 ### Modification du composant `App.jsx`
 
 Dans le composant racine nous ajoutons une liste d'options permettant de modifier le thème des boutons.
 
-La liste est liée de manière bidirectionnelle avec l'état local *theme* grâce à `value={theme} onChange={handleThemeChange}`.
+La liste est liée de manière bidirectionnelle avec l'état local _theme_ grâce à `value={theme} onChange={handleThemeChange}`.
 
-Nous utilisons ensuite un fournisseur de *Context* pour lier la valeur de la variable d'état *theme* au *Context* fourni aux composants enfants du composant racine (donc tous les autres composants) grâce à `<ThemeContext.Provider value={theme}>`.
+Nous utilisons ensuite un fournisseur de _Context_ pour lier la valeur de la variable d'état _theme_ au _Context_ fourni aux composants enfants du composant racine (donc tous les autres composants) grâce à `<ThemeContext.Provider value={theme}>`.
 
 ```jsx
-import { useState } from 'react';
-import TodoList from './components/TodoList';
-import AddTodo from './components/AddTodo';
-import ThemeContext from './context/ThemeContext';
+import { useState } from "react";
+import TodoList from "./components/TodoList";
+import AddTodo from "./components/AddTodo";
+import ThemeContext from "./context/ThemeContext";
 
 function App() {
   const [todoList, setTodoList] = useState([]);
-  const [theme, setTheme] = useState('primary');
+  const [theme, setTheme] = useState("primary");
 
   function addTodo(content) {
     const todo = {
@@ -1222,11 +1220,11 @@ export default App;
 
 ### Qu'est-ce qu'un Reducer ?
 
-Les composants qui ont de nombreux *hooks* d'état et qui ont des mises à jour nombreuses de ces états peuvent devenir rapidement complexes à maintenir et à organiser.
+Les composants qui ont de nombreux _hooks_ d'état et qui ont des mises à jour nombreuses de ces états peuvent devenir rapidement complexes à maintenir et à organiser.
 
-**Pour ces composants, vous pouvez utiliser un *hook* spécifique qui permet de gérer toutes les mises à jour de l'état du composant dans une fonction unique, extérieure au composant, appelée *reducer*.**
+**Pour ces composants, vous pouvez utiliser un _hook_ spécifique qui permet de gérer toutes les mises à jour de l'état du composant dans une fonction unique, extérieure au composant, appelée _reducer_.**
 
-Le *hook* `useReducer()` vient en remplacement de plusieurs *hooks* `useState()` dans un composant.
+Le _hook_ `useReducer()` vient en remplacement de plusieurs _hooks_ `useState()` dans un composant.
 
 La syntaxe d'un reducer est :
 
@@ -1234,79 +1232,79 @@ La syntaxe d'un reducer est :
 const [state, dispatch] = useReducer(reducer, initialState);
 ```
 
-- **state :** état courant contenant un objet avec des propriétés. *Vous pouvez le voir comme la fusion de tous les états locaux des `useState()`.*
-- **dispatch :** fonction permettant d'envoyer une *action* au *reducer*.
-- **reducer :** fonction permettant de mettre à jour l'état (*state*) en fonction d'une *action*.
+- **state :** état courant contenant un objet avec des propriétés. _Vous pouvez le voir comme la fusion de tous les états locaux des `useState()`._
+- **dispatch :** fonction permettant d'envoyer une _action_ au _reducer_.
+- **reducer :** fonction permettant de mettre à jour l'état (_state_) en fonction d'une _action_.
 - **initialState :** état initial pour le premier rendu du composant.
 
- ### Les actions
+### Les actions
 
-Une *action* est l'objet passé à la fonction `dispatch()` et qui représente ce que l'utilisateur a fait.
+Une _action_ est l'objet passé à la fonction `dispatch()` et qui représente ce que l'utilisateur a fait.
 
-Une *action* doit représenter une seule interaction même si elle a plusieurs effets.
+Une _action_ doit représenter une seule interaction même si elle a plusieurs effets.
 
-Par convention, une *action* a une **propriété** *type* qui décrit ce qu'il s'est passé et qui sert au *reducer* pour l'identifier, et **optionnellement d'autres propriétés avec des données.**
+Par convention, une _action_ a une **propriété** _type_ qui décrit ce qu'il s'est passé et qui sert au _reducer_ pour l'identifier, et **optionnellement d'autres propriétés avec des données.**
 
 ### Le reducer
 
-Le *reducer* est une **fonction pure** qui reçoit en arguments l'**état courant** et l'*action*.
+Le _reducer_ est une **fonction pure** qui reçoit en arguments l'**état courant** et l'_action_.
 
-**Il doit retourner le nouvel état résultant des modifications engendrées par l'*action*.**
+**Il doit retourner le nouvel état résultant des modifications engendrées par l'_action_.**
 
 Comme pour `useState()`, **l'état doit toujours être considéré en lecture seul et c'est un nouvel objet qui doit être retourné comme nouvel état.**
 
-**Par convention, on utilise une instruction *switch / case* avec un cas pour chaque type d'*action*.**
+**Par convention, on utilise une instruction _switch / case_ avec un cas pour chaque type d'_action_.**
 
 Exemple :
 
 ```jsx
 function reducer(state, action) {
   switch (action.type) {
-    case 'increment_age': {
+    case "increment_age": {
       return {
         name: state.name,
-        age: state.age + 1
+        age: state.age + 1,
       };
     }
-    case 'change_name': {
+    case "change_name": {
       return {
         name: action.newName,
-        age: state.age
+        age: state.age,
       };
     }
   }
-  throw Error('Action inconnue : ' + action.type);
+  throw Error("Action inconnue : " + action.type);
 }
 ```
 
-*Le nom de **reducer**, vient de la programmation fonctionnelle, et plus précisément de la fonction `reduce()` dont le fonctionnement est similaire.*
+_Le nom de **reducer**, vient de la programmation fonctionnelle, et plus précisément de la fonction `reduce()` dont le fonctionnement est similaire._
 
-*`reduce()` prend en premier argument la valeur courante de l'accumulation et en second argument l'accumulateur et retourne la nouvelle valeur de l'accumulateur.*
+_`reduce()` prend en premier argument la valeur courante de l'accumulation et en second argument l'accumulateur et retourne la nouvelle valeur de l'accumulateur._
 
 *Les **reducers** de **React** ont la même logique : ils prennent l'état actuel et une *action* et retourne le nouvel état. Ils "accumulent" les *actions* au cours du temps et retourne à chaque fois la nouvelle valeur de l'état qui est l'accumulateur.*
 
 ### Exemple basique
 
-Par exemple, si nous avons un bouton qui incrémente un compteur contenu dans l'état, nous pourrions avoir une *action* qui a une propriété *type* **'inc_count'** :
+Par exemple, si nous avons un bouton qui incrémente un compteur contenu dans l'état, nous pourrions avoir une _action_ qui a une propriété _type_ **'inc_count'** :
 
 ```jsx
 function handleClick() {
-  dispatch({ type: 'inc_count' });
+  dispatch({ type: "inc_count" });
 }
 ```
 
 Voici un exemple complet basique pour comprendre le fonctionnement :
 
 ```jsx
-import { useReducer } from 'react';
+import { useReducer } from "react";
 
 function reducer(state, action) {
-  if (action.type === 'inc_count') {
+  if (action.type === "inc_count") {
     return {
-      count: state.count + 1
+      count: state.count + 1,
     };
   }
-  throw Error('Action inconnue.');
+  throw Error("Action inconnue.");
 }
 
 export default function Counter() {
@@ -1314,9 +1312,11 @@ export default function Counter() {
 
   return (
     <>
-      <button onClick={() => {
-        dispatch({ type: 'inc_count' })
-      }}>
+      <button
+        onClick={() => {
+          dispatch({ type: "inc_count" });
+        }}
+      >
         +1
       </button>
       <p>Le compteur vaut {state.count}.</p>
@@ -1329,15 +1329,14 @@ Evidemment, dans cet exemple trivial, utiliser `useReducer()` n'a aucun intérê
 
 L'état initial est `{count: 0}`.
 
-Lorsque l'utilisateur clique sur le bouton, une *action* `{type: 'inc_count'}` est envoyée en utilisant la fonction *dispatch* (qui signifie justement expédier / envoyer).
+Lorsque l'utilisateur clique sur le bouton, une _action_ `{type: 'inc_count'}` est envoyée en utilisant la fonction _dispatch_ (qui signifie justement expédier / envoyer).
 
-Le *reducer* reçoit alors en premier argument l'état actuel en premier argument et l'*action* en second argument.
+Le _reducer_ reçoit alors en premier argument l'état actuel en premier argument et l'_action_ en second argument.
 
-Il met à jour l'état en fonction de la propriété *type* de l'*action* et des éventuelles données contenues dans celle-ci.
+Il met à jour l'état en fonction de la propriété _type_ de l'_action_ et des éventuelles données contenues dans celle-ci.
 
 Il doit retourner le nouvel état.
 
 Pour résumer :
 
 **Etat initial => dispatch(action) => reducer(etatActuel, action) => nouvel état**
-

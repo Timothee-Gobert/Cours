@@ -1,4 +1,4 @@
-## Introduction à Docker
+# Introduction à Docker
 
 ## A quoi sert Docker ?
 
@@ -91,106 +91,107 @@ C'est aussi utile pour pouvoir utiliser différents systèmes d'exploitation san
 
 L'inconvénient est bien sûr une diminution des performances, car il faut diviser l'allocation des ressources physiques entre machine hôte et machine virtuelle, et il y a à exécuter la couche système hôte, l'hyperviseur et la couche système invité comme nous allons le voir.
 
-![](/00-assets/images/Docker/image-1_03_1.png)
+![img](../../assets/images/Docker/image-1_03_1.png)
 
 ### Différences avec _Docker_
 
 **Il faut bien comprendre que _Docker_ utilise le noyau _Linux_ et l'environnement _GNU_ de votre système.**
 
-Si vous êtes sur n'importe quelle distribution de *GNU/Linux*, il pourra utiliser directement cet environnement.
+Si vous êtes sur n'importe quelle distribution de _GNU/Linux_, il pourra utiliser directement cet environnement.
 
-Si vous êtes sur *MacOS* ou *Windows*, il utilisera l'hyperviseur installé sur le système (de type 2) et lancera une machine virtuelle *GNU/Linux* qu'il utilisera.
+Si vous êtes sur _MacOS_ ou _Windows_, il utilisera l'hyperviseur installé sur le système (de type 2) et lancera une machine virtuelle _GNU/Linux_ qu'il utilisera.
 
-Dans tous les cas, *Docker* utilise **un seul système d'exploitation *GNU/Linux*.**
+Dans tous les cas, _Docker_ utilise **un seul système d'exploitation _GNU/Linux_.**
 
-Sur ce système, il va lancer un **conteneur** qui est un processus (c'est-à-dire un programme en cours d'exécution, *c.f. cours Linux / Bash*), avec des fonctionnalités d'encapsulation lui permettant d'être isolé de l'hôte et des autres conteneurs.
+Sur ce système, il va lancer un **conteneur** qui est un processus (c'est-à-dire un programme en cours d'exécution, _c.f. cours Linux / Bash_), avec des fonctionnalités d'encapsulation lui permettant d'être isolé de l'hôte et des autres conteneurs.
 
-Chaque conteneur a son propre système de fichiers isolé qui est fourni par une image *Docker*. Ce système de fichiers contient le code, les binaires, les fichier exécutables et toutes les dépendances requises pour faire fonctionner une application.
+Chaque conteneur a son propre système de fichiers isolé qui est fourni par une image _Docker_. Ce système de fichiers contient le code, les binaires, les fichier exécutables et toutes les dépendances requises pour faire fonctionner une application.
 
 Nous reviendrons sur tous ces aspects en détails, mais cela permet d'avoir une idée du fonctionnement par rapport à une machine virtuelle.
 
-![](/00-assets/images/Docker/image-1_03_2.png)
+![img](../../assets/images/Docker/image-1_03_2.png)
 
-Autrement dit, *Docker* partage le système d'exploitation entre tous les conteneurs qu'il lance, qui sont des simples processus légers. Alors qu'une machine virtuelle est un système d'exploitation entier nécessitant plusieurs gigaoctets de mémoire vive, beaucoup d'espace disque et une utilisation importante du *CPU*.
+Autrement dit, _Docker_ partage le système d'exploitation entre tous les conteneurs qu'il lance, qui sont des simples processus légers. Alors qu'une machine virtuelle est un système d'exploitation entier nécessitant plusieurs gigaoctets de mémoire vive, beaucoup d'espace disque et une utilisation importante du _CPU_.
 
 ### Technologies utilisées par Docker
 
-*Docker* est un environnement beaucoup plus facile d'accès et déjà paramétré de technologies existantes. En fait, il s'agit d'une surcouche et d'une *API* permettant de contrôler des fonctionnalités bas niveau du noyau *Linux*.
+_Docker_ est un environnement beaucoup plus facile d'accès et déjà paramétré de technologies existantes. En fait, il s'agit d'une surcouche et d'une _API_ permettant de contrôler des fonctionnalités bas niveau du noyau _Linux_.
 
-*Docker* est écrit en langage *Go* et utilise toutes les fonctionnalités *Linux* que nous allons voir.
+_Docker_ est écrit en langage _Go_ et utilise toutes les fonctionnalités _Linux_ que nous allons voir.
 
 #### Les namespaces
 
-*Docker* utilise les *namespaces Linux* qui permettent de créer des espaces isolés sur un système d'exploitation *Linux*.
+_Docker_ utilise les _namespaces Linux_ qui permettent de créer des espaces isolés sur un système d'exploitation _Linux_.
 
-C'est cette fonctionnalité de *Linux* qui confère aux conteneurs leur isolation. Chaque aspect d'un containeur est exécuté dans un *namespace* qui lui est propre et auquel seul ce dernier peut accéder.
+C'est cette fonctionnalité de _Linux_ qui confère aux conteneurs leur isolation. Chaque aspect d'un containeur est exécuté dans un _namespace_ qui lui est propre et auquel seul ce dernier peut accéder.
 
-*Docker* utilise ainsi des *namespaces* pour :
-- **l'isolation des processus du conteneur (*PID namespace*)**
-- **l'isolation des interfaces réseaux du conteneur (*NET namespace*)**
-- **l'isolation des ressources de communications inter-processus (*IPC namespace*)**
-- **l'isolation du système de fichiers (*MNP namespace*)**
-- **l'isolation des identifiants du noyau et des versions (*UTS namespace*)** qui permet notamment d'avoir un *hostname* différent pour les conteneurs comme nous le verrons.
+_Docker_ utilise ainsi des _namespaces_ pour :
+
+- **l'isolation des processus du conteneur (_PID namespace_)**
+- **l'isolation des interfaces réseaux du conteneur (_NET namespace_)**
+- **l'isolation des ressources de communications inter-processus (_IPC namespace_)**
+- **l'isolation du système de fichiers (_MNP namespace_)**
+- **l'isolation des identifiants du noyau et des versions (_UTS namespace_)** qui permet notamment d'avoir un _hostname_ différent pour les conteneurs comme nous le verrons.
 
 #### Les Cgroups
 
-*Docker* utilise également les *control groups* (*cgroups*).
+_Docker_ utilise également les _control groups_ (_cgroups_).
 
-Cette technologie *Linux* permet de limiter l'accès aux ressources à des processus. Grâce à cela, *Docker* partage les ressources système disponibles entre tous les conteneurs (*RAM*, *CPU*, accès réseaux et lecture / écriture disques etc).
+Cette technologie _Linux_ permet de limiter l'accès aux ressources à des processus. Grâce à cela, _Docker_ partage les ressources système disponibles entre tous les conteneurs (_RAM_, _CPU_, accès réseaux et lecture / écriture disques etc).
 
 Il est également possible, grâce à cette technologie, de limiter les ressources allouées à chaque conteneur comme nous le verrons plus tard.
 
-![](/00-assets/images/Docker/image-1_03_3.png)
+![img](../../assets/images/Docker/image-1_03_3.png)
 
-#### *UnionFS*
+#### _UnionFS_
 
-*UnionFS* (pour *Union File System*) est un type de système de fichiers pour Linux.
+_UnionFS_ (pour _Union File System_) est un type de système de fichiers pour Linux.
 
-Suivant la distribution *Linux*, *Docker* utilise l'une des implémentations disponibles : *AUFS*, *btrfs*, *vfs* ou *DeviceMapper*.
+Suivant la distribution _Linux_, _Docker_ utilise l'une des implémentations disponibles : _AUFS_, _btrfs_, _vfs_ ou _DeviceMapper_.
 
-Ces systèmes de fichiers fonctionnent en créant des couches (*layers*). Ils sont au coeur des images *Docker* et leur permettent d'être légères et très rapides.
+Ces systèmes de fichiers fonctionnent en créant des couches (_layers_). Ils sont au coeur des images _Docker_ et leur permettent d'être légères et très rapides.
 
 Nous étudierons en détails le fonctionnement de ces systèmes de fichiers lorsque nous verrons les images.
 
 ## L’écosystème Docker
 
-### Le *Docker Engine*
+### Le _Docker Engine_
 
-**Le *Docker Engine* ou moteur *Docker* est une application sur un modèle client / serveur.**
+**Le _Docker Engine_ ou moteur _Docker_ est une application sur un modèle client / serveur.**
 
 Il est composé de **trois parties** principales.
 
-#### 1 - Le serveur *dockerd*
+#### 1 - Le serveur _dockerd_
 
-**Le serveur *dockerd*** qui est un service, également appelé démon, qui est exécuté en permanence. C'est lui qui va créer et gérer tous les objets *Docker* : par exemples les images, les conteneurs, les réseaux et les volumes.
+**Le serveur _dockerd_** qui est un service, également appelé démon, qui est exécuté en permanence. C'est lui qui va créer et gérer tous les objets _Docker_ : par exemples les images, les conteneurs, les réseaux et les volumes.
 
-#### 2 - L'*API REST*
+#### 2 - L'_API REST_
 
-L'*API REST* spécifie les interfaces que les programmes peuvent utiliser pour communiquer avec le service *dockerd*.
+L'_API REST_ spécifie les interfaces que les programmes peuvent utiliser pour communiquer avec le service _dockerd_.
 
-#### 3 - Le client (*CLI*)
+#### 3 - Le client (_CLI_)
 
-**Le client** (un *CLI* pour *command line interface*) permet d'exécuter des commandes *Docker*. Le *CLI* traduit les commandes entrées par l'utilisateur en requêtes pour l'*API REST*.
+**Le client** (un _CLI_ pour _command line interface_) permet d'exécuter des commandes _Docker_. Le _CLI_ traduit les commandes entrées par l'utilisateur en requêtes pour l'_API REST_.
 
-Le schéma officiel suivant montre les relations entre le client, le démon et la bibliothèque d'images (*Docker Hub* ou un *registry* privé) dont nous avons parlé dans la leçon précédente :
+Le schéma officiel suivant montre les relations entre le client, le démon et la bibliothèque d'images (_Docker Hub_ ou un _registry_ privé) dont nous avons parlé dans la leçon précédente :
 
-![](/00-assets/images/Docker/image-1_04_1.png)
+![img](../../assets/images/Docker/image-1_04_1.png)
 
-### Premier aperçu des objets *Docker*
+### Premier aperçu des objets _Docker_
 
 #### Les images
 
-**Une image *Docker* est un schéma en lecture seule qui contient les instructions pour créer un conteneur *Docker*.**
+**Une image _Docker_ est un schéma en lecture seule qui contient les instructions pour créer un conteneur _Docker_.**
 
 Le plus souvent, une image est elle-même basée sur une autre image avec des configurations spécifiques.
 
-Par exemple, il est possible de prendre une image *Node.js* et d'ajouter les fichiers nécessaires au fonctionnement de votre application.
+Par exemple, il est possible de prendre une image _Node.js_ et d'ajouter les fichiers nécessaires au fonctionnement de votre application.
 
-**Pour créer une image, il faut utiliser un fichier spécifique appelé *Dockerfile*** qui a une syntaxe particulière permettant de définir les étapes nécessaires à la création de l'image.
+**Pour créer une image, il faut utiliser un fichier spécifique appelé _Dockerfile_** qui a une syntaxe particulière permettant de définir les étapes nécessaires à la création de l'image.
 
-**Chaque instruction dans un *Dockerfile* permet de créer une couche dans l'image.**
+**Chaque instruction dans un _Dockerfile_ permet de créer une couche dans l'image.**
 
-Lorsque vous modifiez le *Dockerfile* et que vous rebuildez l'image, **seules les couches modifiées sont rebuild**. C'est l'une des raisons pourquoi *Docker* est beaucoup plus rapide que les machines virtuelles.
+Lorsque vous modifiez le _Dockerfile_ et que vous rebuildez l'image, **seules les couches modifiées sont rebuild**. C'est l'une des raisons pourquoi _Docker_ est beaucoup plus rapide que les machines virtuelles.
 
 #### Les conteneurs
 
@@ -200,7 +201,7 @@ Vous pouvez donc avoir de nombreux conteneurs à partir de la même image.
 
 C'est la même logique avec un programme que vous pouvez lancer plusieurs fois en même temps créant ainsi plusieurs processus.
 
-Pour créer, démarrer, arrêter, déplacer ou supprimer un conteneur il faut utiliser le *CLI* dont nous avons parlé.
+Pour créer, démarrer, arrêter, déplacer ou supprimer un conteneur il faut utiliser le _CLI_ dont nous avons parlé.
 
 Nous verrons qu'il est possible de connecter un conteneur à un ou plusieurs réseaux, qu'il est également possible de lui attacher un ou plusieurs volumes de stockage.
 
@@ -214,9 +215,9 @@ Ils sont initialisés lors de la création d'un conteneur.
 
 Ils permettent de persister et de partager des données d'un conteneur.
 
-Ces volumes sont stockés en dehors du système *UnionFS* que nous avons vu. Ils permettent en effet de conserver des données même si un conteneur est supprimé, mis à jour ou rechargé.
+Ces volumes sont stockés en dehors du système _UnionFS_ que nous avons vu. Ils permettent en effet de conserver des données même si un conteneur est supprimé, mis à jour ou rechargé.
 
-### Scaler avec *Docker*
+### Scaler avec _Docker_
 
 Pour l'instant nous avons vu les objets permettant de lancer une ou plusieurs instances d'une image sous la forme de conteneurs.
 
@@ -224,43 +225,43 @@ Mais au fur et à mesure que votre application grandit, vous voudrez lancer plus
 
 Des outils extrêmement puissants permettent de gérer pour vous la problématique du scaling sur plusieurs hôtes.
 
-#### Exécuter une application multi-conteneurs avec *Docker compose*
+#### Exécuter une application multi-conteneurs avec _Docker compose_
 
-***Docker Compose* est l'outil *Docker* permettant de définir et de lancer des applications multi-conteneurs.**
+**_Docker Compose_ est l'outil _Docker_ permettant de définir et de lancer des applications multi-conteneurs.**
 
 Nous verrons que nous aurons simplement à utiliser un fichier de configuration spécifique pour définir **les services de votre application.**
 
-Avec *Docker Compose* vous pourrez ainsi lancer tous les services de votre application en une commande.
+Avec _Docker Compose_ vous pourrez ainsi lancer tous les services de votre application en une commande.
 
 Par exemple, un service pour votre base de données, un service pour l'authentification et un troisième pour votre application serveur.
 
-#### Utiliser un orchestrateur pour du multi-hôte avec *Docker swarm* ou *Kubernetes*
+#### Utiliser un orchestrateur pour du multi-hôte avec _Docker swarm_ ou _Kubernetes_
 
-***Docker Swarm* est un orchestrateur qui permet de gérer facilement plusieurs conteneurs (souvent nombreux) sur de multiples serveurs.**
+**_Docker Swarm_ est un orchestrateur qui permet de gérer facilement plusieurs conteneurs (souvent nombreux) sur de multiples serveurs.**
 
-Nous verrons que ce sont les mêmes fichiers de configuration que *Docker Compose* mais pas les mêmes commandes.
+Nous verrons que ce sont les mêmes fichiers de configuration que _Docker Compose_ mais pas les mêmes commandes.
 
-***Kubernetes* est également un orchestrateur mais développé par *Google* et non par *Docker*.**
+**_Kubernetes_ est également un orchestrateur mais développé par _Google_ et non par _Docker_.**
 
-C'est un outil extrêmement puissant permettant de faire énormément de choses (auto-scaling notamment). Il permet de faire beaucoup plus de choses que *Docker Swarm* mais est bien plus long à maîtriser. Vous n'en aurez besoin que dans des cas spécifiques (énormes charges -applications vidéos très connues par exemple-, machine-learning etc). 
+C'est un outil extrêmement puissant permettant de faire énormément de choses (auto-scaling notamment). Il permet de faire beaucoup plus de choses que _Docker Swarm_ mais est bien plus long à maîtriser. Vous n'en aurez besoin que dans des cas spécifiques (énormes charges -applications vidéos très connues par exemple-, machine-learning etc).
 
 ## Installation de Docker
 
-### Installation sur votre machine *Ubuntu*
+### Installation sur votre machine _Ubuntu_
 
-Installez *Docker Desktop* en allant sur ce [lien](https://docs.docker.com/desktop/install/linux-install/).
+Installez _Docker Desktop_ en allant sur ce [lien](https://docs.docker.com/desktop/install/linux-install/).
 
-### Installation sur *Ubuntu* sans GUI (sans Docker Desktop)
+### Installation sur _Ubuntu_ sans GUI (sans Docker Desktop)
 
-**A suivre uniquement si vous ne voulez pas utiliser *Docker Desktop*.**
+**A suivre uniquement si vous ne voulez pas utiliser _Docker Desktop_.**
 
-Il faut commencer par supprimer les anciens paquets de *Docker* pour éviter tout conflit s'il était installé préalablement :
+Il faut commencer par supprimer les anciens paquets de _Docker_ pour éviter tout conflit s'il était installé préalablement :
 
 ```bash
 sudo apt-get remove docker docker-engine docker.io containerd runc
 ```
 
-Il faut ensuite mettre à jour votre liste de paquets disponibles pour *APT* :
+Il faut ensuite mettre à jour votre liste de paquets disponibles pour _APT_ :
 
 ```bash
 sudo apt-get update
@@ -272,7 +273,7 @@ Il faut installer certaines dépendances :
 sudo apt-get install     ca-certificates     curl     gnupg
 ```
 
-Ensuite, il faut ajouter la clé *GPG* de *Docker* :
+Ensuite, il faut ajouter la clé _GPG_ de _Docker_ :
 
 ```bash
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -280,9 +281,9 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o 
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
 ```
 
-Cette clé permet la transmission des paquets de manière signés et chiffrés, garantissant ainsi leurs authenticité, intégrité et confidentialité. Autrement dit, personne ne pourra se faire passer pour *Docker* pour installer des paquets.
+Cette clé permet la transmission des paquets de manière signés et chiffrés, garantissant ainsi leurs authenticité, intégrité et confidentialité. Autrement dit, personne ne pourra se faire passer pour _Docker_ pour installer des paquets.
 
-Il faut ensuite ajouter le répertoire officiel de *Docker* :
+Il faut ensuite ajouter le répertoire officiel de _Docker_ :
 
 ```bash
 echo   "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu   "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" |   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
@@ -325,9 +326,9 @@ For more examples and ideas, visit:
   https://docs.docker.com/get-started/
 ```
 
-Vous êtes prêt à commencer à utiliser *Docker* !
+Vous êtes prêt à commencer à utiliser _Docker_ !
 
-Si vous n'avez rien, lancez le démon *Docker* avec cette commande :
+Si vous n'avez rien, lancez le démon _Docker_ avec cette commande :
 
 ```bash
 systemctl start docker
@@ -337,31 +338,30 @@ systemctl start docker
 
 Utilisez simplement l'exécutable disponible à cette [adresse](https://docs.docker.com/get-docker/)
 
-### Installation de *Visual Studio Code*
+### Installation de _Visual Studio Code_
 
-*Visual Studio Code* est un éditeur de code extensible développé par *Microsoft*.
+_Visual Studio Code_ est un éditeur de code extensible développé par _Microsoft_.
 
-Il a été créé en 2015 et est *open source* depuis sa création.
+Il a été créé en 2015 et est _open source_ depuis sa création.
 
 Nous allons l'utiliser dans toutes les formations et le recommandons fortement car il est très performant et gratuit.
 
 Vous pouvez le télécharger [ici](https://code.visualstudio.com/).
 
-### Utilisation de *Git Bash* sur *Windows*
+### Utilisation de _Git Bash_ sur _Windows_
 
-Sur *Windows*, téléchargez et installer *Git* en utilisant l'exécutable officiel que vous trouverez [ici](https://git-scm.com/download/win).
+Sur _Windows_, téléchargez et installer _Git_ en utilisant l'exécutable officiel que vous trouverez [ici](https://git-scm.com/download/win).
 
-Par défaut, sur *Windows*, le terminal est *Powershell*.
+Par défaut, sur _Windows_, le terminal est _Powershell_.
 
-Dans tous les cours nous utilisons *bash*, qui est le terminal le plus utilisé et que vous retrouverez sur les serveurs et sur la plupart des environnements de développement.
+Dans tous les cours nous utilisons _bash_, qui est le terminal le plus utilisé et que vous retrouverez sur les serveurs et sur la plupart des environnements de développement.
 
-Sur *Windows*, ouvez *VS Code*.
+Sur _Windows_, ouvez _VS Code_.
 
-Faites *Ctrl + Shift + p* ou *View* puis *Command Palette*.
+Faites _Ctrl + Shift + p_ ou _View_ puis _Command Palette_.
 
-Entrez *select default shell* puis faites entrée.
+Entrez _select default shell_ puis faites entrée.
 
-Ensuite sélectionnez *Git Bash*.
+Ensuite sélectionnez _Git Bash_.
 
-Vous pouvez ensuite faire *Terminal* puis *New Terminal* et vous aurez un terminal *Bash* ! 
-
+Vous pouvez ensuite faire _Terminal_ puis _New Terminal_ et vous aurez un terminal _Bash_ !

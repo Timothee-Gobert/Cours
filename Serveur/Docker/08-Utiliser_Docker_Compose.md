@@ -1,8 +1,8 @@
-## Utiliser Docker Compose
+# Utiliser Docker Compose
 
-### Introduction à Docker compose
+## Introduction à Docker compose
 
-#### Qu'est-ce que *Docker Compose* ?
+### Qu'est-ce que *Docker Compose* ?
 
 ***Docker Compose* permet de faciliter la création d'application multi-conteneur.**
 
@@ -24,7 +24,7 @@ Souvent viennent s'ajouter un reverse proxy pour permettre le routing vers diff�
 
 Nous reviendrons bien évidemment sur l'ensemble de ces étapes en détails.
 
-#### Les avantages à utiliser Docker Compose
+### Les avantages à utiliser Docker Compose
 
 **Pour le développement,** plus besoin de guide d'installation pour votre équipe ! En une seule commande toute l'application s'installe et démarre avec la configuration adéquate. Plus besoin d'installer les dépendances pour chaque partie de votre application vous même, de mettre les bons ports, les bons réseaux, les bons volumes etc.
 
@@ -37,9 +37,9 @@ Pour vérifier que Docker Compose est bien installé :
 ```sh
 docker compose version
 ```
-### Première utilisation de Docker Compose
+## Première utilisation de Docker Compose
 
-#### Le langage *YAML*
+### Le langage *YAML*
 
 Le *YAML* (pour *YAML Ain't Markup Language* ou "YAML n'est pas un langage de balisage") est un langage permettant de représenter des informations élaborées tout en conservant une grande lisibilité. Il repose principalement sur l'indentation.
 
@@ -77,7 +77,7 @@ Une structure plus complexe :
     - html
 ```
 
-#### Première utilisation : `docker compose up`
+### Première utilisation : `docker compose up`
 
 Commencez par créer un nouveau dossier, par exemple *compose* :
 
@@ -139,7 +139,7 @@ Enfin, comme avec `docker run`, *Docker Compose* va attacher le conteneur lancé
 
 Dans notre exemple il quitte immédiatement car aucune commande n'est passée.
 
-#### Lancer une commande sur un service avec `docker compose run`
+### Lancer une commande sur un service avec `docker compose run`
 
 **La commande `docker compose run` permet d'exécuter une commande par un service.**
 
@@ -161,7 +161,7 @@ docker compose run myalpine ls
 
 Pour l'image *alpine*, la commande par défaut est *sh*. Vous remplacez donc *sh* par `ls`.
 
-#### Lister les conteneurs lancés avec `Docker compose`
+### Lister les conteneurs lancés avec `Docker compose`
 
 Vous pouvez lister tous les conteneurs en cours d'exécution en faisant :
 
@@ -177,7 +177,7 @@ docker compose ps
 
 Vous pouvez également lui passer l'option `-a` pour voir également les conteneurs lancés par `docker compose run`.
 
-#### Stopper les conteneurs lancés avec `Docker compose`
+### Stopper les conteneurs lancés avec `Docker compose`
 
 Vous pouvez stopper tous les conteneurs lancés par `Docker compose` avec la commande :
 
@@ -197,13 +197,13 @@ docker compose down -v
 
 A noter que les volumes anonymes ne sont jamais réutilisés par `Docker Compose` comme nous le verrons. Il en lance des nouveaux à chaque fois si vous en déclarez dans votre configuration.
 
-#### Premières configurations
+### Premières configurations
 
 Les configurations des services sont appliquées à chaque démarrage de conteneur pour ces services.
 
 Cela revient à exécuter `docker run` avec toutes les options définies en configuration, ce qui est un énorme gain de temps !
 
-##### *command*
+#### *command*
 
 La configuration *command* permet de remplacer la commande par défaut de l'image.
 
@@ -225,7 +225,7 @@ docker compose up
 
 Pour les commandes de plus d'un mot, il vaut mieux utiliser l'autre syntaxe que nous connaissons : *command: ["npm", "run", "start"]*.
 
-##### *entrypoint*
+#### *entrypoint*
 
 La configuration *entrypoint* permet de remplacer l'*entrypoint* par défaut de l'image. Nous n'allons pas revoir la distinction avec la commande que nous avons vu en détails dans un chapitre précédent.
 
@@ -245,11 +245,11 @@ Refaites :
 docker compose up
 ```
 
-### Utilisation d'images personnalisées avec Docker Compose
+## Utilisation d'images personnalisées avec Docker Compose
 
 Dans cette leçon nous allons voir comment `Docker Compose` s'utilise avec des images personnalisées. Autrement dit, comme il s'utilise avec des *Dockerfiles*.
 
-#### Utilisation avec un *Dockerfile*
+### Utilisation avec un *Dockerfile*
 
 Commencez par créer un *Dockerfile* dans le même dossier :
 
@@ -296,7 +296,7 @@ services:
       dockerfile: Dockerfile
 ```
 
-#### Construire les images avec `docker compose build`
+### Construire les images avec `docker compose build`
 
 **La commande `docker compose build` permet de construire toutes les images spécifiées dans le fichier de configuration (dans les configurations *build*) et de les taguer pour une future utilisation.**
 
@@ -314,7 +314,7 @@ docker image ls
 
 L'image sera taguée comme ceci : **compose_b**, à savoir nom du dossier contenant le fichier *docker-compose.yml* puis le nom du service.
 
-#### Passer des arguments et des labels durant le *build*
+### Passer des arguments et des labels durant le *build*
 
 Nous avons déjà étudié l'instruction *ARG* pour passer des arguments et *LABEL* pour indiquer des labels dans des images personnalisées.
 
@@ -369,9 +369,9 @@ services:
         - email=jean@gmail.com
 ```
 
-### Les ports et les volumes avec Docker Compose
+## Les ports et les volumes avec Docker Compose
 
-#### Publier des ports
+### Publier des ports
 
 Vous pouvez définir quels ports doivent être publiés pour un service dans le fichier de configuration *docker-compose.yml*.
 
@@ -385,11 +385,11 @@ ports:
 
 Nous y reviendrons bien sûr en détails avec plusieurs exemples.
 
-#### Créer des volumes
+### Créer des volumes
 
 Il est possible de monter des chemins de l'hôte (*bind mount*) ou de créer des volumes anonymes ou nommés.
 
-##### Créer des bind mounts
+#### Créer des bind mounts
 
 Reprenons notre exemple en créant un dossier */app* dans le *Dockerfile* :
 
@@ -425,7 +425,7 @@ b:
 
 Il est bien sûr possible de préciser plusieurs volumes. Il faut simplement que chaque volume soit un élément de liste, donc précédé par un tiret puis un espace.
 
-##### Créer des volumes anonymes
+#### Créer des volumes anonymes
 
 Pour créer un volume anonyme il faut simplement déclarer un volume de type *volume* et de spécifier uniquement une *target* (ou *destination* / *dst*) et pas de *source*. Dans ce cas `Docker Compose` créera automatiquement un volume anonyme :
 
@@ -451,7 +451,7 @@ b:
       target: /app/data2
 ```
 
-##### Créer des volumes nommés
+#### Créer des volumes nommés
 
 Pour créer un volume nommé, il faut déclarer dans une configuration au même niveau que services une clé *volumes* : ce sont les volumes nommés qui seront automatiquement créés par `Docker Compose`.
 
@@ -495,7 +495,7 @@ volumes:
   data3:
 ```
 
-##### Utiliser des volumes nommés déjà créés
+#### Utiliser des volumes nommés déjà créés
 
 Si vous ne voulez pas que `Docker Compose` crée un nouveau volume nommé mais utilise un existant (que vous avez créé en dehors de `Docker Compose`), il faut préciser *external: true* dans la configuration, de cette manière :
 
@@ -533,9 +533,9 @@ Ici *data3* ne sera pas créé par `Docker Compose`. Il utilisera le volume déj
 ERROR: Volume data3 declared as external, but could not be found. Please create the volume manually using `docker volume create --name=data3` and try again.
 ```
 
-### Utiliser des variables d'environnement avec Docker Compose
+## Utiliser des variables d'environnement avec Docker Compose
 
-#### Utiliser des variables d'environnement
+### Utiliser des variables d'environnement
 
 Vous pouvez utiliser des variables d'environnement dans votre *Dockerfile* ou votre fichier *docker-compose.yml*, par exemple pour définir une version d'image :
 
@@ -546,7 +546,7 @@ backend:
 
 En plus de vos propres variables, de nombreuses images officielles requièrent de passer des valeurs pour des variables d'environnement. Nous l'avons déjà vu dans un exemple pour définir le mot de passe pour l'image officielle de *postgres*. Nous le verrons dans les leçons suivantes avec l'image officielle *mongo*.
 
-#### Définir la valeur des variables d'environnement avec *environment*
+### Définir la valeur des variables d'environnement avec *environment*
 
 Le premier moyen pour définir des variables d'environnement est d'utiliser la clé de configuration *environment* :
 
@@ -556,7 +556,7 @@ backend:
     - NODE_APP_VERSION=2.2.3
 ```
 
-#### Utiliser un fichier externe avec env_file et .env
+### Utiliser un fichier externe avec env_file et .env
 
 Par défaut, *Docker Compose* va lire les variables d'environnement dans le fichier *.env* situé au même niveau que le *docker-compose.yml*.
 
@@ -576,7 +576,7 @@ backend:
     - config/env.dev
 ```
 
-#### Définir la valeur des variables d'environnement avec *Docker CLI*
+### Définir la valeur des variables d'environnement avec *Docker CLI*
 
 Vous pouvez déclarer des variables d'environnement lors du lancement avec `docker compose` en utilisant l'option `-e` :
 
@@ -598,7 +598,7 @@ docker compose --env-file .config/.env.dev up
 
 Cela vous permet d'avoir par exemple un fichier de variables d'environnement pour la production, par exemple dans *config/env.prod* et un fichier pour le développement *config/env.dev* par exemple.
 
-#### L'ordre de priorité
+### L'ordre de priorité
 
 Normalement vous utiliserez soit *environment* soit un fichier externe et vous ne devrez pas rencontrer de problème, mais ayez en tête l'ordre de priorité de résolution de la valeur des variables d'environnement par *Docker Compose*.
 
@@ -610,7 +610,7 @@ Lorsque vous utilisez une variable d'environnement, *Docker Compose* va utiliser
 
 S'il ne trouve pas la valeur de la variable à tous ces endroits, et dans cet ordre, la variable sera non définie.
 
-#### Définir le nom de son projet pour *Docker Compose*
+### Définir le nom de son projet pour *Docker Compose*
 
 Nous avons vu que *Docker Compose* préfixe tout (les réseaux, les volumes nommés, les conteneurs lancés etc) avec le nom du dossier contenant le fichier *docker-compose.yml*.
 
@@ -622,9 +622,9 @@ Par exemple, vous pouvez mettre dans votre fichier *.env* :
 COMPOSE_PROJECT_NAME=monprojet
 ```
 
-### Utiliser des réseaux avec Docker Compose
+## Utiliser des réseaux avec Docker Compose
 
-#### Création d'un réseau par défaut
+### Création d'un réseau par défaut
 
 Nous avons vu que *Docker Compose* créait un réseau *bridge* par défaut et qu'il le nommait *nomduprojet_default*.
 
@@ -641,7 +641,7 @@ services:
 
 Ici, sur le réseau créé par défaut, *api* et *db* rejoindront le réseau avec les noms *api* et *db*, ce qui est extrêmement pratique pour bénéficier de la résolution des noms automatiques en *IP*.
 
-#### Utiliser des alias avec `--link`
+### Utiliser des alias avec `--link`
 
 Vous pouvez définir des alias pour que vos services soient également accessible sur les réseaux *Docker* sous d'autres noms.
 
@@ -661,7 +661,7 @@ services:
 
 Ici, le service *mongo* pourra être accessible sur le réseau par défaut sous les noms *db*, mais aussi *database* et *mongo*.
 
-#### Créer d'autres réseaux
+### Créer d'autres réseaux
 
 En plus du réseau par défaut, il est possible de définir d'autres réseaux. Dans ce cas,il faut les déclarer au plus au niveau comme pour les volumes nommés, puis les utiliser dans les services.
 
@@ -696,7 +696,7 @@ Ici nous avons créé deux réseaux : *frontend* et *backend* qui sont de type *
 
 Nos services sont connectés à l'un, à l'autre, ou aux deux grâce à la clé de configuration *networks*.
 
-#### Changer le nom du réseau par défaut
+### Changer le nom du réseau par défaut
 
 Comme vous le savez, le réseau par défaut est préfixé par le nom de l'application.
 
@@ -743,9 +743,9 @@ networks:
     name: backend
 ```
 
-### Utiliser Docker Compose avec notre exemple
+## Utiliser Docker Compose avec notre exemple
 
-#### Application d'exemple
+### Application d'exemple
 
 Nous allons reprendre notre application d'exemple et utiliser *Docker Compose*.
 
@@ -808,7 +808,7 @@ Et un fichier *package.json* :
 }
 ```
 
-#### Création de notre service pour notre base de données
+### Création de notre service pour notre base de données
 
 Nous allons commencer par créer un fichier *docker-compose.yml*.
 
@@ -887,9 +887,9 @@ Removing docker-test_db_run_4af54c203c46 ... done
 Removing network docker-test_default
 ```
 
-### Mettre en place le service pour le serveur
+## Mettre en place le service pour le serveur
 
-#### Création du service pour notre serveur
+### Création du service pour notre serveur
 
 Nous modifions notre fichier *docker-compose.yml* pour créer le service pour notre serveur :
 
@@ -924,7 +924,7 @@ docker compose up
 
 Nous pouvons ensuite nous rendre sur *localhost* dans un navigateur.
 
-#### Mise en place d'une authentification pour *MongoDB*
+### Mise en place d'une authentification pour *MongoDB*
 
 Nous devons supprimer notre volume pour le recréer avec l'authentification activée :
 
@@ -939,7 +939,7 @@ Nous le recréons :
 docker volume create mydb
 ```
 
-##### Initialisation de la base de données avec l'authentification activée
+#### Initialisation de la base de données avec l'authentification activée
 
 Nous modifions notre fichier *docker-compose.yml* pour utiliser les variables d'environnement spécifiées par l'image officielle *mongo* pour activer l'authentification :
 
@@ -1031,7 +1031,7 @@ use test
 db.count.insertOne({count: 0});
 ```
 
-##### Création d'un utilisateur dans la base de données *MongoDB* pour notre application
+#### Création d'un utilisateur dans la base de données *MongoDB* pour notre application
 
 Nous allons ensuite créer un utilisateur pour notre application serveur. Cet utilisateur *MongoDB* pourra uniquement lire et écrire dans la base de données test mais il ne pourra pas gérer les bases de données et les utilisateurs.
 
@@ -1074,7 +1074,7 @@ Il faut que nous authentifions notre application serveur.
 docker compose down
 ```
 
-##### Authentification du serveur
+#### Authentification du serveur
 
 Nous allons utiliser des variables d'environnement pour passer au serveur les identifiants de la base de données lors du lancement.
 
@@ -1156,9 +1156,9 @@ L'application est maintenant authentifiée :
 docker compose up
 ```
 
-### Les configurations depends_on et restart
+## Les configurations depends_on et restart
 
-#### La configuration *depends_on*
+### La configuration *depends_on*
 
 **La configuration *depends_on* permet de spécifier qu'un service dépend d'autres services.**
 
@@ -1190,7 +1190,7 @@ Ici, les bases de données *redis* et *mongo* seront démarrées avant node car 
 
 **Attention ! *depends_on* n'attend pas que les services soient prêts, il ne fait aucun test.** Il garantit uniquement que les conteneurs soient en cours d'exécution avant que le conteneur qui a des dépendances ne soit lancé.
 
-#### La configuration *restart*
+### La configuration *restart*
 
 Par défaut, les conteneurs ne sont pas redémarrés si ils sont stoppés : que ce soit à cause d'une erreur, manuellement ou si le démon *dockerd* est arrêté (redémarrage de la machine physique, erreur du démon etc).
 
@@ -1242,9 +1242,9 @@ Notez que vous pouvez modifier la configuration du redémarrage d'un conteneur d
 docker container update --restart unless-stopped ID
 ```
 
-### Les autres commandes de docker-compose
+## Les autres commandes de docker-compose
 
-#### Afficher les logs
+### Afficher les logs
 
 Pour afficher les logs de tous les services lancés par *Docker Compose* vous pouvez faire :
 
@@ -1258,7 +1258,7 @@ Si vous voulez suivre le fichier de log, et donc afficher les logs en temps rée
 docker compose logs -f
 ```
 
-#### Afficher les services en cours d'exécution
+### Afficher les services en cours d'exécution
 
 Pour afficher l'ensemble des conteneurs lancés pour les services par *Docker Compose*, il suffit de faire :
 
@@ -1266,7 +1266,7 @@ Pour afficher l'ensemble des conteneurs lancés pour les services par *Docker Co
 docker compose top
 ```
 
-#### Supprimer les conteneurs stoppés
+### Supprimer les conteneurs stoppés
 
 Pour supprimer les conteneurs stoppés qui avaient été lancés par *Docker Compose*, il suffit de faire :
 
@@ -1304,7 +1304,7 @@ Donc pour stopper les conteneurs, supprimer les volumes anonymes attacher et ne 
 docker compose rm -svf
 ```
 
-#### Vérifier le mapping des ports d'un service
+### Vérifier le mapping des ports d'un service
 
 Pour vérifier qu'un port est bien publié sur un service vous pouvez faire :
 
@@ -1320,7 +1320,7 @@ docker compose port server 80
 
 Qui vous affichera `0.0.0.0:80` s'il est bien publié, sinon rien.
 
-#### Afficher la configuration de *Docker Compose*
+### Afficher la configuration de *Docker Compose*
 
 Pour afficher la configuration qui sera lancée, notamment avec les valeurs des variables d'environnement, vous pouvez faire :
 
@@ -1328,7 +1328,7 @@ Pour afficher la configuration qui sera lancée, notamment avec les valeurs des 
 docker compose config
 ```
 
-#### Télécharger les dernières versions des images
+### Télécharger les dernières versions des images
 
 Pour télécharger l'ensemble des images utilisées par vos services dans votre *docker-compose.yml*, vous pouvez faire :
 

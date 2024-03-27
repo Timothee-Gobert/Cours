@@ -1,8 +1,8 @@
-## Créer une image Docker pour un serveur Node
+# Créer une image Docker pour un serveur Node
 
-### Introduction au projet
+## Introduction au projet
 
-#### Objectif du projet
+### Objectif du projet
 
 L'objectif du projet va être de mettre en place une application *Express* (qui est un framework *Node.js*).
 
@@ -14,7 +14,7 @@ Elle devra comporter plusieurs dépendances : *nodemon* et *express*.
 
 Et elle devra lancer l'application contenue dans *app.js* par défaut.
 
-#### Mise en place du projet
+### Mise en place du projet
 
 Pour le projet, nous allons créer un nouveau *Dockerfile* dans un dossier.
 
@@ -42,9 +42,9 @@ app.get('*', (req, res) => res.status(200).json('Hello World!'));
 app.listen(80);
 ```
 
-### Création du Dockerfile
+## Création du Dockerfile
 
-#### Mise en place du *Dockerfile*
+### Mise en place du *Dockerfile*
 
 Dans le *Dockerfile* nous mettons pour le moment :
 
@@ -66,7 +66,7 @@ La dernière instruction permet de lancer *nodemon*. C'est un outil de développ
 
 *Sur Windows uniquement*, il se peut que le rechargement automatique ne fonctionne pas avec cette commande il faut donc remplacer par `CMD [ "nodemon", "src/app.js", "-L"]` . Cette option permet d'utiliser le *legacyWatch* qui peut être nécessaire pour Windows.
 
-#### Construire l'image
+### Construire l'image
 
 Il ne nous reste plus qu'à construire l'image :
 
@@ -82,9 +82,9 @@ docker container run myapp
 
 Mais cela ne fonctionne pas ! Il va falloir corriger plusieurs problèmes, ce qui va vous permettre de maîtriser les problèmes les plus communs lorsque l'on débute avec *Docker*. 
 
-### Corriger le PATH
+## Corriger le PATH
 
-#### Le problème du *path*
+### Le problème du *path*
 
 Lorsque vous essaierez de lancer un conteneur basé sur votre image, vous aurez :
 
@@ -96,7 +96,7 @@ Cette erreur signifie que *node* ne sait pas où se trouve le programme */app/no
 
 Il y a beaucoup de manières de résoudre cette erreur. Nous allons en voir quelques unes.
 
-#### Installer *nodemon* en global dans l'image
+### Installer *nodemon* en global dans l'image
 
 Une manière serait par exemple d'installer *nodemon* en global pour que la dépendance soit accessible dans le *PATH* par défaut :
 
@@ -108,7 +108,7 @@ RUN npm install -g nodemon && npm install
 CMD [ "nodemon", "/app/app.js" ]
 ```
 
-#### Modifier la variable d'environnement *PATH*
+### Modifier la variable d'environnement *PATH*
 
 Une autre manière, est d'ajouter le *PATH* contenant *nodemon* :
 
@@ -123,7 +123,7 @@ CMD [ "nodemon", "/app/app.js" ]
 
 Dans ce cas, nous redéfinissons la variable d'environnement *PATH* du conteneur, en concaténant sa valeur actuelle (*$PATH*) avec le chemin vers les binaires du dossier des dépendances de *node*.
 
-#### Utiliser *npm*
+### Utiliser *npm*
 
 Encore une autre manière est d'utiliser le *CLI* de *npm* pour lancer *nodemon*. Il n'aura pas de problème de *PATH* dans ce cas.
 
@@ -167,9 +167,9 @@ docker run -it myapp
 
 Lorsque nous allons sur *localhost* il ne se passe rien !
 
-### Publier et exposer des ports
+## Publier et exposer des ports
 
-#### L'isolation par défaut du réseau d'un conteneur
+### L'isolation par défaut du réseau d'un conteneur
 
 Par défaut, le réseau d'un conteneur est isolé.
 
@@ -209,7 +209,7 @@ docker run -it -p 8080:80 test
 
 Cette fois le port sur la machine hôte sera *8080*, vous pourrez voir l'application sur *localhost:8080*.
 
-#### L'instruction `EXPOSE`
+### L'instruction `EXPOSE`
 
 **L'instruction `EXPOSE` permet d'informer *Docker* qu'un conteneur écoute sur les ports spécifiés lors de son exécution.**
 
@@ -235,9 +235,9 @@ Cela permet de documenter quels ports doivent être ouverts pour exécuter le co
 
 Autrement dit, cela permet d'informer l'utilisateur du conteneur quels ports il doit publier. 
 
-### Optimisation et .dockerignore
+## Optimisation et .dockerignore
 
-#### Modifier l'ordre des instructions
+### Modifier l'ordre des instructions
 
 Pour le moment, à chaque fois que nous reconstruisons l'image suite à un changement, l'instruction `RUN npm install` n'utilise pas le cache, ce qui entraîne une installation complète.
 
@@ -300,7 +300,7 @@ Notez que nous n'en avons pas du tout terminé ! Nous avons résolu quasiment to
 
 Il nous faut des connaissances supplémentaires pour palier ce problème que nous apprendrons justement dans le chapitre suivant.
 
-#### Le fichier *.dockerignore*
+### Le fichier *.dockerignore*
 
 Si vous connaissez *Git*, le fonctionnement du fichier *.dockerignore* est très similaire.
 
@@ -340,7 +340,7 @@ Ici tous les fichiers *.txt* sont exclus par la première règle. Mais la deuxi�
 **/*.txt
 ```
 
-#### Quelques rappels sur les commandes
+### Quelques rappels sur les commandes
 
 Pour lancer notre application en mode détaché (pour reprendre la main dans le terminal) :
 

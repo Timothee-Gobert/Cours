@@ -1,10 +1,10 @@
-## Persister des données avec Docker
+# Persister des données avec Docker
 
-### Introduction à la persistance
+## Introduction à la persistance
 
-#### Le problème de la persistance
+### Le problème de la persistance
 
-##### Les conteneurs sont éphémères
+#### Les conteneurs sont éphémères
 
 **Les conteneurs sont conçus pour être immuables et éphémères.**
 
@@ -12,97 +12,99 @@ Cela signifie qu'ils sont prévus pour être arrêtés, supprimés etc sans avoi
 
 Par défaut, les fichiers d'un conteneur sont écrits dans une couche avec les droits d'écritures, mais **cette couche est supprimée si le conteneur n'existe plus.**
 
-En outre, cette couche utilise *UnionFS* comme nous l'avons vu, ce qui réduit les performances d'écriture et de lecture. Ce n'est donc pas du tout adapté pour une base de données.
+En outre, cette couche utilise _UnionFS_ comme nous l'avons vu, ce qui réduit les performances d'écriture et de lecture. Ce n'est donc pas du tout adapté pour une base de données.
 
-##### Comment gérer la persistance ?
+#### Comment gérer la persistance ?
 
 Mais il y a des exceptions à ce principe : **les bases de données.**
 
 Les bases de données servent justement à persister des données et il faut donc pouvoir ne pas perdre toutes les données à chaque fois que vous modifiez ou relancez un conteneur !
 
-Pour ce faire, *Docker* propose l'utilisation de *bind mounts* et de *volumes* qui permettent de résoudre les problèmes de performance (en écrivant directement dans le système de fichiers de l'hôte) et les problèmes de persistance (ils sont conservés après la suppression du conteneur).
+Pour ce faire, _Docker_ propose l'utilisation de _bind mounts_ et de _volumes_ qui permettent de résoudre les problèmes de performance (en écrivant directement dans le système de fichiers de l'hôte) et les problèmes de persistance (ils sont conservés après la suppression du conteneur).
 
 Quelle que soit la persistance choisie, cela ne **fait aucune différence du point de vue du conteneur** : les données sont exposées dans le système de fichiers du conteneur.
 
 Pour visualiser la différence du **point de vue de la machine hôte**, rien de mieux que le schéma officiel :
 
-![](/00-assets/images/Docker/image-6_28_1.png)
+![img](../../assets/images/Docker/image-6_28_1.png)
 
-Dans le cas d'un *bind mount* : il s'agit tout simplement de fichiers et de dossiers n'importe où sur le système de fichiers de l'hôte. N'importe quel processus peut les modifier, y compris en dehors de *Docker*.
+Dans le cas d'un _bind mount_ : il s'agit tout simplement de fichiers et de dossiers n'importe où sur le système de fichiers de l'hôte. N'importe quel processus peut les modifier, y compris en dehors de _Docker_.
 
-Dans le cas d'un *volume* : *Docker* utilise le système de fichiers de la machine hôte mais gère lui même cet espace et l'utilisateur doit passer par le *Docker CLI*. Sur *GNU/Linux* l'emplacement sera */var/lib/docker/volumes/* mais il ne faut jamais y toucher directement !
+Dans le cas d'un _volume_ : _Docker_ utilise le système de fichiers de la machine hôte mais gère lui même cet espace et l'utilisateur doit passer par le _Docker CLI_. Sur _GNU/Linux_ l'emplacement sera _/var/lib/docker/volumes/_ mais il ne faut jamais y toucher directement !
 
-Dans le cas d'un *TMPFS* : il s'agit d'un stockage temporaire en mémoire vive (*RAM*).
+Dans le cas d'un _TMPFS_ : il s'agit d'un stockage temporaire en mémoire vive (_RAM_).
 
-#### Les *bind mounts*
+### Les _bind mounts_
 
-Les *bind mounts* sont limités en fonctionnalités par rapport aux volumes. Ils ne sont pas recommandé sauf dans certains cas que nous étudierons.
+Les _bind mounts_ sont limités en fonctionnalités par rapport aux volumes. Ils ne sont pas recommandé sauf dans certains cas que nous étudierons.
 
-**Lorsque vous utilisez un *bind mount* vous montez un fichier ou un dossier du système de fichiers de la machine hôte dans un conteneur.**
+**Lorsque vous utilisez un _bind mount_ vous montez un fichier ou un dossier du système de fichiers de la machine hôte dans un conteneur.**
 
 Il faut préciser le chemin absolu du fichier ou du dossier que vous voulez monter. Il peut être n'importe où sur l'hôte.
 
-Si le fichier ou le dossier n'existe pas sur l'hôte, il sera créé par *Docker* à l'emplacement indiqué.
+Si le fichier ou le dossier n'existe pas sur l'hôte, il sera créé par _Docker_ à l'emplacement indiqué.
 
-#### Les volumes
+### Les volumes
 
-Les volumes sont créés et gérés entièrement par *Docker*.
+Les volumes sont créés et gérés entièrement par _Docker_.
 
-Ils peuvent être créer en utilisant le *CLI* avec la commande :
+Ils peuvent être créer en utilisant le _CLI_ avec la commande :
 
 ```sh
 docker volume create
 ```
 
-Ils peuvent également être créé par *Docker* lors de la création d'un conteneur ou d'un service.
+Ils peuvent également être créé par _Docker_ lors de la création d'un conteneur ou d'un service.
 
-**Lorsque l'on crée un volume il est stocké dans un dossier sur l'hôte (*/var/lib/docker/volumes/* pour *GNU/Linux*).**
+**Lorsque l'on crée un volume il est stocké dans un dossier sur l'hôte (_/var/lib/docker/volumes/_ pour _GNU/Linux_).**
 
 **Ce volume peut ensuite être monté (c'est-à-dire utilisé) dans un conteneur, le dossier est alors utilisé.**
 
-C'est très similaire avec les *bind mounts*, mais la différence est que **les volumes sont entièrement gérés par *Docker* et qu'ils sont isolés de la machine hôte.**
+C'est très similaire avec les _bind mounts_, mais la différence est que **les volumes sont entièrement gérés par _Docker_ et qu'ils sont isolés de la machine hôte.**
 
-D'ailleurs les permissions du dossier sont les suivantes : **0700/drwx------**. Ce qui signifie que seul l'utilisateur propriétaire qui est le *root* peut utiliser ce dossier.
+D'ailleurs les permissions du dossier sont les suivantes : **0700/drwx------**. Ce qui signifie que seul l'utilisateur propriétaire qui est le _root_ peut utiliser ce dossier.
 
 **Un volume peut être utilisé par plusieurs conteneurs,** comme nous l'étudierons en détails dans une leçon.
 
-#### Les tmpfs
+### Les tmpfs
 
-Les *TMPFS* (pour *temporary file system*) permettent d'avoir un espace de stockage qui n'est pas persisté sur le disque.
+Les _TMPFS_ (pour _temporary file system_) permettent d'avoir un espace de stockage qui n'est pas persisté sur le disque.
 
-Ils permettent de stocker de manière temporaire des données d'état ou des informations sensibles (comme des secrets - nous verrons cela avec *Docker swarm*).
+Ils permettent de stocker de manière temporaire des données d'état ou des informations sensibles (comme des secrets - nous verrons cela avec _Docker swarm_).
 
-Nous les étudierons brièvement dans une leçon. Ils ne sont disponibles pour le moment que sur les machines hôtes *GNU/Linux*. 
+Nous les étudierons brièvement dans une leçon. Ils ne sont disponibles pour le moment que sur les machines hôtes _GNU/Linux_.
 
-### Les bind mounts
+## Les bind mounts
 
-#### Cas d'utilisations recommandés pour les *bind mounts*
+### Cas d'utilisations recommandés pour les _bind mounts_
 
-**Il faut voir un *bind mount* comme une liaison dans les deux sens entre conteneur et hôte pour un dossier (et son contenu) ou un fichier.**
+**Il faut voir un _bind mount_ comme une liaison dans les deux sens entre conteneur et hôte pour un dossier (et son contenu) ou un fichier.**
 
-Les volumes sont la manière recommandée de stocker des données avec *Docker*, les *bind mounts* doivent donc être utilisés uniquement dans les cas suivants :
+Les volumes sont la manière recommandée de stocker des données avec _Docker_, les _bind mounts_ doivent donc être utilisés uniquement dans les cas suivants :
+
 - partager des fichiers de configuration entre l'hôte et les conteneurs.
-- partager le code source **lors du développement** pour permettre le *live reload*. 
+- partager le code source **lors du développement** pour permettre le _live reload_.
 
-#### Créer un *bind mount* avec `--mount`
+### Créer un _bind mount_ avec `--mount`
 
 **Le fichier ou le dossier qui est monté doit être désigné par un chemin absolu sur la machine hôte.**
 
-Il existe deux manières de créer un *bind mount* sur un conteneur avec le *CLI*.
+Il existe deux manières de créer un _bind mount_ sur un conteneur avec le _CLI_.
 
-La première est avec `-v` ou `--volume`, nous ne la montrerons pas car elle est déconseillée par *Docker*. Pour plusieurs raisons : d'une part car elle porte à confusion avec le type de montage (*volume*, *bind mount* et *tmpfs*), d'autre part car elle est trop concise et porte à confusion.
+La première est avec `-v` ou `--volume`, nous ne la montrerons pas car elle est déconseillée par _Docker_. Pour plusieurs raisons : d'une part car elle porte à confusion avec le type de montage (_volume_, _bind mount_ et _tmpfs_), d'autre part car elle est trop concise et porte à confusion.
 
 La seconde est `--mount` qui est plus claire et plus sûre, c'est donc celle que nous étudierons.
 
 L'option `--mount` accepte **une série de paires clé-valeur qui sont séparés par des virgules**, l'ordre des paires n'est pas important :
-- **type** permet de spécifier le type de montage souhaité : *bind mount*, *volume* ou *tmpfs*. Les valeurs possibles sont donc *bind*, *volume* et *tmpfs*. Ici il faut donc mettre *bind*.
+
+- **type** permet de spécifier le type de montage souhaité : _bind mount_, _volume_ ou _tmpfs_. Les valeurs possibles sont donc _bind_, _volume_ et _tmpfs_. Ici il faut donc mettre _bind_.
 - **source** ou **src** permet de spécifier la source. Il s'agit du chemin absolu sur l'hôte du fichier ou du dossier qui doit être monté dans le conteneur.
 - **destination**, **dst** ou **target** permet de spécifier la cible qui doit être le chemin où les fichiers et les dossiers seront montés dans le conteneur.
 - **readonly** permet de rendre le montage en lecture seule. Le conteneur ne pourra alors pas écrire sur celui-ci. Ce cas d'utilisation est rare.
 
-#### Premier exemple
+### Premier exemple
 
-Dans un dossier créez un autre dossier *data* :
+Dans un dossier créez un autre dossier _data_ :
 
 ```sh
 mkdir data
@@ -115,19 +117,19 @@ cd data
 echo 123 > hello.txt
 ```
 
-Créez ensuite un conteneur avec un *bind mount* sur le dossier que nous venons de créer :
+Créez ensuite un conteneur avec un _bind mount_ sur le dossier que nous venons de créer :
 
 ```sh
 docker container run -it --name alpine1 --mount type=bind,source="$(pwd)",target=/data alpine sh
 ```
 
-Notez que `$(pwd)` est une substitution de commande qui va être remplacée par la valeur de la variable d'environnement *pwd*, qui contient le chemin absolu du répertoire courant. (*Pour en savoir plus voyez le cours Linux*).
+Notez que `$(pwd)` est une substitution de commande qui va être remplacée par la valeur de la variable d'environnement _pwd_, qui contient le chemin absolu du répertoire courant. (_Pour en savoir plus voyez le cours Linux_).
 
-Nous montons donc le dossier *data* de la machine hôte que nous avons créé dans le dossier */data* sur le conteneur.
+Nous montons donc le dossier _data_ de la machine hôte que nous avons créé dans le dossier _/data_ sur le conteneur.
 
 Notez que ce dossier peut savoir le nom que vous voulez, il n'a pas à correspondre au nom sur la machine hôte.
 
-*Sur Windows avec Git Bash uniquement*, il se peut que le montage ne fonctionne pas en mettant */data*. Il faut mettre *//data* (car Git Bash le transforme sinon en `C:\\data`).
+_Sur Windows avec Git Bash uniquement_, il se peut que le montage ne fonctionne pas en mettant _/data_. Il faut mettre _//data_ (car Git Bash le transforme sinon en `C:\\data`).
 
 Vérifiez que le dossier data est bien accessible dans le conteneur :
 
@@ -135,7 +137,7 @@ Vérifiez que le dossier data est bien accessible dans le conteneur :
 cat /data/hello.txt
 ```
 
-Quittez ensuite le conteneur avec *exit*.
+Quittez ensuite le conteneur avec _exit_.
 
 Vous pouvez vérifier le montage dans le conteneur :
 
@@ -143,7 +145,7 @@ Vous pouvez vérifier le montage dans le conteneur :
 docker container inspect alpine1
 ```
 
-Cherchez dans toutes les informations de configuration sur le conteneur la partie *Mounts*. Vous aurez par exemple :
+Cherchez dans toutes les informations de configuration sur le conteneur la partie _Mounts_. Vous aurez par exemple :
 
 ```js
 Mounts": [
@@ -158,9 +160,9 @@ Mounts": [
 ],
 ```
 
-Remarquez bien que le volume *data* de l'hôte est bien monté sur */data* dans le conteneur.
+Remarquez bien que le volume _data_ de l'hôte est bien monté sur _/data_ dans le conteneur.
 
-*RW* signifie *Read Write*. La valeur serait *false* si nous avions monté le volume en lecture seul. Mais c'est très rare, la plupart du temps vous aurez *true*.
+_RW_ signifie _Read Write_. La valeur serait _false_ si nous avions monté le volume en lecture seul. Mais c'est très rare, la plupart du temps vous aurez _true_.
 
 La propagation est un sujet très avancé que vous n'étudierons pas.
 
@@ -174,9 +176,9 @@ Vous pouvez ensuite vérifier que les données sont toujours présentes sur l'h�
 
 **Si le dossier cible sur le conteneur où vous montez le dossier de l'hôte, contient des données, alors ils seront cachés.** Ils ne seront pas perdus mais vous ne pourrez plus les voir tant que le montage existe.
 
-### Utilisation d'un bind mount dans notre exemple
+## Utilisation d'un bind mount dans notre exemple
 
-#### Le problème : les modifications des fichiers ne sont pas propagés au conteneur
+### Le problème : les modifications des fichiers ne sont pas propagés au conteneur
 
 Revenons à notre application d'exemple.
 
@@ -186,19 +188,19 @@ Si vous faites :
 docker run -p 80:80 myapp
 ```
 
-Puis que vous modifiez des fichiers dans *app.js*, la nouvelle version ne sera pas dans le conteneur.
+Puis que vous modifiez des fichiers dans _app.js_, la nouvelle version ne sera pas dans le conteneur.
 
 Il faudra reconstruire une nouvelle fois l'image et créer un nouveau conteneur.
 
 Cette situation ne permet pas de développer correctement, impossible de reconstruire l'image à chaque changement !
 
-#### Solution : un bind mount !
+### Solution : un bind mount !
 
-Nous allons mettre en place une liaison entre les fichiers de notre application (ici uniquement *app.js*) et notre conteneur grâce à un *bind mount*.
+Nous allons mettre en place une liaison entre les fichiers de notre application (ici uniquement _app.js_) et notre conteneur grâce à un _bind mount_.
 
-Pour commencer créons un dossier *src* et déplaçons y le fichier *app.js*.
+Pour commencer créons un dossier _src_ et déplaçons y le fichier _app.js_.
 
-Ensuite, modifions le *Dockerfile* et plus spécifiquement l'instruction *CMD* pour prendre en compte le nouveau chemin :
+Ensuite, modifions le _Dockerfile_ et plus spécifiquement l'instruction _CMD_ pour prendre en compte le nouveau chemin :
 
 ```dockerfile
 FROM node:alpine
@@ -222,33 +224,34 @@ Nous démarrons un conteneur avec la nouvelle version de l'image, sans oublier d
 docker run -p 80:80 --mount type=bind,source="$(pwd)/src",target=/app/src myapp
 ```
 
-Essayez de modifier *app.js* sur l'hôte, vous verrez *nodemon* redémarrer dans le terminal.
+Essayez de modifier _app.js_ sur l'hôte, vous verrez _nodemon_ redémarrer dans le terminal.
 
-Vous pourrez constater à chaque fois les changements sur *localhost*, bien sûr en rafraichissant. 
+Vous pourrez constater à chaque fois les changements sur _localhost_, bien sûr en rafraichissant.
 
-### Les volumes
+## Les volumes
 
-#### Cas d'utilisations recommandés pour les volumes
+### Cas d'utilisations recommandés pour les volumes
 
-**Les volumes sont la manière recommandée de stocker des données avec *Docker*.**
+**Les volumes sont la manière recommandée de stocker des données avec _Docker_.**
 
 Ils permettent :
-- d'utiliser le *Docker CLI*.
+
+- d'utiliser le _Docker CLI_.
 - de partager des données entre plusieurs conteneurs en cours d'exécution.
-- d'utiliser un espace de stockage totalement géré par *Docker* et donc de ne pas dépendre du système hôte. Ils fonctionneront quel que soit l'hôte et il n'y a pas à se préoccuper des chemins comme avec les *bind mounts*.
+- d'utiliser un espace de stockage totalement géré par _Docker_ et donc de ne pas dépendre du système hôte. Ils fonctionneront quel que soit l'hôte et il n'y a pas à se préoccuper des chemins comme avec les _bind mounts_.
 - ils permettent de stocker les données sur un hôte distant. Les volumes ne sont pas forcément stockés sur la machine hôte.
 - ils permettent de facilement sauvegarder, restaurer ou migrer des données.
 - ils ont des performances élevées et sont contrôlés par Docker ce qui est absolument nécessaires pour des bases de données.
 
-#### Création des volumes
+### Création des volumes
 
-Les volumes peuvent être créer en utilisant le *CLI* avec la commande :
+Les volumes peuvent être créer en utilisant le _CLI_ avec la commande :
 
 ```sh
 docker volume create
 ```
 
-Ils peuvent également être créé par *Docker* lors de la création d'un conteneur ou d'un service.
+Ils peuvent également être créé par _Docker_ lors de la création d'un conteneur ou d'un service.
 
 Les volumes peuvent être anonyme ou vous pouvez définir un nom lors de la création.
 
@@ -258,7 +261,7 @@ Par exemple si vous faites :
 docker volume create
 ```
 
-Vous aurez en réponse seulement l'*ID* du volume, par exemple :
+Vous aurez en réponse seulement l'_ID_ du volume, par exemple :
 
 ```
 c496de105865487ab8f3b9136bbf191905c0f05c55a96add8e3560c23eb99350
@@ -272,9 +275,9 @@ docker volume create data
 
 Le conteneur aura le nom data et il sera ensuite plus simple d'interagir avec celui-ci, et surtout de savoir à quoi il correspond.
 
-#### Lister les volumes
+### Lister les volumes
 
-Pour lister tous les volumes *Docker* existants, faites simplement :
+Pour lister tous les volumes _Docker_ existants, faites simplement :
 
 ```sh
 docker volume ls
@@ -290,7 +293,7 @@ local     data
 
 Ici nous avons un volume anonyme et un volume nommé.
 
-#### Inspecter des volumes
+### Inspecter des volumes
 
 Pour inspecter un volume il suffit de faire :
 
@@ -308,49 +311,50 @@ Le résultat sera alors par exemple :
 
 ```json
 [
-    {
-        "CreatedAt": "2020-11-04T11:35:40+01:00",
-        "Driver": "local",
-        "Labels": {},
-        "Mountpoint": "/var/lib/docker/volumes/data/_data",
-        "Name": "data",
-        "Options": {},
-        "Scope": "local"
-    }
+  {
+    "CreatedAt": "2020-11-04T11:35:40+01:00",
+    "Driver": "local",
+    "Labels": {},
+    "Mountpoint": "/var/lib/docker/volumes/data/_data",
+    "Name": "data",
+    "Options": {},
+    "Scope": "local"
+  }
 ]
 ```
 
-Nous retrouvons bien sur *GNU/Linux* l'emplacement pour les volumes dont nous avons parlé.
+Nous retrouvons bien sur _GNU/Linux_ l'emplacement pour les volumes dont nous avons parlé.
 
-#### Monter des volumes
+### Monter des volumes
 
-Il existe deux manières de monter un volume sur un conteneur avec le *CLI*.
+Il existe deux manières de monter un volume sur un conteneur avec le _CLI_.
 
-La première est avec `-v` ou `--volume`, nous ne la montrerons pas car elle est déconseillée par *Docker*.
+La première est avec `-v` ou `--volume`, nous ne la montrerons pas car elle est déconseillée par _Docker_.
 
 La seconde est `--mount` qui est plus claire et plus sûre.
 
-##### Monter un volume avec `--mount`
+#### Monter un volume avec `--mount`
 
 L'option `--mount` accepte **une série de paires clé-valeur qui sont séparés par des virgules,** l'ordre des paires n'est pas important :
-- **type** permet de spécifier le type de montage souhaité : *bind mount*, *volume* ou *tmpfs*. Les valeurs possibles sont donc *bind*, *volume* et *tmpfs*.
+
+- **type** permet de spécifier le type de montage souhaité : _bind mount_, _volume_ ou _tmpfs_. Les valeurs possibles sont donc _bind_, _volume_ et _tmpfs_.
 - **source** ou **src** permet de spécifier la source. Cela peut être le nom du volume. Si vous voulez créer un volume anonyme vous pouvez ne rien spécifier.
 - **destination**, **dst** ou **target** permet de spécifier la cible qui doit être le chemin où les fichiers et les dossiers seront montés dans le conteneur.
 - **readonly** permet de rendre le volume monté en lecture seule.
 
-##### Comportement du montage suivant que le volume est vide ou non
+#### Comportement du montage suivant que le volume est vide ou non
 
 **Si le volume que vous montez est vide** et si la cible dans le conteneur contient des dossiers et des fichiers, ils seront copiés dans le volume.
 
 **Si le volume que vous montez contient des données** et si la cible dans le conteneur contient des dossiers et des fichiers, ils seront cachés par le volume. Ils ne seront pas perdus mais vous ne pourrez plus les voir tant que le volume est monté.
 
-Si vous démarrez un conteneur et précisez un volume qui n'existe pas, un volume vide sera créé pour vous par *Docker*.
+Si vous démarrez un conteneur et précisez un volume qui n'existe pas, un volume vide sera créé pour vous par _Docker_.
 
-#### Supprimer des volumes
+### Supprimer des volumes
 
 Les volumes sont prévus pour être persistés. Aussi, ils sont supprimés uniquement si vous le décidez en utilisant une des commandes que nous allons voir.
 
-##### Supprimer un volume
+#### Supprimer un volume
 
 Pour supprimer un seul volume il faut faire
 
@@ -358,7 +362,7 @@ Pour supprimer un seul volume il faut faire
 docker volume rm ID_NOM
 ```
 
-##### Supprimer tous les volumes
+#### Supprimer tous les volumes
 
 Faites très attention à cette commande car les volumes ne seront pas récupérables après suppression. Aussi vérifiez bien les volumes avant de décider de tous les supprimer :
 
@@ -366,7 +370,7 @@ Faites très attention à cette commande car les volumes ne seront pas récupér
 docker volume prune
 ```
 
-#### Exemples
+### Exemples
 
 Nous allons prendre quelques exemples pour vous familiariser avec les volumes.
 
@@ -376,7 +380,7 @@ Commençons par tout supprimer :
 docker volume prune
 ```
 
-##### Démarrer un conteneur avec un volume nommé
+#### Démarrer un conteneur avec un volume nommé
 
 Nous allons commencer par démarrer un conteneur avec un volume qui n'existe pas :
 
@@ -384,13 +388,13 @@ Nous allons commencer par démarrer un conteneur avec un volume qui n'existe pas
 docker container run -d --name nginx1 --mount source=data1,target=/app nginx
 ```
 
-Nous lançons un conteneur en mode détaché avec pour nom *nginx1*.
+Nous lançons un conteneur en mode détaché avec pour nom _nginx1_.
 
-Nous montons un volume qui a pour nom *data1* et nous ciblons */app* dans le conteneur.
+Nous montons un volume qui a pour nom _data1_ et nous ciblons _/app_ dans le conteneur.
 
-*Docker* va créer un volume *data1* automatiquement, le monter sur le dossier */app* dans le conteneur. Comme */app* n'existe pas il va également le créer automatiquement.
+_Docker_ va créer un volume _data1_ automatiquement, le monter sur le dossier _/app_ dans le conteneur. Comme _/app_ n'existe pas il va également le créer automatiquement.
 
-Si vous ne précisez pas le *type* lors de l'utilisation de `--mount`, *Docker* va utiliser par défaut *type=volume*.
+Si vous ne précisez pas le _type_ lors de l'utilisation de `--mount`, _Docker_ va utiliser par défaut _type=volume_.
 
 Vous pouvez vérifier tout cela :
 
@@ -405,7 +409,7 @@ Vérifiez également que le volume créé est bien monté au bon endroit sur le 
 docker container inspect nginx1
 ```
 
-Cherchez dans toutes les informations de configuration sur le conteneur la partie *Mounts*. Vous aurez par exemple :
+Cherchez dans toutes les informations de configuration sur le conteneur la partie _Mounts_. Vous aurez par exemple :
 
 ```json
 Mounts": [
@@ -421,9 +425,10 @@ Mounts": [
   }
 ],
 ```
-Remarquez bien que le volume *datat1* est bien monté sur */app*.
 
-`RW` signifie *Read Write*. La valeur serait *false* si nous avions monté le volume en lecture seul. Mais c'est très rare, la plupart du temps vous aurez *true*.
+Remarquez bien que le volume _datat1_ est bien monté sur _/app_.
+
+`RW` signifie _Read Write_. La valeur serait _false_ si nous avions monté le volume en lecture seul. Mais c'est très rare, la plupart du temps vous aurez _true_.
 
 Supprimez le conteneur et remarquez que le volume est toujours persisté :
 
@@ -439,7 +444,7 @@ Vous pouvez essayer de le remonter sur un autre conteneur, cela fonctionnera san
 docker container run -d --name nginx2 --mount source=data1,target=/app nginx
 ```
 
-##### Démarrer un conteneur avec un volume anonyme
+#### Démarrer un conteneur avec un volume anonyme
 
 Vous pouvez aussi créer un conteneur avec un volume anonyme, par exemple pour faire rapidement quelques tests et vous pourrez le supprimer ensuite :
 
@@ -447,13 +452,13 @@ Vous pouvez aussi créer un conteneur avec un volume anonyme, par exemple pour f
 docker container run --mount target=/data -it alpine sh
 ```
 
-Vérifiez que vous avez bien un dossier */data* :
+Vérifiez que vous avez bien un dossier _/data_ :
 
 ```sh
 ls
 ```
 
-Magique ! *Docker* a également créé un volume automatiquement pour vous et l'a monté dans */data*.
+Magique ! _Docker_ a également créé un volume automatiquement pour vous et l'a monté dans _/data_.
 
 Vous pouvez le voir en faisant :
 
@@ -469,11 +474,11 @@ docker container rm nginx2
 docker volume rm
 ```
 
-### Partager des volumes entre des conteneurs et effectuer des sauvegardes
+## Partager des volumes entre des conteneurs et effectuer des sauvegardes
 
-#### Partager un volume entre plusieurs conteneurs
+### Partager un volume entre plusieurs conteneurs
 
-Pour les applications avec des services répliqués (c'est-à-dire plusieurs instances de la même application permettant d'éviter les *downtimes*), il est courant de partager un *volume* entre eux.
+Pour les applications avec des services répliqués (c'est-à-dire plusieurs instances de la même application permettant d'éviter les _downtimes_), il est courant de partager un _volume_ entre eux.
 
 Pour ce faire, il suffit de préciser le même volume entre les services.
 
@@ -499,7 +504,7 @@ docker container run -it --rm --mount source=data,target=/data alpine sh
 
 L'option `--rm` permet de supprimer le conteneur une fois que celui-ci est stoppé. Donc si vous quittez le conteneur il sera automatiquement supprimé. C'est très pratique pour ce genre de tests !
 
-Créez un fichier dans */data* :
+Créez un fichier dans _/data_ :
 
 ```sh
 echo 123 > /data/test
@@ -540,23 +545,23 @@ echo 123 > /data/test.txt
 ls
 ```
 
-Vous verrez bien */data* dans lequel est monté le même volume que pour *conteneur1*.
+Vous verrez bien _/data_ dans lequel est monté le même volume que pour _conteneur1_.
 
-#### Effectuer une sauvegarde des volumes d'un conteneur
+### Effectuer une sauvegarde des volumes d'un conteneur
 
-Pour sauvegarder tous les volumes utilisés par un conteneur en cours d'exécution, il suffit de créer un *bind mount* temporaire et de créer une sauvegarde du volume :
+Pour sauvegarder tous les volumes utilisés par un conteneur en cours d'exécution, il suffit de créer un _bind mount_ temporaire et de créer une sauvegarde du volume :
 
 ```sh
 docker container run --rm --volumes-from conteneur1 --mount type=bind,src="$(pwd)",target=/backup alpine tar -cf /backup/backup.tar /data
 ```
 
-`--volumes-from conteneur1` va monter tous les volumes montés dans le *conteneur1* sur le nouveau conteneur *alpine* que nous lançons.
+`--volumes-from conteneur1` va monter tous les volumes montés dans le _conteneur1_ sur le nouveau conteneur _alpine_ que nous lançons.
 
-`--mount type=bind,src="$(pwd)",target=/backup` va créer un *bind mount* entre le répertoire de travail (*$(pwd)* est une substitution de commande, cf cours Linux) et un dossier */backup* sur le conteneur.
+`--mount type=bind,src="$(pwd)",target=/backup` va créer un _bind mount_ entre le répertoire de travail (_$(pwd)_ est une substitution de commande, cf cours Linux) et un dossier _/backup_ sur le conteneur.
 
-*tar -cf /backup/backup.tar /data* va prendre le volume */data* monté sur notre nouveau conteneur, (et qui est le même que celui du *conteneur1*), et créer une archive dans */backup/backup.tar* sur le conteneur.
+_tar -cf /backup/backup.tar /data_ va prendre le volume _/data_ monté sur notre nouveau conteneur, (et qui est le même que celui du _conteneur1_), et créer une archive dans _/backup/backup.tar_ sur le conteneur.
 
-Or grâce au *bind mount*, le dossier *backup* est lié au répertoire de travail sur l'hôte. Après la suppression du conteneur (option `--rm`) les fichiers et dossiers situés dans */backup* sur le conteneur sont donc conservés sur l'hôte. En l'occurrence *backup.tar*.
+Or grâce au _bind mount_, le dossier _backup_ est lié au répertoire de travail sur l'hôte. Après la suppression du conteneur (option `--rm`) les fichiers et dossiers situés dans _/backup_ sur le conteneur sont donc conservés sur l'hôte. En l'occurrence _backup.tar_.
 
 Cela peut paraître très complexe au premier abord, aussi testez bien et revenez y plusieurs fois.
 
@@ -574,9 +579,9 @@ docker container run --rm --mount source=data,target=/data --mount type=bind,sou
 
 L'effet est le même.
 
-A noter que cette fois-ci, en plus d'archiver le volume nous le compressons avec *gzip* (option `-z` de la commande tar, *cf cours Linux)*.
+A noter que cette fois-ci, en plus d'archiver le volume nous le compressons avec _gzip_ (option `-z` de la commande tar, _cf cours Linux)_.
 
-#### Effectuer une restauration d'un volume
+### Effectuer une restauration d'un volume
 
 Pour restaurer une archive compressée ou non compressée dans un nouveau volume, il suffit de faire :
 
@@ -584,15 +589,15 @@ Pour restaurer une archive compressée ou non compressée dans un nouveau volume
 docker run --mount type=volume,source=restore,target=/data --mount type=bind,source="$(pwd)",target=/backup -it alpine tar -xf /backup/backup.tar --strip-components 1 -C /data
 ```
 
-`--mount type=volume,source=restore,target=/data` permet de créer un nouveau volume *restore* qui va être monté sur */data* dans le conteneur. Autrement dit, le volume *restore*, qui est au départ vide, se verra copier les fichiers et les dossiers contenus dans */data* sur le conteneur.
+`--mount type=volume,source=restore,target=/data` permet de créer un nouveau volume _restore_ qui va être monté sur _/data_ dans le conteneur. Autrement dit, le volume _restore_, qui est au départ vide, se verra copier les fichiers et les dossiers contenus dans _/data_ sur le conteneur.
 
-`--mount type=bind,source=$"(pwd)",target=/backup` permet de créer un *bind mount* qui va monter le répertoire courant de l'hôte avec le contenu de */backup* sur le conteneur. Autrement dit, cela va copier le contenu du répertoire courant dans le dossier */backup* du conteneur (en réalité ce n'est pas une copie, juste une liaison mais c'est plus facile de le voir comme une copie).
+`--mount type=bind,source=$"(pwd)",target=/backup` permet de créer un _bind mount_ qui va monter le répertoire courant de l'hôte avec le contenu de _/backup_ sur le conteneur. Autrement dit, cela va copier le contenu du répertoire courant dans le dossier _/backup_ du conteneur (en réalité ce n'est pas une copie, juste une liaison mais c'est plus facile de le voir comme une copie).
 
-`tar -xf /backup/backup.tar -C /data` va décompresser */backup/backup.tar* dans le conteneur et mettre le résultat dans */data*. `--strip-components 1` permet de ne pas avoir un dossier *data* dans */data* mais directement son contenu.
+`tar -xf /backup/backup.tar -C /data` va décompresser _/backup/backup.tar_ dans le conteneur et mettre le résultat dans _/data_. `--strip-components 1` permet de ne pas avoir un dossier _data_ dans _/data_ mais directement son contenu.
 
-Or comme */data* est lié au volume *restore*, cela revient à copier le résultat de la décompression dans le volume !
+Or comme _/data_ est lié au volume _restore_, cela revient à copier le résultat de la décompression dans le volume !
 
-Notez que vous pouvez donner n'importe quel nom au volume *restore*. Ici c'est pour faciliter la compréhension mais le plus souvent on l'appellera par exemple *appdata*.
+Notez que vous pouvez donner n'importe quel nom au volume _restore_. Ici c'est pour faciliter la compréhension mais le plus souvent on l'appellera par exemple _appdata_.
 
 Maintenant que vous avez un volume avec les données restaurées, vous pouvez le monter sur n'importe quel conteneur :
 
@@ -600,18 +605,18 @@ Maintenant que vous avez un volume avec les données restaurées, vous pouvez le
 docker container run -it --rm --mount source=restore,target=/data alpine sh
 ```
 
-### Utiliser un volume pour une base de données
+## Utiliser un volume pour une base de données
 
-#### L'image officielle *mongo*
+### L'image officielle _mongo_
 
-Allez chercher l'image officielle de *mongo* sur *Docker Hub*, ensuite trouvez la version *latest* et cliquez dessus.
+Allez chercher l'image officielle de _mongo_ sur _Docker Hub_, ensuite trouvez la version _latest_ et cliquez dessus.
 
-Vous serez redirigé sur le *Dockerfile* de l'image *mongo* sur *Github*.
+Vous serez redirigé sur le _Dockerfile_ de l'image _mongo_ sur _Github_.
 
 Nous allons simplement voir un extrait qui nous intéresse ici :
 
 ```dockerfile
-# … extrait ...
+ … extrait ...
 VOLUME /data/db /data/configdb
 
 COPY docker-entrypoint.sh /usr/local/bin/
@@ -621,15 +626,15 @@ EXPOSE 27017
 CMD ["mongod"]
 ```
 
-`VOLUME /data/db /data/configdb` permet de créer deux volumes et de les monter sur */data/db* et */data/configdb* lors de la création d'un conteneur à partir de l'image.
+`VOLUME /data/db /data/configdb` permet de créer deux volumes et de les monter sur _/data/db_ et _/data/configdb_ lors de la création d'un conteneur à partir de l'image.
 
-`COPY docker-entrypoint.sh /usr/local/bin/` permet de copier le *script shell docker-entrypoint.sh* sur */usr/local/bin/* dans l'image.
+`COPY docker-entrypoint.sh /usr/local/bin/` permet de copier le _script shell docker-entrypoint.sh_ sur _/usr/local/bin/_ dans l'image.
 
-`ENTRYPOINT ["docker-entrypoint.sh"]` permet d'exécuter le script *sh* copié au lancement d'un conteneur.
+`ENTRYPOINT ["docker-entrypoint.sh"]` permet d'exécuter le script _sh_ copié au lancement d'un conteneur.
 
-`EXPOSE 27017` permet de préciser que le service va être lancé sur le port *27017* du conteneur.
+`EXPOSE 27017` permet de préciser que le service va être lancé sur le port _27017_ du conteneur.
 
-`CMD ["mongod"]` permet de lancer le démon *mongod* lors de l'exécution du conteneur.
+`CMD ["mongod"]` permet de lancer le démon _mongod_ lors de l'exécution du conteneur.
 
 Faisons un premier test :
 
@@ -637,7 +642,7 @@ Faisons un premier test :
 docker container run -it mongo sh
 ```
 
-Vérifiez bien la présence de */data/db* et */data/configdb* :
+Vérifiez bien la présence de _/data/db_ et _/data/configdb_ :
 
 ```sh
 ls data
@@ -664,15 +669,15 @@ docker container prune
 docker volume prune
 ```
 
-#### Lancer une instance *mongod* et s'y connecter
+### Lancer une instance _mongod_ et s'y connecter
 
-Nous allons lancer en mode détaché un conteneur *mongo* :
+Nous allons lancer en mode détaché un conteneur _mongo_ :
 
 ```sh
 docker container run -d --name mongodb mongo
 ```
 
-Comme nous l'avons vu cela va lancer *mongod* qui est le démon *MongoDB*.
+Comme nous l'avons vu cela va lancer _mongod_ qui est le démon _MongoDB_.
 
 Vous pouvez voir que la base de données est bien initialisée et tourne :
 
@@ -686,15 +691,15 @@ Vous pouvez maintenant utiliser le client sur le conteneur en cours d'exécution
 docker container exec -it mongodb mongosh
 ```
 
-Les commandes suivantes ne sont pas importantes, elles nous permettent simplement d'ajouter des données dans la base *MongoDB* pour tester la persistance des volumes avec une base de données.
+Les commandes suivantes ne sont pas importantes, elles nous permettent simplement d'ajouter des données dans la base _MongoDB_ pour tester la persistance des volumes avec une base de données.
 
-Commençons par créer et utiliser une nouvelle *db* :
+Commençons par créer et utiliser une nouvelle _db_ :
 
 ```sh
 use test
 ```
 
-Insérons ensuite un *document* :
+Insérons ensuite un _document_ :
 
 ```sql
 db.user.insertOne({name: "jean"})
@@ -722,15 +727,15 @@ docker volume prune
 
 Les volumes anonymes contiennent les données mais ce n'est pas pratique, nous allons voir maintenant comment utiliser des volumes nommés ! Ce sera toujours le cas.
 
-#### Persister les données avec un volume
+### Persister les données avec un volume
 
-Nous allons relancer un conteneur *mongo*, mais cette fois-ci en utilisant un volume nommé :
+Nous allons relancer un conteneur _mongo_, mais cette fois-ci en utilisant un volume nommé :
 
 ```sh
 docker container run -d --name mongodb --mount source=mydb,target=/data/db mongo
 ```
 
-Ici comme le volume *mydb* n'existe pas, il sera automatiquement créé par *Docker*. Il faut absolument le monter dans */data/db* et pas autre part car c'est ce chemin qui est utilisé par le démon *mongod*.
+Ici comme le volume _mydb_ n'existe pas, il sera automatiquement créé par _Docker_. Il faut absolument le monter dans _/data/db_ et pas autre part car c'est ce chemin qui est utilisé par le démon _mongod_.
 
 Nous pouvons vérifier maintenant que nous avons bien un volume nommé :
 
@@ -744,13 +749,13 @@ Nous pouvons refaire notre test :
 docker container exec -it mongodb mongosh
 ```
 
-Commençons par créer et utiliser une nouvelle *db* :
+Commençons par créer et utiliser une nouvelle _db_ :
 
 ```sh
 use test
 ```
 
-Insérons ensuite un *document* :
+Insérons ensuite un _document_ :
 
 ```sql
 db.user.insertOne({name: "jean"})
@@ -805,9 +810,9 @@ Quittons :
 exit
 ```
 
-#### Utiliser *MongoDB Compass*
+### Utiliser _MongoDB Compass_
 
-Si vous connaissez *MongoDB*, vous serez ravi d'apprendre qu'il est simple d'utiliser *mongo* avec *Compass* et *Docker*.
+Si vous connaissez _MongoDB_, vous serez ravi d'apprendre qu'il est simple d'utiliser _mongo_ avec _Compass_ et _Docker_.
 
 Créez un conteneur en publiant le port :
 
@@ -815,37 +820,38 @@ Créez un conteneur en publiant le port :
 docker container run -d --name mongodb --mount source=mydb,target=/data/db -p 27017:27017 mongo
 ```
 
-Vous pouvez ensuite aller dans *Compass*, faire *New connection* et cliquez simplement sur connecter sans rien rentrer. Comme c'est le port par défaut en *localhost* cela fonctionnera.
+Vous pouvez ensuite aller dans _Compass_, faire _New connection_ et cliquez simplement sur connecter sans rien rentrer. Comme c'est le port par défaut en _localhost_ cela fonctionnera.
 
-Si vous avez déjà *mongod* qui tourne sur votre machine locale, il suffit de modifier le port hôte sur lequel le conteneur sera lié :
+Si vous avez déjà _mongod_ qui tourne sur votre machine locale, il suffit de modifier le port hôte sur lequel le conteneur sera lié :
 
 ```sh
 docker container run -d --name mongodb --mount source=mydb,target=/data/db -p 27018:27017 mongo
 ```
 
-Dans *Compass* entrez cette fois-ci :
+Dans _Compass_ entrez cette fois-ci :
 
 ```sh
 mongodb://localhost:27018
 ```
 
-### Utiliser TMPFS
+## Utiliser TMPFS
 
-#### Cas d'utilisations recommandés pour les *TMPFS*
+### Cas d'utilisations recommandés pour les _TMPFS_
 
-Les *TMPFS* ne sont pas persistés. Ils permettent de garder des données en mémoire vive uniquement. Les principaux cas d'utilisation sont :
+Les _TMPFS_ ne sont pas persistés. Ils permettent de garder des données en mémoire vive uniquement. Les principaux cas d'utilisation sont :
+
 - données secrètes (mots de passe, secrets pour des paires de clés ou pour de l'encryption symétrique etc).
 - données d'état qui seraient trop volumineuses pour être persistées ou trop coûteuse en performance pour être écrites sur disque.
 
-#### Lancer un conteneur avec un *TMPFS* monté
+### Lancer un conteneur avec un _TMPFS_ monté
 
-Il suffit cette fois-ci de mettre *type=tmpfs* :
+Il suffit cette fois-ci de mettre _type=tmpfs_ :
 
 ```sh
 docker run --name tmp --mount type=tmpfs,target=/data -it alpine sh
 ```
 
-Créer un fichier dans */data* :
+Créer un fichier dans _/data_ :
 
 ```sh
 echo 123 > /data/test
@@ -863,7 +869,7 @@ Relancez-le :
 docker start -ai tmp
 ```
 
-Il n'y aura plus de données dans */data* car le conteneur a été stoppé :
+Il n'y aura plus de données dans _/data_ car le conteneur a été stoppé :
 
 ```sh
 ls /data

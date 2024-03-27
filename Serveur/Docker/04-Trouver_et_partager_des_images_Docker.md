@@ -1,8 +1,8 @@
-## Trouver et partager des images Docker
+# Trouver et partager des images Docker
 
-### Présentation de Docker Hub
+## Présentation de Docker Hub
 
-#### Le service _Docker Hub_
+### Le service _Docker Hub_
 
 _Docker Hub_ est la plateforme d'image officielle de _Docker_. Il s'agit d'un _registry_, c'est-à-dire d'un service d'hébergement qui contient un très grand nombre de _repositories_ d'images.
 
@@ -18,13 +18,13 @@ _Docker Hub_ permet également de distribuer ses propres images de manière publ
 
 Rendez-vous à cette [adresse](https://hub.docker.com/signup) pour créer un compte sur _Docker Hub_.
 
-#### Etude d'une image officielle
+### Etude d'une image officielle
 
 Nous allons voir ce que nous pouvons trouver lorsque nous nous rendons sur un _repository_ officiel, par exemple celui de _node_.
 
 Vous aurez d'abord une partie de présentation :
 
-![](/00-assets/images/Docker/image-4_19_1.png)
+![img](../../assets/images/Docker/image-4_19_1.png)
 
 Vous pouvez retrouver le fait qu'il s'agit d'une image officielle (titre en bleu et _tag Official Image_ en gris).
 
@@ -38,17 +38,17 @@ docker pull node
 
 Vous avez ensuite tous les _tags_ disponibles pour l'image :
 
-![](/00-assets/images/Docker/image-4_19_2.png)
+![img](../../assets/images/Docker/image-4_19_2.png)
 
-Chaque ligne correspond à une image différente (avec un *ID* d'image différent).
+Chaque ligne correspond à une image différente (avec un _ID_ d'image différent).
 
-Les images varient en fonction de l'image de base utilisée (la distribution *Linux* ou les librairies minimales) et la version de la librairie.
+Les images varient en fonction de l'image de base utilisée (la distribution _Linux_ ou les librairies minimales) et la version de la librairie.
 
-Par exemple ici, nous avons des images sur *Alpine*, sur des versions de *Debian*, des versions sur *slim*, sur *Ubuntu* etc de *Node.js* pour des versions de 10 à 15.
+Par exemple ici, nous avons des images sur _Alpine_, sur des versions de _Debian_, des versions sur _slim_, sur _Ubuntu_ etc de _Node.js_ pour des versions de 10 à 15.
 
-Sur la même ligne, vous avez tous les *tags* qui correspondent à la même image.
+Sur la même ligne, vous avez tous les _tags_ qui correspondent à la même image.
 
-Autrement dit, *15.0.1-alpine3.10*, *15.0-alpine3.10*, *15-alpine3.10*, *alpine3.10*, *current-alpine3.10* désignent exactement la même image.
+Autrement dit, _15.0.1-alpine3.10_, _15.0-alpine3.10_, _15-alpine3.10_, _alpine3.10_, _current-alpine3.10_ désignent exactement la même image.
 
 Vous pouvez le vérifier en faisant :
 
@@ -63,24 +63,23 @@ Puis :
 docker image ls
 ```
 
-Vous verrez les deux tags mais vous verrez aussi qu'ils correspondent au même *ID* d'image. En outre, le deuxième `docker pull` n'entraînera aucun téléchargement.
+Vous verrez les deux tags mais vous verrez aussi qu'ils correspondent au même _ID_ d'image. En outre, le deuxième `docker pull` n'entraînera aucun téléchargement.
 
-Si vous cliquez sur une des versions (sur une des lignes), vous serez redirigé sur le *Dockerfile* de l'image correspondante qui est la plupart du temps sur *Github*. Ces *Dockerfiles* sont complexes car ils doivent permettre de s'assurer de la sécurité de l'image.
+Si vous cliquez sur une des versions (sur une des lignes), vous serez redirigé sur le _Dockerfile_ de l'image correspondante qui est la plupart du temps sur _Github_. Ces _Dockerfiles_ sont complexes car ils doivent permettre de s'assurer de la sécurité de l'image.
 
-Vous trouverez ensuite toujours des explications sur les versions des images, ici dans *Images Variants*.
+Vous trouverez ensuite toujours des explications sur les versions des images, ici dans _Images Variants_.
 
 Vous aurez accès à une documentation, ici qui est sur [Github](https://github.com/nodejs/docker-node/blob/main/README.md#how-to-use-this-image).
 
+## Publier ses images sur Docker Hub
 
-### Publier ses images sur Docker Hub
+### Les _repositories_ publics ou privés
 
-#### Les *repositories* publics ou privés
+Sur _Docker Hub_, une fois que vous avez créé votre compte gratuit, rendez vous dans _Repositories_.
 
-Sur *Docker Hub*, une fois que vous avez créé votre compte gratuit, rendez vous dans *Repositories*.
+Vous avez le droit à un seul _repository_ privé gratuit, en revanche vous avez le droit à autant de _repository_ publics que vous souhaitez.
 
-Vous avez le droit à un seul *repository* privé gratuit, en revanche vous avez le droit à autant de *repository* publics que vous souhaitez.
-
-#### Publier une image sur un *repository*
+### Publier une image sur un _repository_
 
 Pour publier une image, il faut commencer par se connecter :
 
@@ -90,9 +89,9 @@ docker login
 
 Il faut entrer les identifiants que vous avez entrés lors de la création de votre compte.
 
-Suivant votre environnement votre mot de passe sera stocké de manière chiffrée (par exemple dans *keychain* sur *MacOS*) ou dans un fichier de configuration en *Base64* dans *$HOME/.docker/config.json*.
+Suivant votre environnement votre mot de passe sera stocké de manière chiffrée (par exemple dans _keychain_ sur _MacOS_) ou dans un fichier de configuration en _Base64_ dans _$HOME/.docker/config.json_.
 
-Si vous vous connectez à *Docker Hub* depuis une machine partagée ou un serveur, il est très important de se déconnecter une fois terminé :
+Si vous vous connectez à _Docker Hub_ depuis une machine partagée ou un serveur, il est très important de se déconnecter une fois terminé :
 
 ```sh
 docker logout
@@ -100,9 +99,9 @@ docker logout
 
 Dans le cas contraire vous vous exposez au vol de votre mot de passe.
 
-Une fois connecté, il faut recréer un *tag* adapté à votre *repository*. Il doit être de la forme *utilisateur/repository* et éventuellement avec une version :*version*.
+Une fois connecté, il faut recréer un _tag_ adapté à votre _repository_. Il doit être de la forme _utilisateur/repository_ et éventuellement avec une version :_version_.
 
-L'utilisateur doit être l'utilisateur que vous avez créé sur *Docker hub*.
+L'utilisateur doit être l'utilisateur que vous avez créé sur _Docker hub_.
 
 Par exemple :
 
@@ -110,7 +109,7 @@ Par exemple :
 docker build -t jean/mon-app:1.0.0 .
 ```
 
-Une fois votre image construite et correctement taguée, il suffit de la pusher, c'est-à-dire la publier sur *Docker Hub* pour la rendre accessible :
+Une fois votre image construite et correctement taguée, il suffit de la pusher, c'est-à-dire la publier sur _Docker Hub_ pour la rendre accessible :
 
 ```sh
 docker image push jean/mon-app:1.0.0
@@ -128,7 +127,7 @@ Puis télécharger localement l'image que vous avez publiée :
 docker image pull jean/mon-app:1.0.0
 ```
 
-#### Chiffrer ses identifiants *GNU/Linux*
+### Chiffrer ses identifiants _GNU/Linux_
 
 Si vous êtes sur une distribution Debian, comme Ubuntu par exemple, suivez ces étapes pour pouvoir chiffrer vos identifiants Docker :
 
@@ -170,23 +169,25 @@ Puis :
 
 ```json
 {
-    "credsStore": "pass"
+  "credsStore": "pass"
 }
 ```
 
 Puis :
+
 ```bash
 docker login
 ```
-### Les commandes save et load
 
-#### La commande `docker image save`
+## Les commandes save et load
 
-La commande `docker image save` permet de sauvegarder une ou plusieurs images dans une archive *tar*.
+### La commande `docker image save`
 
-Les archives sont un moyen de partager facilement des images sans passer par un *repository*.
+La commande `docker image save` permet de sauvegarder une ou plusieurs images dans une archive _tar_.
 
-Par défaut, l'archive est envoyée sur le flux de sortie standard (*STDOUT*), il faut donc utiliser l'option `-o` ou `--output` pour la sauvegarder dans un fichier.
+Les archives sont un moyen de partager facilement des images sans passer par un _repository_.
+
+Par défaut, l'archive est envoyée sur le flux de sortie standard (_STDOUT_), il faut donc utiliser l'option `-o` ou `--output` pour la sauvegarder dans un fichier.
 
 Par exemple :
 
@@ -194,13 +195,13 @@ Par exemple :
 docker image save -o mon_image.tar mon_image
 ```
 
-A noter que vous pouvez bien sûr compresser l'archive, par exemple avec *gzip* :
+A noter que vous pouvez bien sûr compresser l'archive, par exemple avec _gzip_ :
 
 ```sh
 docker save mon_image | gzip > mon_image.tar.gz
 ```
 
-#### La commande `docker image load`
+### La commande `docker image load`
 
 La commande `docker image load` permet de charger une image depuis une archive passée en entrée standard.
 
@@ -216,15 +217,15 @@ Et vous pouvez également utiliser l'option `-i` ou `--input` :
 docker image load -i mon_image.tar
 ```
 
-### Les commandes export et import
+## Les commandes export et import
 
-#### La commande `docker container export`
+### La commande `docker container export`
 
-La commande `docker container export` permet d'exporter le système de fichiers d'un conteneur dans une archive *tar*.
+La commande `docker container export` permet d'exporter le système de fichiers d'un conteneur dans une archive _tar_.
 
 Attention ! Cette commande n'exporte pas les volumes associés au conteneur, que nous étudierons en détails dans un prochain chapitre.
 
-Par défaut, l'archive est envoyée sur le flux de sortie standard (*STDOUT*), il faut donc utiliser l'option `-o` ou `--output` pour la sauvegarder dans un fichier :
+Par défaut, l'archive est envoyée sur le flux de sortie standard (_STDOUT_), il faut donc utiliser l'option `-o` ou `--output` pour la sauvegarder dans un fichier :
 
 ```sh
 docker container export -o conteneur_fs.tar mon_conteneur
@@ -236,9 +237,9 @@ Vous pouvez également utiliser une redirection :
 docker container export mon_conteneur > conteneur_fs.tar
 ```
 
-#### La commande `docker image import`
+### La commande `docker image import`
 
-La commande `docker image import` permet d'importer le système de fichiers d'une archive *tar* pour créer une image.
+La commande `docker image import` permet d'importer le système de fichiers d'une archive _tar_ pour créer une image.
 
 Elle accepte également les URLs, et vous pouvez donc récupérer des archives distantes. Si l'archive est compressée, le démon va automatiquement la décompresser et l'extraire.
 
