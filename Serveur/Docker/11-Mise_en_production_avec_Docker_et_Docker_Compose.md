@@ -982,3 +982,43 @@ Nous vérifions que tout est bien lancé :
 ```sh
 sudo docker compose -f docker-compose.prod.yml logs -f
 ```
+
+## Renouvellement automatique des certificats TLS
+
+Un certificat *TLS* de *letsencrypt* est valable pendant 90 jours. Il faut donc reprouver que vous êtes bien propriétaire du domaine tous les 90 jours.
+
+Pour ce faire, il faut taper une commande, mais si l'on oublie l'application ne fonctionnera plus car le certificat *TLS* ne sera plus valide et les navigateurs refuseront la connexion en *HTTPS* au site.
+
+Nous allons donc automatiser la commande avec une tâche *cron*.
+
+### Tester la commande de renouvellement
+
+Avant de créer la tâche *cron*, nous allons vérifier que la commande de renouvellement fonctionne bien :
+
+```sh
+sudo certbot --standalone renew --force-renewal --pre-hook "/snap/bin/docker compose -f ~/docker-production/docker-compose.prod.yml stop reverseproxy" --post-hook "/snap/bin/docker compose -f ~/docker-production/docker-compose.prod.yml restart reverseproxy"
+```
+
+Il faut bien sûr adapter le dossier de votre projet */docker-production*.
+
+Et vérifier où est installé *Docker Compose* en faisant `which docker-compose`.
+
+### Ajouter la tâche *cron*
+
+Nous ajoutons la tâche *cron* :
+
+```sh
+crontab -e
+```
+
+Nous plaçons :
+
+```sh
+0 0 * * * certbot --standalone renew --pre-hook "/snap/bin/docker compose -f ~/docker-production/docker-compose.prod.yml stop reverseproxy" --post-hook "/snap/bin/docker compose -f ~/docker-production/docker-compose.prod.yml restart reverseproxy"
+```
+
+Nous sauvegardons et nous quittons l'éditeur : le certificat sera renouvelé au bon moment par *certbot* automatiquement. Vous aurez un *downtime* de quelques secondes un jour par mois tous les 3 mois environ.
+
+### Code de l'exemple
+
+Vous pouvez également retrouver le code du projet sur [Github](https://github.com/dymafr/docker-chapitre11-server-prod). 
