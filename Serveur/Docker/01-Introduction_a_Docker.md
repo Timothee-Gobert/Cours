@@ -91,7 +91,7 @@ C'est aussi utile pour pouvoir utiliser différents systèmes d'exploitation san
 
 L'inconvénient est bien sûr une diminution des performances, car il faut diviser l'allocation des ressources physiques entre machine hôte et machine virtuelle, et il y a à exécuter la couche système hôte, l'hyperviseur et la couche système invité comme nous allons le voir.
 
-![img](../../assets/images/Docker/image-1_03_1.png)
+![IMAGE img](../../assets/images/Docker/image-1_03_1.png)
 
 ### Différences avec _Docker_
 
@@ -109,7 +109,7 @@ Chaque conteneur a son propre système de fichiers isolé qui est fourni par une
 
 Nous reviendrons sur tous ces aspects en détails, mais cela permet d'avoir une idée du fonctionnement par rapport à une machine virtuelle.
 
-![img](../../assets/images/Docker/image-1_03_2.png)
+![IMAGE img](../../assets/images/Docker/image-1_03_2.png)
 
 Autrement dit, _Docker_ partage le système d'exploitation entre tous les conteneurs qu'il lance, qui sont des simples processus légers. Alors qu'une machine virtuelle est un système d'exploitation entier nécessitant plusieurs gigaoctets de mémoire vive, beaucoup d'espace disque et une utilisation importante du _CPU_.
 
@@ -141,7 +141,7 @@ Cette technologie _Linux_ permet de limiter l'accès aux ressources à des proce
 
 Il est également possible, grâce à cette technologie, de limiter les ressources allouées à chaque conteneur comme nous le verrons plus tard.
 
-![img](../../assets/images/Docker/image-1_03_3.png)
+![IMAGE img](../../assets/images/Docker/image-1_03_3.png)
 
 #### _UnionFS_
 
@@ -175,7 +175,7 @@ L'_API REST_ spécifie les interfaces que les programmes peuvent utiliser pour c
 
 Le schéma officiel suivant montre les relations entre le client, le démon et la bibliothèque d'images (_Docker Hub_ ou un _registry_ privé) dont nous avons parlé dans la leçon précédente :
 
-![img](../../assets/images/Docker/image-1_04_1.png)
+![IMAGE img](../../assets/images/Docker/image-1_04_1.png)
 
 ### Premier aperçu des objets _Docker_
 

@@ -26,7 +26,7 @@ Quelle que soit la persistance choisie, cela ne **fait aucune différence du poi
 
 Pour visualiser la différence du **point de vue de la machine hôte**, rien de mieux que le schéma officiel :
 
-![img](../../assets/images/Docker/image-6_28_1.png)
+![IMAGE img](../../assets/images/Docker/image-6_28_1.png)
 
 Dans le cas d'un _bind mount_ : il s'agit tout simplement de fichiers et de dossiers n'importe où sur le système de fichiers de l'hôte. N'importe quel processus peut les modifier, y compris en dehors de _Docker_.
 

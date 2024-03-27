@@ -23,26 +23,26 @@ Voila.
 
 ### Italique, gras et mise en exergue
 
-On met un texte en *italique* en le plaçant entre 2 étoiles.  
+On met un texte en _italique_ en le plaçant entre 2 étoiles.  
 On met un texte en **gras** en le plaçant entre 4 étoiles (2 de chaque côté).
 
->On met un paragraphe entier en exergue en le pfaisant précéder du symbole >. Syntaxe utilisée notamment pour les citations...
+> On met un paragraphe entier en exergue en le pfaisant précéder du symbole >. Syntaxe utilisée notamment pour les citations...
 
 ### Listes
 
 **Liste à puces :**
 
 - item 1
-    - item 1.1
-    - item 1.2
+  - item 1.1
+  - item 1.2
 - item 2
 - item 3
 
 **Liste numérotée :**
 
 1. item 1
-    1. item 1.1
-    1. item 1.2
+   1. item 1.1
+   1. item 1.2
 1. item 2
 1. item 3
 
@@ -63,7 +63,7 @@ Pour assurer une compatibilité maximal entre éditeurs, il est donc préférabl
 ### Images
 
 On insère des images avec une syntaxe semblable aux liens hypertextes. Notez simplement le point d'exclamation avant les crochets.
-![Oncept Car Nissan](../assets/images/Markdown/nissan.jpg)
+![IMAGE Oncept Car Nissan](../assets/images/Markdown/nissan.jpg)
 
 Le texte entre crochets donne uen description textuelle de l'image. Il n'est pas obligatoire, mais les crochets restent tout de même obligatoires.
 
@@ -76,14 +76,12 @@ Ou bien créer des blocs de code comme ceci entre back tics (`ALTGR + 7`) :
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-</head>
-<body>
-    
-</body>
+  </head>
+  <body></body>
 </html>
 ```
 
@@ -91,10 +89,10 @@ Ou bien créer des blocs de code comme ceci entre back tics (`ALTGR + 7`) :
 
 ### Tableau
 
-|Nom|Prénom|Date de naissance|
-|:--|:---:|---:|
-|Gobert|Timothée|18/01/1992|
-|Simon|Claire|20/08/1992|
+| Nom    |  Prénom  | Date de naissance |
+| :----- | :------: | ----------------: |
+| Gobert | Timothée |        18/01/1992 |
+| Simon  |  Claire  |        20/08/1992 |
 
 ### Cases à cocher
 
@@ -136,14 +134,14 @@ Le Markdown saveur GitHub (abrégé en GFM) propose des codes courts sous la for
 
 Voici une séléction de quelque icône courantes :
 
-|Icône|code court GFM|Icône|Code court GFM|
-|:---:|:---|:---:|:---|
-|:warning:|`:warning:`|:bell:|`:bell:`|
-|:question:|`:question:`|:loudspeaker:|`:loudspeaker:`|
-|:exclamation:|`:exclamation:`|:bulb:|`:bulb:`|
-|:no_entry:|`:no_entry:`|:heavy_check_mark:|`:heavy_check_mark:`|
-|:star:|`:star:`|:x:|`:x:`|
-|:speech_balloon:|`:speech_ballon:`|:information_source:|`:information_source:`|
+|      Icône       | code court GFM    |        Icône         | Code court GFM         |
+| :--------------: | :---------------- | :------------------: | :--------------------- |
+|    :warning:     | `:warning:`       |        :bell:        | `:bell:`               |
+|    :question:    | `:question:`      |    :loudspeaker:     | `:loudspeaker:`        |
+|  :exclamation:   | `:exclamation:`   |        :bulb:        | `:bulb:`               |
+|    :no_entry:    | `:no_entry:`      |  :heavy_check_mark:  | `:heavy_check_mark:`   |
+|      :star:      | `:star:`          |         :x:          | `:x:`                  |
+| :speech_balloon: | `:speech_ballon:` | :information_source: | `:information_source:` |
 
 Les listes complètes (trés longues) des code courts GFM est consultable sur [cette page](https://github.com/ikatyang/emoji-cheat-sheet/blob/master/README.md).
 
@@ -177,5 +175,4 @@ title Consommation d'energie en France en 2020
 "Charbon" : 2.5
 "Gaz naturel" : 15.8
 "Énergies renouvelables" : 12.9
-``` 
-
+```

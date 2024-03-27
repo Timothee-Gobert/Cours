@@ -171,7 +171,7 @@ Dans le second cas, la fonction anonyme crée une fonction gestionnaire, qui ser
 
 Voici un rappel sur la propagation des événements avec les phases de capture et de bouillonnement (_bubbling_) :
 
-![bubbling](../../assets/images/React/bubbling-capturing-fr.png)
+![IMAGE bubbling](../../assets/images/React/bubbling-capturing-fr.png)
 
 > _Si vous ne maîtrisez pas ces sujets, rafraîchissez-vous la mémoire sur la formation **JavaScript**._
 

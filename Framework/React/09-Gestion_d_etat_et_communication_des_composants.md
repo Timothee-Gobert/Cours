@@ -825,11 +825,11 @@ Mais passer des _props_ peut devenir très verbeux et pénible s'il faut les pas
 
 Par exemple, nous avons besoin d'une information dans tous les composants en bleu. Nous devons donc passer en _prop_ cette information 8 fois :
 
-![Diagram with a tree of ten nodes, each node with two children or less. The root node contains a bubble representing a value highlighted in purple. The value flows down through the two children, each of which pass the value but do not contain it. The left child passes the value down to two children which are both highlighted purple. The right child of the root passes the value through to one of its two children - the right one, which is highlighted purple. That child passed the value through its single child, which passes it down to both of its two children, which are highlighted purple.](../../assets/images/React/passing_data_prop_drilling.webp)
+![IMAGE Diagram with a tree of ten nodes, each node with two children or less. The root node contains a bubble representing a value highlighted in purple. The value flows down through the two children, each of which pass the value but do not contain it. The left child passes the value down to two children which are both highlighted purple. The right child of the root passes the value through to one of its two children - the right one, which is highlighted purple. That child passed the value through its single child, which passes it down to both of its two children, which are highlighted purple.](../../assets/images/React/passing_data_prop_drilling.webp)
 
 **_Context_ permet de rendre des informations disponibles dans tous les composants enfant d'un composant même s'ils sont très éloignés.**
 
-![Diagram with a tree of ten nodes, each node with two children or less. The root parent node contains a bubble representing a value highlighted in orange. The value projects down directly to four leaves and one intermediate component in the tree, which are all highlighted in orange. None of the other intermediate components are highlighted.](../../assets/images/React/passing_data_context_far.webp)
+![IMAGE Diagram with a tree of ten nodes, each node with two children or less. The root parent node contains a bubble representing a value highlighted in orange. The value projects down directly to four leaves and one intermediate component in the tree, which are all highlighted in orange. None of the other intermediate components are highlighted.](../../assets/images/React/passing_data_context_far.webp)
 
 ### Utilisation du _Context_
 

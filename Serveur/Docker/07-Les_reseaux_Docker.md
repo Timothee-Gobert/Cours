@@ -64,7 +64,7 @@ docker network ls
 
 Vous verrez que vous avez notamment un réseau _bridge_ par défaut, comme par exemple :
 
-![img](../../assets/images/Docker/image-7_36_1.png)
+![IMAGE img](../../assets/images/Docker/image-7_36_1.png)
 
 ### Inspecter les réseaux
 
@@ -141,7 +141,7 @@ ifconfig
 
 Cherchez la partie _inet addr_ pour la carte _eth0_, vous aurez par exemple :
 
-![img](../../assets/images/Docker/image-7_36_2.png)
+![IMAGE img](../../assets/images/Docker/image-7_36_2.png)
 
 ```sh
 inet addr:172.17.0.3
@@ -288,7 +288,7 @@ docker network inspect mynet
 
 Vous retrouverez bien nos deux conteneurs dans la clé _Containers_, vous retrouverez d'ailleurs les noms des conteneurs :
 
-![img](../../assets/images/Docker/image-7_37_1.png)
+![IMAGE img](../../assets/images/Docker/image-7_37_1.png)
 
 Nous pouvons enfin vérifier, dans le terminal où _alpine2_ n'est pas en cours d'exécution qu'_alpine1_ peut également communiquer avec _alpine2_ :
 
@@ -327,7 +327,7 @@ L'application sera très triviale. Elle va simplement enregistrer en base de don
 
 Voici le schéma de ce que nous voulons faire :
 
-![img](../../assets/images/Docker/image-7_38_1.png)
+![IMAGE img](../../assets/images/Docker/image-7_38_1.png)
 
 ### Création du conteneur avec la base de données
 

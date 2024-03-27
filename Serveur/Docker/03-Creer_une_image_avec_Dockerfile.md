@@ -24,7 +24,7 @@ Comme nous le verrons un _Dockerfile_ est constituée de trois parties :
 
 **L'extension _VS Code Remote Docker_ est une extension officielle de _Microsoft_ permettant de gérer très simplement les conteneurs depuis _VS Code_ :**
 
-![img](../../assets/images/Docker/image-3_13_1.png)
+![IMAGE img](../../assets/images/Docker/image-3_13_1.png)
 
 Nous verrons au fur et à mesure du cours ses fonctionnalités. Mais notez déjà l'onglet _Docker_ (baleine remplie de conteneurs) à gauche après l'installation.
 

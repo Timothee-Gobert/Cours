@@ -90,7 +90,7 @@ Les principales caractéristiques de la _SPA_ sont :
 - le développement mobile est simplifié car **le code backend peut être utilisé que l’application soit Web ou native** (iOS, Android).
 - elle est particulièrement adaptée pour stocker les données localement et de n’envoyer des requêtes au serveur lorsque c’est nécessaire.
 
-![spa.png](../../assets/images/React/spa.png)
+![IMAGE spa.png](../../assets/images/React/spa.png)
 
 ## vite, swc et JSX
 
@@ -135,13 +135,13 @@ Pour résoudre ces problèmes, _Vite_ tire parti des avancées récentes, notamm
 
 Contrairement aux configurations de _build_ basées sur des _bundlers_ qui doivent traiter toute l'application avant de pouvoir la servir, _Vite_ améliore le temps de démarrage du serveur de développement en divisant les modules en deux catégories : les dépendances et le code source.
 
-![Vite avec ES Modules](../../assets/images/React/vite-bundle-new.svg)
+![IMAGE Vite avec ES Modules](../../assets/images/React/vite-bundle-new.svg)
 
 Les dépendances, qui changent rarement, sont pré-bundlées rapidement avec _esbuild_ un outil écrit en _Go_ ou _swc_ un outil écrit en _Rust_. Le code source, qui contient souvent du _JavaScript_ non standard (par exemples du _TypeScript_) nécessitant une transformation et est fréquemment modifié, est servi via des modules _ES_ natifs, permettant au navigateur de demander et de traiter le code à la demande.
 
 Dans les configurations basées sur des _bundlers_, éditer un fichier peut nécessiter de reconstruire et de recharger l'ensemble du _bundle_, ce qui est inefficace, surtout pour les grandes applications. _Vite_, en revanche, effectue des mises à jour _HMR_ (_Hot Module Replacement_) sur des modules _ES_ natifs, invalidant et mettant à jour uniquement le nécessaire, ce qui accélère considérablement le processus.
 
-![Vite et bundle à l'ancienne](../../assets/images/React/vite-bundle-old.svg)
+![IMAGE Vite et bundle à l'ancienne](../../assets/images/React/vite-bundle-old.svg)
 
 #### Le bundling reste nécessaire pour la production
 

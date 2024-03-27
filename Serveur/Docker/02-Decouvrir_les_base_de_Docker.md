@@ -151,7 +151,7 @@ Il s'agit bien d'un nouveau conteneur et pas du même, vous pouvez le vérifier 
 
 Vous aurez ainsi :
 
-![img](../../assets/images/Docker/image-2_06_1.png)
+![IMAGE img](../../assets/images/Docker/image-2_06_1.png)
 
 ## Lancer un conteneur
 
@@ -331,7 +331,7 @@ Cette commande permet d'envoyer des paquets à intervalle de temps régulier à 
 
 Vous verrez que dans ce cas, **les sorties standard et d'erreur et l'entrée standard du conteneur sont liées à votre terminal :**
 
-![img](../../assets/images/Docker/image-2_07_1.png)
+![IMAGE img](../../assets/images/Docker/image-2_07_1.png)
 
 Vous remarquez que la sortie standard du conteneur est liée à votre terminal car les retours sont affichés dans votre terminal (sur la machine hôte).
 
@@ -488,7 +488,7 @@ docker ps -a
 
 Vous obtiendrez alors quelque chose comme :
 
-![img](../../assets/images/Docker/image-2_08_1.png)
+![IMAGE img](../../assets/images/Docker/image-2_08_1.png)
 
 Vous retrouverez le début de l'_ID_ des conteneurs, l'image utilisée, la commande lancée lors de l'exécution du conteneur, la date de création du conteneur, son statut, les ports (que nous verrons dans un prochain chapitre) et enfin un nom aléatoire généré par _Docker_ pour pouvoir faciliter l'utilisation des commandes du _CLI_.
 
@@ -508,7 +508,7 @@ docker image ls
 
 Ce qui peut donner par exemple :
 
-![img](../../assets/images/Docker/image-2_08_2.png)
+![IMAGE img](../../assets/images/Docker/image-2_08_2.png)
 
 Vous retrouverez le nom de l'image, son _tag_ (version), son _ID_, la date de création de l'image et la taille décompressée.
 
@@ -823,7 +823,7 @@ docker container ls
 
 Vous aurez alors :
 
-![img](../../assets/images/Docker/image-2-09-1.png)
+![IMAGE img](../../assets/images/Docker/image-2-09-1.png)
 
 _Vous pourriez en voir deux si vous aviez démarrer l'autre conteneur dans une leçon précédente._
 
@@ -1438,7 +1438,7 @@ Vous aurez les informations sur l'utilisation du _CPU_, de la mémoire, sur les 
 
 Par exemple :
 
-![img](../../assets/images/Docker/image-2_11_1.png)
+![IMAGE img](../../assets/images/Docker/image-2_11_1.png)
 
 ### Visualiser l'espace disque utilisé
 

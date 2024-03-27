@@ -24,7 +24,7 @@ Nous allons voir ce que nous pouvons trouver lorsque nous nous rendons sur un _r
 
 Vous aurez d'abord une partie de présentation :
 
-![img](../../assets/images/Docker/image-4_19_1.png)
+![IMAGE img](../../assets/images/Docker/image-4_19_1.png)
 
 Vous pouvez retrouver le fait qu'il s'agit d'une image officielle (titre en bleu et _tag Official Image_ en gris).
 
@@ -38,7 +38,7 @@ docker pull node
 
 Vous avez ensuite tous les _tags_ disponibles pour l'image :
 
-![img](../../assets/images/Docker/image-4_19_2.png)
+![IMAGE img](../../assets/images/Docker/image-4_19_2.png)
 
 Chaque ligne correspond à une image différente (avec un _ID_ d'image différent).
 
