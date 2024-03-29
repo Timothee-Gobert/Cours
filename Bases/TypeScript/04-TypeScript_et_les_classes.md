@@ -55,9 +55,9 @@ class Sportive extends Voiture {
 }
 ```
 
-Pas non plus de différence d'utilisation avec l'utilisation de *super()* pour accéder aux propriétés et méthodes de la classe parente.
+Pas non plus de différence d'utilisation avec l'utilisation de `super()` pour accéder aux propriétés et méthodes de la classe parente.
 
-Il est de même obligatoire d'appeler *super()* pour exécuter le constructeur de la classe parente si on utilise un constructeur dans la classe fille :
+Il est de même obligatoire d'appeler `super()` pour exécuter le constructeur de la classe parente si on utilise un constructeur dans la classe fille :
 
 ```ts
 class Voiture {
@@ -138,7 +138,8 @@ personne.nom; // Erreur
 personne.sePresenter(); // Erreur
 ```
 
-Dans les deux cas *TypeScript* vous signalera que la propriété est privée, par exemple : *Property 'sePresenter' is private and only accessible within class 'Personne'*.
+Dans les deux cas *TypeScript* vous signalera que la propriété est privée, par exemple : 
+>*Property 'sePresenter' is private and only accessible within class 'Personne'*.
 
 ### Le modificateur *protected*
 
@@ -206,7 +207,8 @@ class Personne {
 const personne = new Personne("Jean");
 ```
 
-Ici *TypeScript* vous signalera : *Cannot assign to 'nom' because it is a read-only property.*. 
+Ici *TypeScript* vous signalera : 
+>*Cannot assign to 'nom' because it is a read-only property.*
 
 ## Propriétés statiques et notation raccourcie
 

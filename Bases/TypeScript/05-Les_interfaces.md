@@ -62,7 +62,8 @@ printUser(paul); // Cela fonctionne car paul a au moins une propriété nom
 const jean: User = {prenom: 'Jean', nom: 'Duprey'}; // Erreur
 ```
 
-Dans le cas de l'objet *Jean*, *TypeScript* nous signale l'erreur suivante : *Type '{ prenom: string; nom: string; }' is not assignable to type 'User'. Object literal may only specify known properties, and 'nom' does not exist in type 'User'.*
+Dans le cas de l'objet *Jean*, *TypeScript* nous signale l'erreur suivante : 
+>*Type '{ prenom: string; nom: string; }' is not assignable to type 'User'. Object literal may only specify known properties, and 'nom' does not exist in type 'User'.*
 
 Autrement dit, il se plaint car *jean* a une propriété *nom* qui ne respecte pas le contrat imposé par l'interface *User*. 
 
@@ -97,7 +98,8 @@ function printUser(user: User) {
 }
 ```
 
-Ici l'autocorrection vous signalera : *Property 'prnom' does not exist on type 'User'. Did you mean 'prenom'?*.
+Ici l'autocorrection vous signalera : 
+>*Property 'prnom' does not exist on type 'User'. Did you mean 'prenom'?*.
 
 ### Propriété en lecture seule avec readonly
 
@@ -124,7 +126,8 @@ const jean: User = {prenom: 'Jean'};
 jean.prenom = 'Paul'; // Erreur
 ```
 
-*TypeScript* vous signale :* Cannot assign to 'prenom' because it is a read-only property.*.
+*TypeScript* vous signale :
+>*Cannot assign to 'prenom' because it is a read-only property.*.
 
 Autrement dit que la propriété est en lecture seule et ne peut être modifiée après sa première assignation.
 
@@ -140,7 +143,8 @@ const jean: User = {prenom: 'Jean', allergies: ['pollen', 'poussière']};
 jean.allergies.push('poils de chat'); // Erreur
 ```
 
-Ici, vous aurez l'erreur suivante : *Property 'push' does not exist on type 'readonly string[]'.*.
+Ici, vous aurez l'erreur suivante : 
+>*Property 'push' does not exist on type 'readonly string[]'.*
 
 Les tableaux en readonly se déclarent également en faisant :
 
@@ -209,7 +213,8 @@ interface User {
 }
 ```
 
-Ici vous aurez l'erreur : *Property 'prenom' of type 'string' is not assignable to string index type 'number'.*, car *prenom* ne retourne pas un nombre.
+Ici vous aurez l'erreur : 
+>*Property 'prenom' of type 'string' is not assignable to string index type 'number'.*, car *prenom* ne retourne pas un nombre.
 
 Or, un type indexable type l'ensemble des propriétés de l'objet.
 
@@ -376,7 +381,8 @@ const obj: C = {
 
 Ici notre objet ne respecte l'*interface C* car il a une propriété qui n'est pas présente sur *les interfaces A* et *B* que *l'interface C* étend.
 
-L'erreur est bien : *Type '{ propA: string; propB: string; propC: string; }' is not assignable to type 'C'. Object literal may only specify known properties.*
+L'erreur est bien : 
+>*Type '{ propA: string; propB: string; propC: string; }' is not assignable to type 'C'. Object literal may only specify known properties.*
 
 ### Différence entre interfaces et classes abstraites
 
@@ -484,7 +490,8 @@ class Game implements PlayerBasic {
 }
 ```
 
-L'erreur est la suivante : *Class 'Game' incorrectly implements interface 'PlayerBasic'. Types have separate declarations of a private property 'isPlaying'*.
+L'erreur est la suivante : 
+>*Class 'Game' incorrectly implements interface 'PlayerBasic'. Types have separate declarations of a private property 'isPlaying'*.
 
 Autrement dit, la propriété *isPlaying* n'est pas implémentée par la classe *Player* et donc l'*interface PlayerBasic* n'est pas respectée, il faudrait faire :
 
@@ -512,7 +519,8 @@ class Game implements PlayerBasic {
 }
 ```
 
-Ici vous aurez une erreur *Class 'Game' incorrectly implements interface 'PlayerBasic'. Property 'record' is protected but type 'Game' is not a class derived from 'Player'*.
+Ici vous aurez une erreur :
+>*Class 'Game' incorrectly implements interface 'PlayerBasic'. Property 'record' is protected but type 'Game' is not a class derived from 'Player'*.
 
 Autrement dit, la méthode *record()* n'est pas implémentée par la classe *Player* ou une classe fille de la classe *Player* et donc l'*interface PlayerBasic* n'est pas respectée, il faudrait faire :
 

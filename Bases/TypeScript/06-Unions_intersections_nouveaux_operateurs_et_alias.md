@@ -109,9 +109,10 @@ function uneFonction(user: User | Moderator) {
 }
 ```
 
-Ici, nous avons une erreur suivante : *Property 'editMessage' does not exist on type 'User | Moderator'. Property 'editMessage' does not exist on type 'User'*.
+Ici, nous avons une erreur suivante : 
+>*Property 'editMessage' does not exist on type 'User | Moderator'. Property 'editMessage' does not exist on type 'User'*.
 
-Autrement dit ici *TypeScript* ne peut pas savoir si la fonction va recevoir un utilisateur ou un modérateur, il ne peut donc pas savoir si la méthode *editMessage()* existera sur l'argument passé lors de l'exécution.
+Autrement dit ici *TypeScript* ne peut pas savoir si la fonction va recevoir un utilisateur ou un modérateur, il ne peut donc pas savoir si la méthode `editMessage()` existera sur l'argument passé lors de l'exécution.
 
 *TypeScript* nous le signale et nous affiche donc une erreur.
 
@@ -410,7 +411,8 @@ const monObj2 = {}
 monObj2.prop1.prop2;
 ```
 
-Ici vous aurez l'erreur suivante : *TypeError: Cannot read property 'prop2' of undefined*.
+Ici vous aurez l'erreur suivante : 
+>*TypeError: Cannot read property 'prop2' of undefined*.
 
 Il est donc commun d'avoir ce pattern :
 
@@ -439,7 +441,8 @@ const a = { b: {}}
 a.b.hello();
 ```
 
-Nous aurions l'erreur *TypeError: a.b.hello is not a function*.
+Nous aurions l'erreur 
+>*TypeError: a.b.hello is not a function*.
 
 Alors que si nous utilisons l'opérateur de chaînage optionnel :
 
