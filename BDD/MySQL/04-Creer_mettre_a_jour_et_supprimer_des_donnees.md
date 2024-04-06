@@ -59,19 +59,19 @@ Vous pouvez voir dans la colonne indexes que movie_id est la clé primaire :
 Expliquons en détail quelques colonnes :
 
 - **_movie_id_**
-  - **Type :** *int* (entier). Utilisé pour des nombres sans décimales.
-  - **Attributs :** *NOT NULL* signifie que chaque film doit avoir un identifiant unique et ne peut pas être laissé vide. *AUTO_INCREMENT* indique que *MySQL* va automatiquement augmenter la valeur de cette colonne pour chaque nouvel enregistrement inséré.
-  - **Contraintes :** *PRIMARY KEY* indique que cette colonne est la clé principale de la table, ce qui garantit l'unicité de chaque ligne.
+  - **Type :** _int_ (entier). Utilisé pour des nombres sans décimales.
+  - **Attributs :** _NOT NULL_ signifie que chaque film doit avoir un identifiant unique et ne peut pas être laissé vide. _AUTO_INCREMENT_ indique que _MySQL_ va automatiquement augmenter la valeur de cette colonne pour chaque nouvel enregistrement inséré.
+  - **Contraintes :** _PRIMARY KEY_ indique que cette colonne est la clé principale de la table, ce qui garantit l'unicité de chaque ligne.
 - **title**
-  - **Type :** *varchar(1000)*. Un type de données pour les chaînes de caractères pouvant aller jusqu'à 1000 caractères.
-  - **Attributs :** *DEFAULT NULL* indique que si aucune valeur n'est spécifiée lors de l'insertion d'un enregistrement, la colonne sera remplie avec *NULL*.
+  - **Type :** _varchar(1000)_. Un type de données pour les chaînes de caractères pouvant aller jusqu'à 1000 caractères.
+  - **Attributs :** _DEFAULT NULL_ indique que si aucune valeur n'est spécifiée lors de l'insertion d'un enregistrement, la colonne sera remplie avec _NULL_.
 - **budget**
-  - **Type :** *int*. Stocke des nombres entiers.
-  - **Attributs :** *DEFAULT NULL* permet de ne pas spécifier de budget pour un film.
+  - **Type :** _int_. Stocke des nombres entiers.
+  - **Attributs :** _DEFAULT NULL_ permet de ne pas spécifier de budget pour un film.
 
 ## Insérer une rangée dans une table
 
-L'insertion de données dans une table *MySQL* se fait à l'aide de la commande `INSERT INTO`.
+L'insertion de données dans une table _MySQL_ se fait à l'aide de la commande `INSERT INTO`.
 
 Celle-ci permet d'ajouter une nouvelle ligne dans la table avec les valeurs pour chaque colonne spécifiée.
 
@@ -84,9 +84,9 @@ VALUES (valeur1, valeur2, valeur3, ...);
 
 **Les noms des colonnes sont facultatifs si vous fournissez des valeurs pour toutes les colonnes dans l'ordre exact où elles ont été définies dans la table.**
 
-Si une colonne a un attribut `AUTO_INCREMENT`, vous pouvez omettre cette colonne dans la liste des colonnes, et *MySQL* lui attribuera automatiquement la prochaine valeur incrémentée.
+Si une colonne a un attribut `AUTO_INCREMENT`, vous pouvez omettre cette colonne dans la liste des colonnes, et _MySQL_ lui attribuera automatiquement la prochaine valeur incrémentée.
 
-Pour les colonnes définies avec `DEFAULT NULL` ou avec une valeur par défaut, vous pouvez omettre ces colonnes et *MySQL* utilisera la valeur par défaut définie.
+Pour les colonnes définies avec `DEFAULT NULL` ou avec une valeur par défaut, vous pouvez omettre ces colonnes et _MySQL_ utilisera la valeur par défaut définie.
 
 Pour la syntaxe propre à chaque type :
 
@@ -96,22 +96,22 @@ Pour la syntaxe propre à chaque type :
 
 ### Insertion sans préciser le nom des colonnes
 
-Pour insérer une nouvelle rangée sans spécifier explicitement les noms des colonnes, vous devez fournir des valeurs pour toutes les colonnes de la table dans l'ordre dans lequel elles sont définies, excepté celles qui sont automatiquement gérées par *MySQL* (comme les colonnes `AUTO_INCREMENT`).
+Pour insérer une nouvelle rangée sans spécifier explicitement les noms des colonnes, vous devez fournir des valeurs pour toutes les colonnes de la table dans l'ordre dans lequel elles sont définies, excepté celles qui sont automatiquement gérées par _MySQL_ (comme les colonnes `AUTO_INCREMENT`).
 
-Il est crucial de respecter l'ordre exact des colonnes tel qu'il est défini dans la structure de la table, ce qui peut rendre l'opération d'insertion moins claire et plus sujette aux erreurs. 
+Il est crucial de respecter l'ordre exact des colonnes tel qu'il est défini dans la structure de la table, ce qui peut rendre l'opération d'insertion moins claire et plus sujette aux erreurs.
 
 Ce n'est donc généralement pas recommandé, mais nous allons voir un exemple.
 
 #### Exemple avec la table **movie**
 
-Vous devez respecter l'ordre des colonnes exact dans l'onglet *Indexes* sur *Workbench* :
+Vous devez respecter l'ordre des colonnes exact dans l'onglet _Indexes_ sur _Workbench_ :
 
 ```sql
 INSERT INTO movie
 VALUES (NULL, 'Future Echoes', 75000000, 'https://futureechoes.com', 'Une exploration du temps qui défie la réalité.', 22.8, '2021-11-05', 200000000, 130, 'Released', 'Le futur résonne toujours.', 9.0, 3500);
 ```
 
-Notez que *NULL* est utilisé pour *movie_id*, permettant à *MySQL* d'assigner automatiquement la prochaine valeur `AUTO_INCREMENT`.
+Notez que _NULL_ est utilisé pour _movie_id_, permettant à _MySQL_ d'assigner automatiquement la prochaine valeur `AUTO_INCREMENT`.
 
 Nous verrons les fonctions plus tard, mais contrôlez l'insertion avec la requête :
 
@@ -122,7 +122,7 @@ WHERE movie_id = last_insert_id();
 
 ### Insertion en précisant le nom des colonnes
 
-Lors de l'insertion de données dans une base de données *MySQL*, il est souvent recommandé de préciser explicitement les noms des colonnes pour lesquelles vous fournissez des valeurs.
+Lors de l'insertion de données dans une base de données _MySQL_, il est souvent recommandé de préciser explicitement les noms des colonnes pour lesquelles vous fournissez des valeurs.
 
 Les avantages sont les suivants :
 
@@ -136,7 +136,7 @@ Imaginons que nous voulons insérer des informations sur un nouveau film intitul
 
 Nous avons des informations sur le titre, la date de sortie, le statut du film, et la popularité, mais peut-être pas sur les autres détails pour le moment.
 
-Nous avons vu précédemment que seul *movie_id* est non nullable dans la table et que si nous précisons pas cette colonne, *MySQL* va générer une valeur automatiquement grâce à l'auto-incrémentation.
+Nous avons vu précédemment que seul _movie_id_ est non nullable dans la table et que si nous précisons pas cette colonne, _MySQL_ va générer une valeur automatiquement grâce à l'auto-incrémentation.
 
 ```sql
 INSERT INTO movie (title, release_date, movie_status, popularity)
@@ -161,7 +161,7 @@ WHERE movie_id = last_insert_id();
 
 ### Insertion de plusieurs rangées
 
-***MySQL* permet d'insérer plusieurs rangées en une seule instruction `INSERT`.**
+**_MySQL_ permet d'insérer plusieurs rangées en une seule instruction `INSERT`.**
 
 Cette méthode est particulièrement efficace pour ajouter de nombreuses données en réduisant le nombre de requêtes exécutées.
 
@@ -188,7 +188,7 @@ Vous pouvez voir les dernières insertions tout simplement avec un `ORDER BY` :
 ```sql
 SELECT * FROM movie ORDER BY `movie_id` DESC LIMIT 10
 ```
- 
+
 ### Insertion à partir d'une sélection
 
 **Vous pouvez insérer des données dans une table en sélectionnant et transformant des données provenant d'une autre table ou d'une requête complexe.**
@@ -197,13 +197,13 @@ SELECT * FROM movie ORDER BY `movie_id` DESC LIMIT 10
 
 Supposons que nous voulons ajouter des films sortis avant le 1er janvier 1950 à une nouvelle table **old_movies** à partir de la table **movie**.
 
-Dans *Workbench* dans la base de données *movies*, cliquez du droit sur *Tables* puis *Create Table* :
+Dans _Workbench_ dans la base de données _movies_, cliquez du droit sur _Tables_ puis _Create Table_ :
 
 - Table Name: **old_movies**
 - Colonnes :
-    - title, VARCHAR(1000)
-    - release_date, DATE
-    - movie_id : INT, PK, NN, AI
+  - title, VARCHAR(1000)
+  - release_date, DATE
+  - movie_id : INT, PK, NN, AI
 
 ![IMAGE Creation de table sur Workbench](../../assets/images/MySQL/image-04_26_1.png)
 
@@ -228,7 +228,7 @@ Les insertions avec sélection sont très puissantes.
 
 ### Mise à jour de rangées
 
-La mise à jour des données d'une table *MySQL* se fait avec l'instruction `UPDATE`.
+La mise à jour des données d'une table _MySQL_ se fait avec l'instruction `UPDATE`.
 
 Cette commande modifie les valeurs des colonnes dans une ou plusieurs rangées selon les conditions spécifiées.
 
@@ -242,7 +242,7 @@ WHERE condition;
 
 **nom_de_la_table :** le nom de la table où vous souhaitez effectuer la mise à jour.
 
-*colonne = valeur :* la colonne à mettre à jour et la nouvelle valeur à lui attribuer.
+_colonne = valeur :_ la colonne à mettre à jour et la nouvelle valeur à lui attribuer.
 
 **WHERE condition :** la condition qui détermine quelles rangées doivent être mises à jour. Si la condition `WHERE` est omise, toutes les rangées de la table seront mises à jour, ce qui n'est généralement pas recommandé.
 
@@ -256,7 +256,7 @@ Prenons comme exemple la table **movie** que nous avons vue précédemment et vo
 
 #### Exemple 1 : mise à jour simple
 
-Mettre à jour la popularité du film "*Inception*":
+Mettre à jour la popularité du film "_Inception_":
 
 ```sql
 UPDATE movie
@@ -266,23 +266,23 @@ WHERE title = 'Inception';
 
 Vous aurez cette erreur : **UPDATE movie SET popularity = 180 WHERE title = 'Inception' Error Code: 1175. You are using safe update mode and you tried to update a table without a WHERE that uses a KEY column. To disable safe mode, toggle the option in Preferences -> SQL Editor and reconnect.**
 
-En fait, *MySQL Workbench* a une option de sécurité activée par défaut qui empêche les mises à jour (et les suppressions) accidentelles de toutes les rangées d'une table si la clause `WHERE` n'utilise pas une colonne indexée.
+En fait, _MySQL Workbench_ a une option de sécurité activée par défaut qui empêche les mises à jour (et les suppressions) accidentelles de toutes les rangées d'une table si la clause `WHERE` n'utilise pas une colonne indexée.
 
 Cela sert à prévenir les modifications massives non intentionnelles qui pourraient affecter la performance ou entraîner la perte de données.
 
 En développement, vous pouvez désactiver le mode de mise à jour sécurisée.
 
-Allez dans *Edit -> Preferences* et sous SQL Editor, décochez l'option *Safe Updates* (*rejects UPDATEs and DELETEs with no restrictions*).
+Allez dans _Edit -> Preferences_ et sous SQL Editor, décochez l'option _Safe Updates_ (_rejects UPDATEs and DELETEs with no restrictions_).
 
 Cliquez sur OK, **puis reconnectez vous à la base de données** pour que le changement prenne effet.
 
-**En production ou si vous pouvez perdre des données, il est fortement déconseillé de désactiver le mode *Safe Update*.**
+**En production ou si vous pouvez perdre des données, il est fortement déconseillé de désactiver le mode _Safe Update_.**
 
-Pour le moment nous allons désactiver l'option car nous sommes en test. N'oubliez pas de quitter et de relancer la connexion à *MySQL* dans *Workbench*. Vous pourrez ensuite exécuter la requête.
+Pour le moment nous allons désactiver l'option car nous sommes en test. N'oubliez pas de quitter et de relancer la connexion à _MySQL_ dans _Workbench_. Vous pourrez ensuite exécuter la requête.
 
 #### Exemple 2 : mise à jour de plusieurs valeurs
 
-Augmenter le *vote_count* et mettre à jour le *vote_average* pour le même film :
+Augmenter le _vote_count_ et mettre à jour le _vote_average_ pour le même film :
 
 ```sql
 UPDATE movie
@@ -290,7 +290,7 @@ SET vote_count = vote_count + 100, vote_average = 8.8
 WHERE title = 'Inception';
 ```
 
-Cette requête augmente le *vote_count* de 100 votes et ajuste la note moyenne à 8.8 pour "Inception".
+Cette requête augmente le _vote_count_ de 100 votes et ajuste la note moyenne à 8.8 pour "Inception".
 
 #### Exemple 3 : mise à jour de plusieurs rangées
 
@@ -335,7 +335,7 @@ UPDATE table_a
 SET column_to_update = new_value
 WHERE column IN (SELECT value FROM table_b WHERE condition);
 ```
- 
+
 ### Exemples
 
 #### Exemple avec `INNER JOIN` et sous-requête dans la clause `WHERE`
@@ -347,7 +347,7 @@ SET popularity = popularity + 10
 WHERE genre_id = (SELECT genre_id FROM genre WHERE genre_name = 'Fantasy');
 ```
 
-Cette requête augmentera de 10 le niveau de popularité dans la table **movie** pour tous les films qui sont classés dans le genre *'Fantasy'*, selon les correspondances trouvées dans la table **movie_genres**.
+Cette requête augmentera de 10 le niveau de popularité dans la table **movie** pour tous les films qui sont classés dans le genre _'Fantasy'_, selon les correspondances trouvées dans la table **movie_genres**.
 
 #### Utilisation de plusieurs requêtes imbriquées
 
@@ -409,7 +409,7 @@ Pour supprimer des enregistrements spécifiques, on utilise la clause `WHERE` :
 DELETE FROM movie WHERE title = 'Inception';
 ```
 
-Ceci supprimera tous les enregistrements de la table **movie** où le titre est *Inception*.
+Ceci supprimera tous les enregistrements de la table **movie** où le titre est _Inception_.
 
 Noter que comme dans la leçon précédente il faut désactiver le mode SAFE UPDATE.
 
@@ -431,8 +431,8 @@ WHERE
     AND movie_id > 0;
 ```
 
-*Vous aurez une erreur de contrainte avec cette requête.*
- 
+_Vous aurez une erreur de contrainte avec cette requête._
+
 ### Utilisation de sous-requêtes
 
 Les sous-requêtes peuvent être utilisées pour cibler des enregistrements spécifiques :

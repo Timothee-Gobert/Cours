@@ -2,38 +2,38 @@
 
 ## Syntaxe SQL de base
 
-Dans cette leçon nous allons voir la syntaxe *SQL* de base, nous verrons ensuite tous les mots clés.
+Dans cette leçon nous allons voir la syntaxe _SQL_ de base, nous verrons ensuite tous les mots clés.
 
 ### Utilisation des majuscules
 
-En *SQL*, l'utilisation des majuscules n'est pas requise par le langage lui-même, mais elle suit une convention largement adoptée pour améliorer la lisibilité des requêtes.
+En _SQL_, l'utilisation des majuscules n'est pas requise par le langage lui-même, mais elle suit une convention largement adoptée pour améliorer la lisibilité des requêtes.
 
-Les mots-clés *SQL* tels que `SELECT`, `FROM`, `WHERE`, etc., sont habituellement écrits en majuscules, tandis que les noms d'identifiants (noms de tables, de colonnes) sont écrits en minuscules ou suivent la casse définie lors de leur création.
+Les mots-clés _SQL_ tels que `SELECT`, `FROM`, `WHERE`, etc., sont habituellement écrits en majuscules, tandis que les noms d'identifiants (noms de tables, de colonnes) sont écrits en minuscules ou suivent la casse définie lors de leur création.
 
 Par exemple :
 
 ```sql
 SELECT name, age FROM users WHERE age >= 18;
 ```
- 
+
 ### Points-virgules
 
-Le point-virgule est le terminateur standard d'une instruction *SQL*.
+Le point-virgule est le terminateur standard d'une instruction _SQL_.
 
-Il indique au système de gestion de base de données (*SGBD*) que votre instruction est complète et prête à être exécutée.
+Il indique au système de gestion de base de données (_SGBD_) que votre instruction est complète et prête à être exécutée.
 
-Dans les scripts contenant plusieurs instructions *SQL*, le point-virgule est essentiel pour séparer chaque instruction :
+Dans les scripts contenant plusieurs instructions _SQL_, le point-virgule est essentiel pour séparer chaque instruction :
 
 ```sql
 SELECT name FROM users;
 UPDATE users SET age = age + 1 WHERE name = 'Alice';
 ```
- 
+
 ### Commentaires
 
-Les commentaires sont des textes ignorés par le *SGBD*, servant à expliquer des parties du code *SQL* ou à désactiver temporairement certaines parties d'une requête.
+Les commentaires sont des textes ignorés par le _SGBD_, servant à expliquer des parties du code _SQL_ ou à désactiver temporairement certaines parties d'une requête.
 
-*SQL* supporte deux types de commentaires :
+_SQL_ supporte deux types de commentaires :
 
 - **Commentaires sur une ligne :** commencent par `--` et s'étendent jusqu'à la fin de la ligne.
 
@@ -51,10 +51,10 @@ qui couvre plusieurs lignes
 */
 SELECT * FROM users;
 ```
- 
+
 ### Espaces et indentation
 
-Bien que les espaces blancs supplémentaires (espaces, tabulations, nouvelles lignes) ne soient pas significatifs en *SQL* et n'affectent pas l'exécution de vos requêtes, un bon usage de l'indentation et des espaces peut rendre votre code beaucoup plus lisible.
+Bien que les espaces blancs supplémentaires (espaces, tabulations, nouvelles lignes) ne soient pas significatifs en _SQL_ et n'affectent pas l'exécution de vos requêtes, un bon usage de l'indentation et des espaces peut rendre votre code beaucoup plus lisible.
 
 Par exemple :
 
@@ -74,7 +74,7 @@ WHERE
 
 Avant d'effectuer une requête il faut sélectionner la base de données (ou schéma) contre laquelle la requête va être effectuée.
 
-Autrement dit, sélectionner une base de données détermine le contexte dans lequel les requêtes *SQL* sont exécutées. Sans sélectionner une base de données, vous devrez qualifier chaque table avec le nom de sa base de données, ce qui peut rendre les requêtes plus longues et moins lisibles.
+Autrement dit, sélectionner une base de données détermine le contexte dans lequel les requêtes _SQL_ sont exécutées. Sans sélectionner une base de données, vous devrez qualifier chaque table avec le nom de sa base de données, ce qui peut rendre les requêtes plus longues et moins lisibles.
 
 Sans :
 
@@ -90,15 +90,15 @@ SELECT * FROM movie
 
 #### Utiliser une base de données par défaut
 
-Faites un clic droit sur le nom du schéma et choisissez "*Set as Default Schema*".
+Faites un clic droit sur le nom du schéma et choisissez "_Set as Default Schema_".
 
-Cela rendra ce schéma le contexte par défaut pour toutes les opérations et requêtes *SQL* dans cette session.
+Cela rendra ce schéma le contexte par défaut pour toutes les opérations et requêtes _SQL_ dans cette session.
 
-#### Utilisation de l'éditeur *SQL*
+#### Utilisation de l'éditeur _SQL_
 
-**Ouverture d'un nouvel onglet *SQL* :** dans l'onglet de connexion active, cliquez sur l'icône "*New Query Tab*" dans la barre d'outils pour ouvrir un nouvel onglet d'éditeur *SQL*.
+**Ouverture d'un nouvel onglet _SQL_ :** dans l'onglet de connexion active, cliquez sur l'icône "_New Query Tab_" dans la barre d'outils pour ouvrir un nouvel onglet d'éditeur _SQL_.
 
-**Commande `USE` :** dans le nouvel onglet *SQL*, tapez la commande `USE nom_de_la_base_de_données`; en remplaçant *nom_de_la_base_de_données* par le nom de la base de données que vous souhaitez sélectionner.
+**Commande `USE` :** dans le nouvel onglet _SQL_, tapez la commande `USE nom_de_la_base_de_données`; en remplaçant _nom_de_la_base_de_données_ par le nom de la base de données que vous souhaitez sélectionner.
 
 Exécutez cette commande en cliquant sur l'éclair.
 
@@ -117,15 +117,15 @@ USE movies;
 SELECT * from movie;
 ```
 
-Cette requête *SQL* donnée comporte deux instructions distinctes. Il faut donc obligatoirement mettre un premier point virgule après la première instruction (essayez sans).
+Cette requête _SQL_ donnée comporte deux instructions distinctes. Il faut donc obligatoirement mettre un premier point virgule après la première instruction (essayez sans).
 
 Le point virgule de la dernière instruction est optionnel mais nous recommandons de toujours le mettre pour débuter.
- 
+
 ```sql
 SELECT * FROM movie;
 ```
 
-Cette instruction est une requête *SQL* qui demande la récupération de toutes les données de la table *movie*.
+Cette instruction est une requête _SQL_ qui demande la récupération de toutes les données de la table _movie_.
 
 C'est une des requêtes les plus basiques et les plus utilisées en SQL, permettant de consulter le contenu d'une table.
 
@@ -133,7 +133,7 @@ C'est une des requêtes les plus basiques et les plus utilisées en SQL, permett
 - `FROM` est le mot-clé qui spécifie la table à partir de laquelle récupérer les données.
 - `movie` est le nom de la table dont les données sont demandées.
 
-**Vous pouvez d'ailleurs exécuter cette requête de base en cliquant du droit dans Workbench sur une Table et en sélectionnant *Select Rows - Limit 1000*.**
+**Vous pouvez d'ailleurs exécuter cette requête de base en cliquant du droit dans Workbench sur une Table et en sélectionnant _Select Rows - Limit 1000_.**
 
 Remarquez que la requête est alors :
 
@@ -145,7 +145,7 @@ SELECT * FROM movies.movie;
 
 ### La clause `SELECT`
 
-La clause `SELECT` est l'une des instructions *SQL* les plus fondamentales et les plus utilisées.
+La clause `SELECT` est l'une des instructions _SQL_ les plus fondamentales et les plus utilisées.
 
 Elle permet d'extraire des données spécifiques à partir de bases de données relationnelles.
 
@@ -155,7 +155,7 @@ La forme la plus simple de la clause `SELECT` est :
 SELECT colonne1, colonne2 FROM nom_de_la_table;
 ```
 
-Ici, *colonne1* et *colonne2* sont les noms des colonnes que vous souhaitez récupérer, et *nom_de_la_table* est la table depuis laquelle vous voulez extraire les données.
+Ici, _colonne1_ et _colonne2_ sont les noms des colonnes que vous souhaitez récupérer, et _nom_de_la_table_ est la table depuis laquelle vous voulez extraire les données.
 
 **L'ordre des colonnes importe !** Si vous inversez colonne1 et colonne2, les colonnes du tableau de sortie seront également inversées.
 
@@ -167,7 +167,7 @@ Pour sélectionner toutes les colonnes d'une table, utilisez le caractère `*` :
 SELECT * FROM nom_de_la_table;
 ```
 
-*Ceci est particulièrement utile pour l'exploration rapide des données, mais nous verrons qu'il est recommandé de spécifier les colonnes pour améliorer la performance des requêtes sur de grandes bases de données.*
+_Ceci est particulièrement utile pour l'exploration rapide des données, mais nous verrons qu'il est recommandé de spécifier les colonnes pour améliorer la performance des requêtes sur de grandes bases de données._
 
 ### La clause `LIMIT`
 
@@ -186,25 +186,25 @@ Si `LIMIT` est utilisé avec un seul argument, cet argument spécifie le nombre 
 ```sql
 SELECT * FROM tbl LIMIT 5;  # Renvoie les 5 premières lignes
 ```
- 
+
 ### Mise en pratique
 
-Récupérez les colonnes *title* et *vote_average* de la table *movie* dans la base de données *movies* et limitez à 10 résultats.
+Récupérez les colonnes _title_ et _vote_average_ de la table _movie_ dans la base de données _movies_ et limitez à 10 résultats.
 
 ## La clause WHERE et les opérateurs de comparaison communs
 
 ### La clause `WHERE`
 
-La clause `WHERE` est un outil puissant en *SQL*, utilisée pour filtrer les enregistrements qui répondent à une condition spécifique.
+La clause `WHERE` est un outil puissant en _SQL_, utilisée pour filtrer les enregistrements qui répondent à une condition spécifique.
 
 Elle permet d'extraire, de modifier ou de supprimer des données précises d'une base de données relationnelle.
 
-La syntaxe générale pour utiliser la clause `WHERE` dans une requête *SQL* est la suivante :
+La syntaxe générale pour utiliser la clause `WHERE` dans une requête _SQL_ est la suivante :
 
 ```sql
 SELECT colonnes FROM table WHERE condition;
 ```
- 
+
 ### Opérateurs de comparaison les plus communs
 
 Nous ne verrons pas tous les opérateurs dès cette leçon mais seulement les plus utilisé.
@@ -243,7 +243,7 @@ SELECT * FROM produits WHERE prix BETWEEN 10 AND 20;
 
 **Cela inclut les valeurs limites.**
 
-Lorsque vous utilisez `BETWEEN` `min` `AND` `max`, *SQL* vérifie si l'expression est à la fois supérieur ou égal à `min` et inférieur ou égal à `max`.
+Lorsque vous utilisez `BETWEEN` `min` `AND` `max`, _SQL_ vérifie si l'expression est à la fois supérieur ou égal à `min` et inférieur ou égal à `max`.
 
 ```sql
 SELECT 2 BETWEEN 1 AND 3; -- Renvoie 1 (vrai), car 2 est entre 1 et 3.
@@ -272,7 +272,7 @@ SELECT * FROM utilisateurs WHERE adresse IS NULL;
 
 #### Recherche de motifs - `LIKE`
 
-`LIKE` en *SQL* est utilisé pour effectuer des recherches de motifs dans les données textuelles, offrant une grande souplesse dans les conditions de filtrage
+`LIKE` en _SQL_ est utilisé pour effectuer des recherches de motifs dans les données textuelles, offrant une grande souplesse dans les conditions de filtrage
 
 `LIKE` retourne 1 (vrai) si le motif spécifié correspond à l'expression donnée, et 0 (faux) sinon. Si l'expression ou le motif est `NULL`, le résultat est également `NULL`.
 
@@ -292,21 +292,21 @@ Les comparaisons effectuées avec `LIKE` ne sont pas sensibles à la casse.
 
 ### Mise en pratique
 
-- Sélectionnez tous les films ayant un *vote_average* supérieur à 8.
-- Trouvez les films avec une *popularity* supérieure à *140* et un *vote_count* supérieur à *3000*.
+- Sélectionnez tous les films ayant un _vote_average_ supérieur à 8.
+- Trouvez les films avec une _popularity_ supérieure à _140_ et un _vote_count_ supérieur à _3000_.
 - Sélectionnez les films dont le temps de lecture est compris entre 90 et 120 minutes.
-- Affichez les films dont le *movie_status* est soit '*Rumored*' soit '*Post Production*'.
-- Trouvez les films dont *overview* contient 'god'.
-- Sélectionnez les films qui n'ont pas de *homepage*.
-- Affichez les films qui ne sont pas en statut '*Released*'.
+- Affichez les films dont le _movie_status_ est soit '_Rumored_' soit '_Post Production_'.
+- Trouvez les films dont _overview_ contient 'god'.
+- Sélectionnez les films qui n'ont pas de _homepage_.
+- Affichez les films qui ne sont pas en statut '_Released_'.
 - Trouvez les films qui sont sortis après le 15 mars 2016.
-- Trouvez les films qui ont soit un *budget* supérieur à 100 millions, soit un *revenue* supérieur à 300 millions.
+- Trouvez les films qui ont soit un _budget_ supérieur à 100 millions, soit un _revenue_ supérieur à 300 millions.
 
 ## Conditions composées
 
 ### Ordre d'évaluation des conditions
 
-***MySQL* évalue les conditions en suivant la priorité des opérateurs : `NOT` est évalué en premier, suivi de `AND`, puis `OR`.**
+**_MySQL_ évalue les conditions en suivant la priorité des opérateurs : `NOT` est évalué en premier, suivi de `AND`, puis `OR`.**
 
 Cependant, cette hiérarchie peut conduire à des résultats inattendus si on ne structure pas explicitement l'ordre d'évaluation.
 
@@ -362,29 +362,29 @@ Nous vous recommandons d'utiliser des parenthèses dès lors que vous utilisez p
 SELECT * FROM employes WHERE (departement = 'Ventes' OR departement = 'IT') AND salaire > 3000;
 ```
 
-Et avec *NOT* :
+Et avec _NOT_ :
 
 ```sql
 SELECT * FROM commandes WHERE NOT (etat = 'Annulée' OR etat = 'En attente');
 ```
- 
+
 ### Mise en pratique
 
 Entrainez vous :
 
 1. Sélectionnez les titres et la note moyenne des films dont le budget est supérieur à 50 millions et dont la note moyenne est supérieure à 7.
-2. Trouvez les films dont le budget est de plus de 100 millions et sortis après 2010 ou ceux ayant un *popularity* supérieur à 100.
+2. Trouvez les films dont le budget est de plus de 100 millions et sortis après 2010 ou ceux ayant un _popularity_ supérieur à 100.
 3. Sélectionnez les films qui ne sont pas en post-production et qui ont un budget de plus de 250 millions.
-4. Trouvez les films dont le titre commence par 'A' et qui ont soit un *vote_count* supérieur à 500 soit un *runtime* inférieur à 120 minutes.
+4. Trouvez les films dont le titre commence par 'A' et qui ont soit un _vote_count_ supérieur à 500 soit un _runtime_ inférieur à 120 minutes.
 5. Sélectionnez les films qui ne sont ni 'Cancelled' ni 'Post Production' et dont la note moyenne est soit inférieure à 5, soit supérieure à 8.
 
 ## Les opérateurs arithmétiques et les alias
 
 ### Les opérateurs arithmétiques
 
-Dans le langage *SQL*, les opérateurs arithmétiques permettent de réaliser des calculs sur les données numériques
+Dans le langage _SQL_, les opérateurs arithmétiques permettent de réaliser des calculs sur les données numériques
 
-Les opérateurs arithmétiques en *SQL* incluent `+` (addition), - (soustraction), `*` (multiplication), `/` (division), et `%` (modulo).
+Les opérateurs arithmétiques en _SQL_ incluent `+` (addition), - (soustraction), `*` (multiplication), `/` (division), et `%` (modulo).
 
 Ils peuvent être utilisés dans les requêtes `SELECT` pour effectuer des calculs sur les colonnes de la table.
 
@@ -407,19 +407,19 @@ SELECT prix * quantite AS revenu_total FROM ventes;
 ```sql
 SELECT * FROM produits WHERE id % 2 = 0;
 ```
- 
+
 ### Les alias
 
-**Les alias en *SQL* sont utilisés pour renommer temporairement une colonne ou une table dans les résultats d'une requête avec le mot clé `AS`.**
+**Les alias en _SQL_ sont utilisés pour renommer temporairement une colonne ou une table dans les résultats d'une requête avec le mot clé `AS`.**
 
 Ils rendent les résultats plus compréhensibles et facilitent la référence à des colonnes calculées ou à des tables jointes.
 
-**Division :** trouver le prix moyen par article dans une commande puis renommer la colonne de sortie en *prix_moyen* :
+**Division :** trouver le prix moyen par article dans une commande puis renommer la colonne de sortie en _prix_moyen_ :
 
 ```sql
 SELECT montant_total / nombre_articles AS prix_moyen FROM commandes;
 ```
- 
+
 ### Mise en pratique guidée
 
 Ajoutez une colonne profit que nous calculons pour chaque film :
@@ -430,13 +430,13 @@ SELECT *, (revenue - budget) AS profit FROM movie;
 
 Grâce à cette colonne récupérez les films ayant fait un profit de plus de 1 milliard de dollars.
 
-*En **SQL**, vous ne pouvez pas directement assigner un alias à une expression dans la clause `WHERE`. L'alias doit être défini dans la liste de sélection (`SELECT`) et ne peut être utilisé dans une clause `WHERE` directement. Nous devons donc faire :*
+_En **SQL**, vous ne pouvez pas directement assigner un alias à une expression dans la clause `WHERE`. L'alias doit être défini dans la liste de sélection (`SELECT`) et ne peut être utilisé dans une clause `WHERE` directement. Nous devons donc faire :_
 
 ```sql
 SELECT *, (revenue - budget) AS profit FROM movie WHERE (revenue - budget) > 1000000000;
 ```
 
-Trouvez les films dont le revenu est supérieur à deux fois le budget, et qui ont un budget de plus de 50 millions, et ajoutez une colonne ROI pour avoir le *return on Investment* de chaque film :
+Trouvez les films dont le revenu est supérieur à deux fois le budget, et qui ont un budget de plus de 50 millions, et ajoutez une colonne ROI pour avoir le _return on Investment_ de chaque film :
 
 ```sql
 SELECT *, (revenue / budget) AS ROI FROM movie WHERE (revenue > 2 * budget) AND budget > 50000000;
@@ -444,15 +444,15 @@ SELECT *, (revenue / budget) AS ROI FROM movie WHERE (revenue > 2 * budget) AND 
 
 ## Expressions régulières
 
-### L'opérateur *REGEXP*
+### L'opérateur _REGEXP_
 
-*REGEXP* dans *MySQL* est un puissant outil de recherche de motifs qui permet de réaliser des recherches complexes basées sur des expressions régulières.
+_REGEXP_ dans _MySQL_ est un puissant outil de recherche de motifs qui permet de réaliser des recherches complexes basées sur des expressions régulières.
 
-Contrairement à l'opérateur `LIKE`, qui ne permet que des recherches simples avec les jokers `%` et `_`, *REGEXP* offre une flexibilité bien plus grande pour la correspondance de motifs dans les chaînes de caractères.
+Contrairement à l'opérateur `LIKE`, qui ne permet que des recherches simples avec les jokers `%` et `_`, _REGEXP_ offre une flexibilité bien plus grande pour la correspondance de motifs dans les chaînes de caractères.
 
-Une expression régulière (ou *regex*) est une séquence de caractères qui définit un motif de recherche.
+Une expression régulière (ou _regex_) est une séquence de caractères qui définit un motif de recherche.
 
-Avec *REGEXP*, vous pouvez filtrer les enregistrements dans une table *MySQL* en fonction de motifs complexes.
+Avec _REGEXP_, vous pouvez filtrer les enregistrements dans une table _MySQL_ en fonction de motifs complexes.
 
 Syntaxe de base :
 
@@ -473,13 +473,13 @@ Les expressions régulières utilisent des métacaractères ayant des significat
 - `+` : une ou plusieurs occurrences du caractère précédent.
 - `?` : zéro ou une occurrence du caractère précédent.
 - `[abc]` : correspond à n'importe quel caractère unique dans l'ensemble spécifié (ici a, b, ou c).
-    - `[a-dX]` correspond à un caractère parmi "a", "b", "c", "d", ou "X";
-    - `[^a-dX]` exclut ces caractères.
+  - `[a-dX]` correspond à un caractère parmi "a", "b", "c", "d", ou "X";
+  - `[^a-dX]` exclut ces caractères.
 - `(abc)` : correspond à l'expression exacte entre parenthèses.
-- `{n}` correspond exactement à n occurrences de l'élément précédent; `{m,n}` à entre *m* et *n* occurrences.
-    - `a*` équivaut à `a{0,}`, correspondant à zéro ou plus occurrences de "a".
-    - `a+` est identique à `a{1,}`, signifiant une ou plus occurrences de "a".
-    - `a?` se traduit par `a{0,1}`, pour zéro ou une occurrence de "a".
+- `{n}` correspond exactement à n occurrences de l'élément précédent; `{m,n}` à entre _m_ et _n_ occurrences.
+  - `a*` équivaut à `a{0,}`, correspondant à zéro ou plus occurrences de "a".
+  - `a+` est identique à `a{1,}`, signifiant une ou plus occurrences de "a".
+  - `a?` se traduit par `a{0,1}`, pour zéro ou une occurrence de "a".
 
 #### Exemples d'utilisation
 
@@ -506,7 +506,7 @@ Sélectionner des noms commençant par 'Al' ou 'Be' :
 ```sql
 SELECT nom FROM employes WHERE nom REGEXP '^(Al|Be)';
 ```
- 
+
 ### Mise en pratique
 
 1. Sélectionner les films dont le titre commence par "The".
@@ -522,7 +522,7 @@ SELECT nom FROM employes WHERE nom REGEXP '^(Al|Be)';
 
 #### Utilisation de classes de caractères
 
-Les classes de caractères *POSIX* étendent les capacités de correspondance en permettant de cibler des types spécifiques de caractères.
+Les classes de caractères _POSIX_ étendent les capacités de correspondance en permettant de cibler des types spécifiques de caractères.
 
 Par exemple, `[[:digit:]]` correspond à tout chiffre numérique, tandis que `[[:alpha:]]` cible n'importe quelle lettre alphabétique.
 
@@ -534,20 +534,20 @@ Cette requête sélectionne les films dont le titre contient une séquence de qu
 
 Voici la liste des classes utilisables :
 
-|Nom de la classe | Signification|
-|:---------------:|:-------------|
-|alnum 	|Caractères alphanumériques|
-|alpha 	|Caractères alphabétiques|
-|blank 	|Caractères d'espacement|
-|cntrl 	|Caractères de contrôle|
-|digit 	|Caractères numériques|
-|graph 	|Caractères graphiques|
-|lower 	|Caractères alphabétiques en minuscules|
-|print 	|Caractères graphiques ou espace|
-|punct 	|Caractères de ponctuation|
-|space 	|Espace, tabulation, nouvelle ligne et retour chariot|
-|upper 	|Caractères alphabétiques en majuscules|
-|xdigit |	Caractères numériques hexadécimaux|
+| Nom de la classe | Signification                                        |
+| :--------------: | :--------------------------------------------------- |
+|      alnum       | Caractères alphanumériques                           |
+|      alpha       | Caractères alphabétiques                             |
+|      blank       | Caractères d'espacement                              |
+|      cntrl       | Caractères de contrôle                               |
+|      digit       | Caractères numériques                                |
+|      graph       | Caractères graphiques                                |
+|      lower       | Caractères alphabétiques en minuscules               |
+|      print       | Caractères graphiques ou espace                      |
+|      punct       | Caractères de ponctuation                            |
+|      space       | Espace, tabulation, nouvelle ligne et retour chariot |
+|      upper       | Caractères alphabétiques en majuscules               |
+|      xdigit      | Caractères numériques hexadécimaux                   |
 
 #### Les bornes de mot
 
@@ -557,17 +557,17 @@ Une borne de mot `\\b` permet de rechercher des mots complets, en assurant que l
 SELECT * FROM movie WHERE title REGEXP '\\blove\\b';
 ```
 
-Cette requête retourne les films dont le titre contient le mot "love" comme un mot entier, et non pas les titres dont des mots contiennent le motif *love*.
+Cette requête retourne les films dont le titre contient le mot "love" comme un mot entier, et non pas les titres dont des mots contiennent le motif _love_.
 
 #### Notes sur la sensibilité à la casse - [avancé]
 
 **Par défaut, les expressions régulières sont sensibles à la casse.**
 
-Mais la sensibilité à la casse, dépend également de la collation de la colonne interrogée. 
+Mais la sensibilité à la casse, dépend également de la collation de la colonne interrogée.
 
 **Une collation détermine comment les données de chaîne sont comparées et triées dans la base de données.**
 
-Par exemple, la collation de la colonne *title* de la table *movie* est définie pour être insensible à la casse (par exemple, *utf8mb4_0900_ai_ci* où *ci* signifie *case-insensitive*), et la requête :
+Par exemple, la collation de la colonne _title_ de la table _movie_ est définie pour être insensible à la casse (par exemple, _utf8mb4_0900_ai_ci_ où _ci_ signifie _case-insensitive_), et la requête :
 
 ```sql
 SELECT title FROM movie WHERE title REGEXP 'love';
@@ -575,18 +575,17 @@ SELECT title FROM movie WHERE title REGEXP 'love';
 
 ne sera pas sensible à la casse. Cela signifie que la requête correspondra à "love", "Love", "LOVE", etc., indépendamment de la casse des lettres dans le mot "love".
 
-En revanche, si la collation avait été sensible à la casse (par exemple, *utf8_general_cs* où *cs* signifie *case-sensitive*), la même requête n'aurait retourné que les titres correspondant exactement à la casse spécifiée dans l'expression régulière.
+En revanche, si la collation avait été sensible à la casse (par exemple, _utf8_general_cs_ où _cs_ signifie _case-sensitive_), la même requête n'aurait retourné que les titres correspondant exactement à la casse spécifiée dans l'expression régulière.
 
 ## Trier les résultats
 
 ### Trier les résultats avec ORDER BY
 
-**La clause `ORDER BY` dans *MySQL* est un outil puissant pour trier les résultats d'une requête selon un ou plusieurs critères.**
+**La clause `ORDER BY` dans _MySQL_ est un outil puissant pour trier les résultats d'une requête selon un ou plusieurs critères.**
 
 Cette fonctionnalité est essentielle pour organiser les données de manière significative, faciliter l'analyse ou améliorer la présentation des résultats. Voici une exploration détaillée de son utilisation.
 
 `ORDER BY` permet de trier les résultats d'une requête `SELECT` en ordre ascendant (`ASC`) ou descendant (`DESC`) selon les valeurs d'une ou plusieurs colonnes.
- 
 
 **Syntaxe :**
 
@@ -594,7 +593,7 @@ Cette fonctionnalité est essentielle pour organiser les données de manière si
 SELECT colonne1, colonne2 FROM table ORDER BY colonne1 ASC, colonne2 DESC;
 ```
 
-Cette requête trie d'abord les résultats selon *colonne1* en ordre ascendant, puis trie les résultats avec des valeurs identiques de *colonne1* selon *colonne2* en ordre descendant.
+Cette requête trie d'abord les résultats selon _colonne1_ en ordre ascendant, puis trie les résultats avec des valeurs identiques de _colonne1_ selon _colonne2_ en ordre descendant.
 
 ### Fonctionnement
 
@@ -609,9 +608,9 @@ Il est possible de trier selon plusieurs colonnes en les listant après `ORDER B
 
 #### Tri des valeurs nulles
 
-Par défaut, *MySQL* place les valeurs *NULL* en premier avec `ORDER BY ... ASC` et en dernier avec `ORDER BY ... DESC`.
+Par défaut, _MySQL_ place les valeurs _NULL_ en premier avec `ORDER BY ... ASC` et en dernier avec `ORDER BY ... DESC`.
 
-*Nous verrons que nous pouvons utiliser des fonctions comme `COALESCE` pour gérer différemment les valeurs **NULL** si nécessaire.*
+_Nous verrons que nous pouvons utiliser des fonctions comme `COALESCE` pour gérer différemment les valeurs **NULL** si nécessaire._
 
 #### Exemples Pratiques
 
@@ -632,7 +631,7 @@ Trier des employés selon leur salaire annuel estimé, du plus élevé au plus b
 ```sql
 SELECT nom, salaire FROM employes ORDER BY (salaire * 12) DESC;
 ```
- 
+
 #### Mise en pratique
 
 Trier les films par titre dans l'ordre alphabétique :
@@ -656,7 +655,7 @@ Essayez par vous même :
 
 ### Définition des sous-requêtes
 
-**Une sous-requête, aussi appelée requête imbriquée, est une requête *SQL* qui est insérée à l'intérieur d'une autre requête *SQL*.**
+**Une sous-requête, aussi appelée requête imbriquée, est une requête _SQL_ qui est insérée à l'intérieur d'une autre requête _SQL_.**
 
 Les sous-requêtes peuvent être utilisées dans diverses parties d'une requête principale, y compris dans les clauses `SELECT`, `FROM` et `WHERE`.
 
@@ -668,7 +667,7 @@ Nous allons voir deux exemples rapides et les pratiquerons largement dans les ch
 
 Les sous-requêtes utilisées dans la clause `WHERE` permettent de filtrer les résultats de la requête principale en se basant sur les résultats de la sous-requête.
 
-Imaginez une base de données d'une librairie avec deux tables : *livres* et *auteurs*. La table *livres* contient des colonnes *titre*, *annee_publication*, et *auteur_id*. La table auteurs contient *auteur_id*, *nom_auteur*.
+Imaginez une base de données d'une librairie avec deux tables : _livres_ et _auteurs_. La table _livres_ contient des colonnes _titre_, _annee_publication_, et _auteur_id_. La table auteurs contient _auteur_id_, _nom_auteur_.
 
 **Objectif :** trouver tous les livres publiés par "Victor Hugo".
 
@@ -679,9 +678,9 @@ WHERE auteur_id = (SELECT auteur_id FROM auteurs WHERE nom_auteur = 'Victor Hugo
 
 Le fonctionnement est le suivant :
 
-1. La sous-requête `(SELECT auteur_id FROM auteurs WHERE nom_auteur = 'Victor Hugo')` est exécutée en premier. Elle cherche l'*auteur_id* correspondant à "Victor Hugo" dans la table *auteurs*.
-2. La sous-requête retourne l'*auteur_id* de Victor Hugo.
-3. La requête principale utilise cet *auteur_id* pour filtrer tous les livres dans la table livres qui correspondent à cet auteur.
+1. La sous-requête `(SELECT auteur_id FROM auteurs WHERE nom_auteur = 'Victor Hugo')` est exécutée en premier. Elle cherche l'_auteur_id_ correspondant à "Victor Hugo" dans la table _auteurs_.
+2. La sous-requête retourne l'_auteur_id_ de Victor Hugo.
+3. La requête principale utilise cet _auteur_id_ pour filtrer tous les livres dans la table livres qui correspondent à cet auteur.
 
 ### Exemple plus avancé
 
@@ -694,6 +693,6 @@ SELECT
 FROM livres AS l1;
 ```
 
-1. Pour chaque ligne (livre) dans la table *livres* (alias l1), la sous-requête est exécutée.
-2. La sous-requête `(SELECT COUNT(*) FROM livres AS l2 WHERE l2.auteur_id = l1.auteur_id)` compte le nombre total de livres (`COUNT(*)`) dans la table *livres* (alias *l2*) qui ont le même *auteur_id* que le livre courant de la requête principale (l1.auteur_id).
-3. Le résultat de la sous-requête, qui est le nombre de livres par auteur, est retourné comme une colonne supplémentaire *nombre_livres_auteur* pour chaque ligne de la requête principale.
+1. Pour chaque ligne (livre) dans la table _livres_ (alias l1), la sous-requête est exécutée.
+2. La sous-requête `(SELECT COUNT(*) FROM livres AS l2 WHERE l2.auteur_id = l1.auteur_id)` compte le nombre total de livres (`COUNT(*)`) dans la table _livres_ (alias _l2_) qui ont le même _auteur_id_ que le livre courant de la requête principale (l1.auteur_id).
+3. Le résultat de la sous-requête, qui est le nombre de livres par auteur, est retourné comme une colonne supplémentaire _nombre_livres_auteur_ pour chaque ligne de la requête principale.

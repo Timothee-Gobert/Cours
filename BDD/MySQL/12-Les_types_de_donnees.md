@@ -1,93 +1,94 @@
 # Les types de données
 
-Types numériques : les entiers
-Les types entiers
+## Types numériques : les entiers
+
+### Les types entiers
 
 Les types entiers sont utilisés pour stocker des données numériques qui ne contiennent pas de fractions (pas de nombre après la virgule).
 
-Ils sont couramment utilisés pour stocker des données comme les identifiants, les quantités, les codes, etc. MySQL offre une variété de types entiers pour s'adapter à différentes tailles et besoins de stockage.
-TINYINT
+Ils sont couramment utilisés pour stocker des données comme les identifiants, les quantités, les codes, etc. _MySQL_ offre une variété de types entiers pour s'adapter à différentes tailles et besoins de stockage.
 
-    Plage de valeurs : -128 à 127 pour la version signée, et 0 à 255 pour la version non signée.
-    Utilisation courante : pour de très petits entiers ou pour économiser de l'espace disque quand les valeurs ne sont pas grandes. Souvent utilisé pour stocker des valeurs booléennes (où 0 est FALSE et 1 est TRUE).
+#### `TINYINT`
 
-SMALLINT
+- **Plage de valeurs :** _-128_ à _127_ pour la version signée, et _0_ à _255_ pour la version non signée.
+- **Utilisation courante :** pour de très petits entiers ou pour économiser de l'espace disque quand les valeurs ne sont pas grandes. Souvent utilisé pour stocker des valeurs booléennes (où _0_ est _FALSE_ et _1_ est _TRUE_).
 
-    Plage de valeurs : -32768 à 32767 pour la version signée, et 0 à 65535 pour la version non signée.
-    Utilisation courante : pour des entiers légèrement plus grands, comme des scores, des petits compteurs, ou des identifiants.
+#### `SMALLINT`
 
-MEDIUMINT
+- **Plage de valeurs :** _-32768_ à _32767_ pour la version signée, et _0_ à _65535_ pour la version non signée.
+- **Utilisation courante :** pour des entiers légèrement plus grands, comme des scores, des petits compteurs, ou des identifiants.
 
-    Plage de valeurs : -8388608 à 8388607 pour la version signée, et 0 à 16777215 pour la version non signée.
-    Utilisation courante : pour des entiers de taille moyenne qui dépassent les limites de SMALLINT, comme des identifiants d'utilisateurs dans des systèmes avec plus d'utilisateurs.
+#### `MEDIUMINT`
 
-INT ou INTEGER
+- **Plage de valeurs :** _-8388608_ à _8388607_ pour la version signée, et _0_ à _16777215_ pour la version non signée.
+- **Utilisation courante :** pour des entiers de taille moyenne qui dépassent les limites de `SMALLINT`, comme des identifiants d'utilisateurs dans des systèmes avec plus d'utilisateurs.
 
-    Plage de valeurs : -2147483648 à 2147483647 pour la version signée, et 0 à 4294967295 pour la version non signée.
-    Utilisation courante : c'est le type entier le plus couramment utilisé dans MySQL. Il est utilisé pour une grande variété de besoins, tels que les identifiants d'articles, les compteurs de visiteurs, etc.
+#### `INT` ou `INTEGER`
 
-BIGINT
+- **Plage de valeurs :** _-2147483648_ à _2147483647_ pour la version signée, et _0_ à _4294967295_ pour la version non signée.
+- **Utilisation courante :** c'est le type entier le plus couramment utilisé dans MySQL. Il est utilisé pour une grande variété de besoins, tels que les identifiants d'articles, les compteurs de visiteurs, etc.
 
-    Plage de valeurs : -9223372036854775808 à 9223372036854775807 pour la version signée, et 0 à 18446744073709551615 pour la version non signée.
-    Utilisation courante : pour des entiers très grands, comme des identifiants uniques à l'échelle mondiale, des compteurs extrêmement élevés, ou lorsqu'il est nécessaire de stocker des valeurs au-delà de la capacité d'un INT.
+#### `BIGINT`
 
-Tableau récapitulatif
-Type 	Stockage (octets) 	Valeur Min Signée 	Valeur Min Non Signée 	Valeur Max Signée 	Valeur Max Non Signée
-TINYINT 	1 	-128 	0 	127 	255
-SMALLINT 	2 	-32768 	0 	32767 	65535
-MEDIUMINT 	3 	-8388608 	0 	8388607 	16777215
-INT 	4 	-2147483648 	0 	2147483647 	4294967295
-BIGINT 	8 	-2^63 	0 	2^63 - 1 	2^64 - 1
+- **Plage de valeurs :** _-9223372036854775808_ à _9223372036854775807_ pour la version signée, et _0_ à _18446744073709551615_ pour la version non signée.
+- **Utilisation courante :** pour des entiers très grands, comme des identifiants uniques à l'échelle mondiale, des compteurs extrêmement élevés, ou lorsqu'il est nécessaire de stocker des valeurs au-delà de la capacité d'un `INT`.
 
-Notez que les valeurs pour BIGINT sont exprimées en puissances de 2, car elles dépassent les capacités d'affichage.
-SERIAL
+#### Tableau récapitulatif
 
-C'est un type spécial qui est un alias pour BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE, souvent utilisé pour créer des clés primaires simples.
+| Type      | Stockage (octets) | Valeur Min Signée | Valeur Min Non Signée | Valeur Max Signée | Valeur Max Non Signée |
+| --------- | ----------------- | ----------------- | --------------------- | ----------------- | --------------------- |
+| TINYINT   | 1                 | -128              | 0                     | 127               | 255                   |
+| SMALLINT  | 2                 | -32768            | 0                     | 32767             | 65535                 |
+| MEDIUMINT | 3                 | -8388608          | 0                     | 8388607           | 16777215              |
+| INT       | 4                 | -2147483648       | 0                     | 2147483647        | 4294967295            |
+| BIGINT    | 8                 | -2^63             | 0                     | 2^63 - 1          | 2^64 - 1              |
 
-Nous en reparlerons lorsque nous verrons les clés primaires en détail.
+Notez que les valeurs pour `BIGINT` sont exprimées en puissances de 2, car elles dépassent les capacités d'affichage.
 
- 
-Attributs des types entiers
+#### SERIAL
 
-    UNSIGNED : utilisé pour indiquer qu'un type entier ne contiendra que des valeurs positives ou nulles.
-    AUTO_INCREMENT : utilisé pour créer un identifiant unique pour de nouvelles lignes. Souvent utilisé avec PRIMARY KEY. Déclenche la génération de la prochaine valeur de séquence, qui est généralement la valeur la plus élevée actuellement dans la table plus un.
+C'est un type spécial qui est un alias pour `BIGINT` `UNSIGNED` `NOT NULL` `AUTO_INCREMENT` `UNIQUE`, souvent utilisé pour créer des clés primaires simples.
 
- 
-Qu'est-ce que l'overflow et comment le gérer ?
+### Attributs des types entiers
 
-L'overflow, ou dépassement de capacité, est un problème qui survient lorsqu'une opération arithmétique sur des nombres entiers atteint une valeur qui dépasse la plage de valeurs maximale que le type de données peut stocker.
+- `UNSIGNED` : utilisé pour indiquer qu'un type entier ne contiendra que des valeurs positives ou nulles.
+- `AUTO_INCREMENT` : utilisé pour créer un identifiant unique pour de nouvelles lignes. Souvent utilisé avec `PRIMARY KEY`. Déclenche la génération de la prochaine valeur de séquence, qui est généralement la valeur la plus élevée actuellement dans la table plus un.
+
+### Qu'est-ce que l'*overflow* et comment le gérer ?
+
+L'*overflow*, ou dépassement de capacité, est un problème qui survient lorsqu'une opération arithmétique sur des nombres entiers atteint une valeur qui dépasse la plage de valeurs maximale que le type de données peut stocker.
 
 Les types de données entiers dans les bases de données ont une plage de valeurs limitée déterminée par le nombre d'octets alloués pour le stockage du type de données.
 
-Si vous essayez d'insérer une valeur en overflow/underflow vous aurez : Error Code: 1264. Out of range value for column 'colonne' at row n.
+Si vous essayez d'insérer une valeur en overflow/underflow vous aurez : 
+>*Error Code: 1264. Out of range value for column 'colonne' at row n.*
 
-Voici les problèmes potentiels :
+#### Voici les problèmes potentiels :
 
-Dépassement de capacité positif (Overflow) : Se produit lorsque vous essayez d'ajouter deux grands nombres positifs ou d'augmenter la valeur d'un nombre entier au-delà de sa valeur maximale autorisée.
+**Dépassement de capacité positif (*Overflow*) :** Se produit lorsque vous essayez d'ajouter deux grands nombres positifs ou d'augmenter la valeur d'un nombre entier au-delà de sa valeur maximale autorisée.
 
-Exemple : pour TINYINT, la valeur maximale est 127. Si vous essayez de stocker 128, il y aura un overflow.
+Exemple : pour `TINYINT`, la valeur maximale est 127. Si vous essayez de stocker 128, il y aura un *overflow*.
 
-Dépassement de capacité négatif (Underflow) : se produit lorsque vous essayez de soustraire un grand nombre d'un nombre plus petit, menant la valeur résultante en dessous de la valeur minimale autorisée.
+**Dépassement de capacité négatif (*Underflow*) :** se produit lorsque vous essayez de soustraire un grand nombre d'un nombre plus petit, menant la valeur résultante en dessous de la valeur minimale autorisée.
 
-Exemple : pour TINYINT, la valeur minimale est -128. Si vous essayez de stocker -129, il y aura un underflow.
+Exemple : pour `TINYINT`, la valeur minimale est -128. Si vous essayez de stocker -129, il y aura un *underflow*.
 
-Multiplication et division : l'overflow peut également se produire avec la multiplication de deux entiers qui donne un résultat au-delà de la plage autorisée, ou lors de la division par zéro ou un nombre proche de zéro, ce qui peut produire un très grand nombre.
+**Multiplication et division :** l'*overflow* peut également se produire avec la multiplication de deux entiers qui donne un résultat au-delà de la plage autorisée, ou lors de la division par zéro ou un nombre proche de zéro, ce qui peut produire un très grand nombre.
 
- 
-Bonnes pratiques et note
+### Bonnes pratiques et note
 
 Lorsque vous utilisez des types entiers, il est important de choisir un type qui peut gérer toutes les valeurs possibles que vous attendez sans gaspiller d'espace disque. Cela augmentera les performances des requêtes et cela optimisera l'utilisation de l'espace disque de votre base de données.
 
-Note : depuis MySQL 8.0.17, l'attribut de largeur d'affichage (M) pour les types entiers est obsolète. De même, l'attribut ZEROFILL est obsolète. Nous ne les verrons donc pas dans la formation.
+***Note :*** depuis MySQL *8.0.17*, l'attribut de largeur d'affichage (*M*) pour les types entiers est obsolète. De même, l'attribut `ZEROFILL` est obsolète. Nous ne les verrons donc pas dans la formation.
 
-Types numériques : DECIMAL, NUMERIC, FLOAT et DOUBLE
-Les types numériques non entiers
+## Types numériques : DECIMAL, NUMERIC, FLOAT et DOUBLE
 
-Les types numériques non entiers comprennent les types à virgule flottante et à point fixe. 
+### Les types numériques non entiers
+
+Les types numériques non entiers comprennent les types à virgule flottante et à point fixe.
 
 Ils sont utilisés pour stocker des nombres qui peuvent avoir des fractions, ce qui les rend essentiels pour représenter des valeurs telles que les mesures, les devises, et d'autres quantités qui nécessitent une précision au-delà des nombres entiers.
 
- 
 Les types à point fixe
 
 Les types à point fixe (Fixed-Point Types), DECIMAL et NUMERIC, sont conçus pour stocker des valeurs numériques exactes.
@@ -123,7 +124,6 @@ Les colonnes DECIMAL sont idéales pour stocker des valeurs nécessitant une pr�
 
 Par exemple, lorsqu'il s'agit de stocker des salaires, des prix, ou des coûts, où arrondir au chiffre le plus proche pourrait entraîner des erreurs significatives en cumulé.
 
- 
 Les types à virgule flottante
 
 Les types à virgule flottante (Floating-Point Types), FLOAT et DOUBLE sont utilisés pour représenter des valeurs numériques approximatives.
@@ -149,7 +149,7 @@ FLOAT et DOUBLE sont mieux utilisés pour les données scientifiques ou les cas 
 
 Lors de la comparaison de valeurs à virgule flottante, il est préférable d'utiliser une marge d'erreur ou "epsilon" pour tenir compte de l'imprécision. Par exemple, au lieu de vérifier l'égalité directe, vérifiez si la différence entre les deux nombres est inférieure à un petit seuil.
 
-Soyez conscient de l'arrondissement lors de l'insertion ou de la mise à jour des valeurs dans les colonnes FLOAT ou DOUBLE. 
+Soyez conscient de l'arrondissement lors de l'insertion ou de la mise à jour des valeurs dans les colonnes FLOAT ou DOUBLE.
 
 Pour les données nécessitant une précision exacte, comme l'argent, utilisez plutôt DECIMAL. Réservez l'utilisation de FLOAT et DOUBLE pour les cas où la représentation approximative est acceptable et souhaitable.
 
@@ -158,7 +158,7 @@ Note : à partir de MySQL 8.0.17, la syntaxe non standard FLOAT(M,D) et DOUBLE(M
 Chaînes : CHAR, VARCHAR, BINARY, VARBINARY
 Les types de données chaîne
 
-Les types de données chaîne (String Data Types) sont utilisés pour stocker des textes de différentes longueurs et formats. Ils incluent CHAR, VARCHAR, BINARY, VARBINARY, BLOB, TEXT, ENUM, et SET. 
+Les types de données chaîne (String Data Types) sont utilisés pour stocker des textes de différentes longueurs et formats. Ils incluent CHAR, VARCHAR, BINARY, VARBINARY, BLOB, TEXT, ENUM, et SET.
 
 Nous allons présenter brièvement chaque type puis entrer plus en détail.
 CHAR et VARCHAR
@@ -182,7 +182,6 @@ ENUM('value1', 'value2', ...) : permet de stocker une valeur choisie dans une li
 
 SET('value1', 'value2', ...) : permet de stocker zéro ou plusieurs valeurs choisies dans une liste spécifiée. SET est également représenté en interne comme un entier.
 
- 
 CHAR vs VARCHAR
 
 CHAR est un type de longueur fixe qui alloue un espace de stockage constant pour chaque entrée, quelle que soit la longueur réelle de la chaîne stockée. Si la chaîne stockée est plus courte que la longueur définie pour la colonne CHAR, MySQL complète la chaîne avec des espaces à droite jusqu'à atteindre cette longueur fixe.
@@ -193,11 +192,11 @@ CHAR est idéal pour stocker des données de longueur relativement constante, co
 
 Dans tous les autres cas on utilisera VARCHAR.
 Exemple d'utilisation du stockage
-Valeur 	CHAR(4) Stockage 	VARCHAR(4) Stockage
-'' (vide) 	' ' (4 octets) 	'' (1 octet)
-'ab' 	'ab ' (4 octets) 	'ab' (3 octets)
-'abcd' 	'abcd' (4 octets) 	'abcd' (5 octets)
-'abcdefgh' 	'abcd' (4 octets) 	'abcd' (5 octets)
+Valeur CHAR(4) Stockage VARCHAR(4) Stockage
+'' (vide) ' ' (4 octets) '' (1 octet)
+'ab' 'ab ' (4 octets) 'ab' (3 octets)
+'abcd' 'abcd' (4 octets) 'abcd' (5 octets)
+'abcdefgh' 'abcd' (4 octets) 'abcd' (5 octets)
 
 '' (vide) : Pour CHAR(4), MySQL stocke la valeur vide comme quatre espaces, utilisant 4 octets. Pour VARCHAR(4), seulement un octet est utilisé pour indiquer la longueur de la chaîne, qui est 0 dans ce cas.
 
@@ -214,7 +213,6 @@ Déterminez la taille maximale des données que vous prévoyez de stocker dans l
 
 Par exemple, si vous stockez des adresses email, une valeur comme VARCHAR(255) est courante car elle est suffisamment longue pour la plupart des adresses email tout en restant sous la limite de 256 caractères souvent utilisée dans les spécifications et les normes.
 
- 
 BINARY vs VARBINARY
 BINARY
 
@@ -266,7 +264,6 @@ Il est important de noter que ces limites sont basées sur le nombre de caractè
 
 Les colonnes TEXT ne peuvent pas avoir de valeurs par défaut et, pour indexer une colonne TEXT, une longueur de préfixe d'index doit être spécifiée.
 
- 
 Exemples d'utilisation de TEXT
 
     Articles de blog ou nouvelles : un champ TEXT ou MEDIUMTEXT est idéal pour stocker le corps d'articles de blog, de nouvelles ou de publications sur des forums, où le contenu peut être relativement long et varier en taille.
@@ -275,14 +272,12 @@ Exemples d'utilisation de TEXT
 
     Scripts ou code source : les développeurs peuvent utiliser des champs TEXT pour stocker des scripts, des configurations, ou du code source dans des applications de gestion de configuration ou de déploiement automatisé.
 
- 
 Exemples d'Utilisation de BLOB
 
     Images de profil utilisateur : bien que stocker des images directement dans une base de données ne soit pas toujours recommandé, un champ BLOB peut être utilisé pour cela, en particulier si les images sont de petite taille et que la facilité d'accès est une priorité.
 
     Documents PDF ou Word : pour une application qui nécessite l'accès rapide à des documents utilisateurs (comme des CVs ou des rapports), les stocker dans un champ BLOB peut être pratique pour une récupération facile directement depuis la base de données.
 
- 
 Bonnes pratiques
 
 Utilisez TEXT et BLOB avec modération : privilégiez l'utilisation de ces types pour des données qui doivent être étroitement couplées avec d'autres données dans la base de données et qui ne sont pas excessivement volumineuses.
@@ -329,7 +324,6 @@ Bien que ENUM ait ses avantages, il existe des situations où d'autres types de 
 
     Recherche de performance : l'utilisation d'indices sur des colonnes avec des types numériques (INT, TINYINT, etc.) peut être plus performante que l'utilisation d'ENUM pour des grandes bases de données avec des requêtes complexes.
 
- 
 SET
 
 Le type SET est un objet de chaîne qui peut contenir zéro ou plusieurs valeurs, chacune devant être choisie parmi une liste de valeurs permises spécifiées lors de la création de la table.
@@ -391,7 +385,6 @@ YEAR
 
 YEAR stocke une année en format 4 chiffres. Les valeurs vont de 1901 à 2155, ou 0000.
 
- 
 DATE en détail
 Syntaxe et format
 
@@ -406,7 +399,6 @@ Puisque le type DATE ne tient pas compte des fuseaux horaires, il convient pour 
 
 Autrement dit, l'utilisation du type DATE est recommandée dans tous les cas où l'information temporelle nécessaire se limite à la date. Cela simplifie la manipulation et l'interrogation des données, tout en optimisant l'espace de stockage. Pour les situations nécessitant la prise en compte de l'heure, des minutes et des secondes, les types DATETIME ou TIMESTAMP sont plus appropriés.
 
- 
 TIME en détail
 Syntaxe et format
 
@@ -423,13 +415,12 @@ Bonnes pratiques
 
 Spécifier la précision des secondes fractionnaires uniquement si nécessaire, car cela peut augmenter la taille de stockage et affecter les performances pour les grandes bases de données.
 
- 
 DATETIME en détail
 Syntaxe et format
 
 Le type de données DATETIME est conçu pour stocker des valeurs de date et d'heure, combinant ainsi les aspects de la date et de l'heure dans un seul champ.
 
-Ce type est particulièrement utile pour enregistrer des moments précis, comme des horodatages d'événements, des moments de création ou de modification de données, et d'autres instances nécessitant à la fois la date et l'heure. 
+Ce type est particulièrement utile pour enregistrer des moments précis, comme des horodatages d'événements, des moments de création ou de modification de données, et d'autres instances nécessitant à la fois la date et l'heure.
 
 Le format standard de DATETIME est 'YYYY-MM-DD HH:MM:SS'. Cela permet de représenter la date et l'heure jusqu'à la seconde. MySQL supporte également les secondes fractionnaires, permettant une précision supplémentaire.
 
@@ -442,11 +433,10 @@ Spécifier la précision des secondes fractionnaires uniquement si nécessaire, 
 
 Soyez conscient de la gestion des fuseaux horaires lors de l'utilisation de DATETIME, surtout si votre application fonctionne à l'échelle mondiale. DATETIME ne stocke pas d'informations sur le fuseau horaire, donc si vous gérez des utilisateurs dans plusieurs fuseaux horaires, envisagez des stratégies pour gérer correctement les conversions.
 
- 
 TIMESTAMP en détail
 Syntaxe et format
 
-Le type de données TIMESTAMP est spécialement conçu pour enregistrer des instants précis, en associant une date à une heure. Ce type est largement utilisé pour les systèmes qui nécessitent de suivre le moment exact d'un événement, tel que la création ou la mise à jour de données. 
+Le type de données TIMESTAMP est spécialement conçu pour enregistrer des instants précis, en associant une date à une heure. Ce type est largement utilisé pour les systèmes qui nécessitent de suivre le moment exact d'un événement, tel que la création ou la mise à jour de données.
 
 Les valeurs TIMESTAMP sont stockées sous la forme 'YYYY-MM-DD HH:MM:SS', et peuvent optionnellement inclure des fractions de seconde jusqu'à une précision de microsecondes (6 chiffres), par exemple, 'YYYY-MM-DD HH:MM:SS.mmmmmm'.
 
@@ -463,7 +453,6 @@ Il faut utiliser la précision des secondes fractionnaires uniquement lorsque la
 
 Être conscient de la limite supérieure de l'an 2038 pour les valeurs TIMESTAMP et planifier en conséquence, notamment en envisageant l'utilisation de DATETIME pour les dates postérieures à cette limite.
 
- 
 YEAR en détail
 Syntaxe et format
 
@@ -478,7 +467,6 @@ Bonnes pratiques
 
 Tenez compte de la plage de dates limitée du type YEAR lors de la conception de votre base de données. Pour les données historiques ou futures s'étendant au-delà de 1901 à 2155, envisagez d'utiliser un type de données différent, comme DATE ou INT.
 
- 
 Résumé des utilisations des différents formats
 
     DATE : utilisé pour les dates sans information temporelle, idéal pour les anniversaires, les dates d'expiration, ou les jours fériés. Recommandé quand l'heure de l'événement n'est pas nécessaire.
@@ -496,7 +484,7 @@ Le format JSON
 
 Le format JSON (JavaScript Object Notation) est un format de données textuel léger pour l'échange de données.
 
-Il est facile à lire pour les humains et simple à analyser et à générer pour les machines. JSON est basé sur la notation des objets dans JavaScript, mais il est indépendant du langage et peut être utilisé avec de nombreux langages de programmation. 
+Il est facile à lire pour les humains et simple à analyser et à générer pour les machines. JSON est basé sur la notation des objets dans JavaScript, mais il est indépendant du langage et peut être utilisé avec de nombreux langages de programmation.
 Syntaxe
 
 Un objet JSON est entouré par des accolades {} et représente un ensemble de paires clé-valeur. Les clés sont des chaînes de caractères et les valeurs peuvent être de différents types.
@@ -521,23 +509,22 @@ Exemple
 Voici un exemple de document JSON représentant des informations sur une personne, incluant un objet et un tableau :
 
 {
-  "nom": "Doe",
-  "prénom": "John",
-  "age": 30,
-  "estEmployé": true,
-  "adresse": {
-    "rue": "123 Rue Principale",
-    "ville": "Ville",
-    "codePostal": "12345"
-  },
-  "numérosDeTéléphone": ["0425478774", "0146456796"],
-  "languesParlées": ["français", "anglais", "espagnol"],
-  "conjoints": null
+"nom": "Doe",
+"prénom": "John",
+"age": 30,
+"estEmployé": true,
+"adresse": {
+"rue": "123 Rue Principale",
+"ville": "Ville",
+"codePostal": "12345"
+},
+"numérosDeTéléphone": ["0425478774", "0146456796"],
+"languesParlées": ["français", "anglais", "espagnol"],
+"conjoints": null
 }
 
 JSON est largement utilisé pour échanger des données entre un serveur et un client web, ainsi que pour stocker des configurations, des options ou des états d'application dans divers logiciels. Sa simplicité et sa facilité de manipulation en font un choix populaire dans de nombreux contextes de développement.
 
- 
 Insertion et normalisation
 
 MySQL supporte nativement le type de données JSON, permettant de stocker des documents JSON directement dans les tables.
@@ -579,7 +566,6 @@ Ce comportement est différent avec la fonction JSON_MERGE_PRESERVE() qui concat
 SELECT JSON_MERGE_PRESERVE('{"a": 1}', '{"a": 2}');
 -- Résultat : {"a": [1, 2]}
 
- 
 Extraire ou modifier une valeur JSON
 
 La recherche et la modification de valeurs JSON utilisent des expressions de chemin JSON pour identifier précisément les éléments à manipuler dans un document JSON.
@@ -610,19 +596,19 @@ JSON_EXTRACT() ou l'opérateur -> permet d'extraire une valeur JSON spécifiée 
 Prenons un document en exemple qui serait dans une colonne informations :
 
 {
-  "id": 1,
-  "nom": "Dupont",
-  "prénom": "Jean",
-  "adresse": {
-    "rue": "123 rue de Paris",
-    "ville": "Paris",
-    "codePostal": "75000"
-  },
-  "contacts": ["email@example.com", "email2@example.com"],
-  "preferences": {
-    "newsletter": true,
-    "couleurs": ["bleu", "vert"]
-  }
+"id": 1,
+"nom": "Dupont",
+"prénom": "Jean",
+"adresse": {
+"rue": "123 rue de Paris",
+"ville": "Paris",
+"codePostal": "75000"
+},
+"contacts": ["email@example.com", "email2@example.com"],
+"preferences": {
+"newsletter": true,
+"couleurs": ["bleu", "vert"]
+}
 }
 
 Pour extraire le nom de l'utilisateur :
@@ -672,7 +658,6 @@ vaUPDATE utilisateurs
 SET informations = JSON_REMOVE(informations, '$.adresse.codePostal')
 WHERE JSON_EXTRACT(informations, '$.id') = 1;
 
- 
 Bonnes pratiques
 
 Le format JSON permet de stocker des données dont la structure peut varier ou évoluer avec le temps, comme des configurations utilisateur personnalisées, des profils avec des attributs variables, ou des métadonnées de produits.

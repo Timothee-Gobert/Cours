@@ -453,35 +453,35 @@ Nous y reviendrons en détail dans un chapitre plus avancé, mais voici le sché
 
 ### Premier aperçu des menus
 
-*MySQL Workbench* est conçu pour faciliter la gestion, le développement, et l'administration des bases de données *MySQL*.
+_MySQL Workbench_ est conçu pour faciliter la gestion, le développement, et l'administration des bases de données _MySQL_.
 
-Il se compose d'une série d'éditeurs spécialisés et de trois panneaux principaux : le panneau latéral (*sidebar*), le second panneau latéral (*secondary sidebar*), et la zone de sortie (*output area*).
+Il se compose d'une série d'éditeurs spécialisés et de trois panneaux principaux : le panneau latéral (_sidebar_), le second panneau latéral (_secondary sidebar_), et la zone de sortie (_output area_).
 
 Chaque éditeur s'ouvre dans un onglet secondaire au sein d'un onglet de connexion MySQL actif, et chaque panneau peut être masqué ou affiché selon les besoins.
 
 #### Accueil
 
-Le *Home Screen Tab* (bouton maison en haut à gauche) offre un accès rapide aux connexions, aux modèles, et à l'assistant de migration *MySQL*. Il reste ouvert en permanence pour un accès facile.
+Le _Home Screen Tab_ (bouton maison en haut à gauche) offre un accès rapide aux connexions, aux modèles, et à l'assistant de migration _MySQL_. Il reste ouvert en permanence pour un accès facile.
 
 #### Onglets connexion
 
-Chaque connexion à un serveur *MySQL* est représentée par un onglet de connexion distinct avec le nom que vous lui avez donné.
+Chaque connexion à un serveur _MySQL_ est représentée par un onglet de connexion distinct avec le nom que vous lui avez donné.
 
 Un serveur peut être actif ou inactif lors de l'ouverture de son onglet de connexion.
 
-#### *SQL Query Tab*
+#### _SQL Query Tab_
 
-L'onglet de requête SQL (*SQL query tab*) s'ouvre par défaut lorsqu'une connexion à un serveur *MySQL* est établie.
+L'onglet de requête SQL (_SQL query tab_) s'ouvre par défaut lorsqu'une connexion à un serveur _MySQL_ est établie.
 
 Chaque onglet de requête est identifié par un numéro croissant. Cet onglet fournit un espace pour éditer les requêtes SQL, et d'autres éditeurs spécialisés peuvent également être ouverts dans cet espace central.
 
 #### Menu principal
 
-La barre de menu principale contient des menus comme *File*, *Edit*, *View*, *Query*, *Database*, *Server*, *Tools*, *Scripting*, et *Help*, offrant diverses actions en fonction de l'onglet sélectionné.
+La barre de menu principale contient des menus comme _File_, _Edit_, _View_, _Query_, _Database_, _Server_, _Tools_, _Scripting_, et _Help_, offrant diverses actions en fonction de l'onglet sélectionné.
 
 #### Barre d'outils principale
 
-La barre d'outils principale propose des actions rapides pour créer de nouveaux onglets *SQL*, ouvrir des fichiers de script *SQL*, accéder à l'Inspecteur pour l'objet sélectionné, créer de nouveaux schémas, tables, vues, procédures stockées, et fonctions sur le serveur connecté, ainsi que pour rechercher des données dans les tables.
+La barre d'outils principale propose des actions rapides pour créer de nouveaux onglets _SQL_, ouvrir des fichiers de script _SQL_, accéder à l'Inspecteur pour l'objet sélectionné, créer de nouveaux schémas, tables, vues, procédures stockées, et fonctions sur le serveur connecté, ainsi que pour rechercher des données dans les tables.
 
 #### Shortcut Actions
 
@@ -489,43 +489,43 @@ Cette zone (tout en haut à droite) offre des raccourcis pour afficher le dialog
 
 #### Le panneau latéral
 
-Le panneau latéral comprend deux principales zones : *Navigator* et *Information*.
+Le panneau latéral comprend deux principales zones : _Navigator_ et _Information_.
 
-Le *Navigator* a deux sous-onglets : *Administration* et *Schemas*, permettant de gérer les schémas de la base de données et d'accéder aux outils d'administration.
+Le _Navigator_ a deux sous-onglets : _Administration_ et _Schemas_, permettant de gérer les schémas de la base de données et d'accéder aux outils d'administration.
 
-L'espace *Information* fournit des informations en lecture seule sur l'objet sélectionné et sur la connexion active. Cliquez par exemple sur la *Table movie*.
+L'espace _Information_ fournit des informations en lecture seule sur l'objet sélectionné et sur la connexion active. Cliquez par exemple sur la _Table movie_.
 
-#### Deuxième panneau latéral (*SQL Additions*)
+#### Deuxième panneau latéral (_SQL Additions_)
 
-Le panneau *SQL Additions* propose des sous-onglets pour l'aide contextuelle (*Context Help*) et les extraits de code (Snippets), fournissant une assistance pour la rédaction de requêtes *SQL*.
+Le panneau _SQL Additions_ propose des sous-onglets pour l'aide contextuelle (_Context Help_) et les extraits de code (Snippets), fournissant une assistance pour la rédaction de requêtes _SQL_.
 
 #### Le panneau de sortie
 
-Le panneau de sortie (en bas) peut afficher un résumé des requêtes exécutées sous forme de *Action Output*, *Text Output*, ou *History Output*, aidant à analyser les résultats et le processus d'exécution des requêtes.
+Le panneau de sortie (en bas) peut afficher un résumé des requêtes exécutées sous forme de _Action Output_, _Text Output_, ou _History Output_, aidant à analyser les résultats et le processus d'exécution des requêtes.
 
 Nous verrons tous les menus et boutons en détail au fur et à mesure de notre utilisation.
 
-### Visualisation de la structure de la base de données *movies*
+### Visualisation de la structure de la base de données _movies_
 
-#### Onglet *Schemas*
+#### Onglet _Schemas_
 
 ![IMAGE Onglet schemas](../../assets/images/MySQL/image-01_08_3.png)
 
-L'onglet *Schemas* dans le *Navigator* montre les schémas disponibles sur le serveur auquel vous êtes actuellement connecté.
+L'onglet _Schemas_ dans le _Navigator_ montre les schémas disponibles sur le serveur auquel vous êtes actuellement connecté.
 
 Vous pouvez explorer ces éléments pour afficher les tables, les vues et les routines au sein du schéma.
 
 Cette fonctionnalité est particulièrement utile pour les développeurs et les administrateurs de base de données qui ont besoin de visualiser rapidement la structure des bases de données et d'accéder à leurs différents composants.
 
-Ici la base de données *movies* est dépliée et on affiche ses *Tables* et les colonnes de la *Table movie*.
+Ici la base de données _movies_ est dépliée et on affiche ses _Tables_ et les colonnes de la _Table movie_.
 
-#### Inspecteur de *Schéma*
+#### Inspecteur de _Schéma_
 
-Le *Schema Inspector* vous permet de parcourir des informations générales sur les objets d'un schéma, comme les tables, les index et les déclencheurs (triggers).
+Le _Schema Inspector_ vous permet de parcourir des informations générales sur les objets d'un schéma, comme les tables, les index et les déclencheurs (triggers).
 
-Il est accessible en cliquant avec le bouton droit sur un schéma dans le navigateur d'objets et en sélectionnant "*Schema Inspector*", **ou en survolant la base de données avec la souris et en cliquant sur la bulle info.**
+Il est accessible en cliquant avec le bouton droit sur un schéma dans le navigateur d'objets et en sélectionnant "_Schema Inspector_", **ou en survolant la base de données avec la souris et en cliquant sur la bulle info.**
 
-Une fois ouvert, l'interface du *Schema Inspector* présente différentes informations réparties par onglets, centrées sur des sujets spécifiques.
+Une fois ouvert, l'interface du _Schema Inspector_ présente différentes informations réparties par onglets, centrées sur des sujets spécifiques.
 
 Cliquez sur l'onglet Tables pour avoir un ensemble très utile d'informations sur chaque table de la base de données (par exemple le nombre de rangées) :
 
@@ -533,10 +533,11 @@ Cliquez sur l'onglet Tables pour avoir un ensemble très utile d'informations su
 
 #### Inspecteur de Table
 
-Le *Table Inspector* offre une interface similaire pour visualiser des informations spécifiques à une table.
+Le _Table Inspector_ offre une interface similaire pour visualiser des informations spécifiques à une table.
 
-Pour l'ouvrir, cliquez avec le bouton droit sur une table dans le navigateur d'objets de la zone Navigator et choisissez "*Table Inspector*", **ou en survolant la table avec la souris et en cliquant sur la bulle info.**
+Pour l'ouvrir, cliquez avec le bouton droit sur une table dans le navigateur d'objets de la zone Navigator et choisissez "_Table Inspector_", **ou en survolant la table avec la souris et en cliquant sur la bulle info.**
 
 L'inspecteur de table fournit des informations détaillées sur la table sélectionnée, y compris :
+
 - **Informations sur la table :** affiche des détails généraux sur la table, tels que le moteur de stockage, le nombre de lignes, la taille de la table, et plus encore.
 - **Analyse et indexation :** permet d'analyser la table et de créer ou modifier des index pour améliorer les performances des requêtes. Les index sont cruciaux pour optimiser l'accès aux données et peuvent avoir un impact significatif sur les performances des requêtes.
