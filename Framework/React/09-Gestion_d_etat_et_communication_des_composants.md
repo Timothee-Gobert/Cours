@@ -1340,3 +1340,584 @@ Il doit retourner le nouvel état.
 Pour résumer :
 
 **Etat initial => dispatch(action) => reducer(etatActuel, action) => nouvel état**
+
+## Exemple d'utilisation de useReducer()
+
+### Modification de *App.jsx*
+
+L'utilisation d'un *reducer* va grandement simplifier notre composant racine.
+
+En effet, nous allons extraire toute la logique des fonctions pour se contenter d'envoyer des *actions* en fonction des interactions de l'utilisateur.
+
+Comme nous l'avons vu dans la leçon précédente, chaque *action* contient un *type* et éventuellement une propriété permettant de modifier l'état.
+
+```ts
+import { useReducer } from 'react';
+import TodoList from './components/TodoList';
+import AddTodo from './components/AddTodo';
+import ThemeContext from './context/ThemeContext';
+import todoReducer from './reducers/todoReducer';
+
+function App() {
+  const [state, dispatch] = useReducer(todoReducer, {
+    theme: 'primary',
+    todoList: [],
+  });
+
+  function addTodo(content) {
+    dispatch({
+      type: 'ADD_TODO',
+      content,
+    });
+  }
+
+  function deleteTodo(id) {
+    dispatch({
+      type: 'DELETE_TODO',
+      id,
+    });
+  }
+
+  function toggleTodo(id) {
+    dispatch({
+      type: 'TOGGLE_TODO',
+      id,
+    });
+  }
+
+  function toggleTodoEdit(id) {
+    dispatch({
+      type: 'TOGGLE_EDIT_TODO',
+      id,
+    });
+  }
+
+  function editTodo(id, content) {
+    dispatch({
+      type: 'EDIT_TODO',
+      id,
+      content,
+    });
+  }
+
+  function selectTodo(id) {
+    dispatch({
+      type: 'SELECT_TODO',
+      id,
+    });
+  }
+
+  function handleThemeChange(e) {
+    dispatch({
+      type: 'SET_THEME',
+      theme: e.target.value,
+    });
+  }
+
+  return (
+    <ThemeContext.Provider value={state.theme}>
+      <div className="d-flex justify-content-center align-items-center p-20">
+        <div className="card container p-20">
+          <h1 className="mb-20 d-flex justify-content-center align-items-center">
+            <span className="flex-fill">Liste de tâches</span>
+            <select value={state.theme} onChange={handleThemeChange}>
+              <option value="primary">Rouge</option>
+              <option value="secondary">Bleu</option>
+            </select>
+          </h1>
+          <AddTodo addTodo={addTodo} />
+          <TodoList
+            todoList={state.todoList}
+            deleteTodo={deleteTodo}
+            toggleTodo={toggleTodo}
+            toggleTodoEdit={toggleTodoEdit}
+            editTodo={editTodo}
+            selectTodo={selectTodo}
+          />
+        </div>
+      </div>
+    </ThemeContext.Provider>
+  );
+}
+
+export default App;
+```
+ 
+### Création de *todoReducer.js*
+
+Dans le dossier **src**, créez un dossier **reducers** et placez-y un fichier *todoReducer.js* :
+
+```ts
+function todoReducer(state, action) {
+  switch (action.type) {
+    case 'ADD_TODO': {
+      return {
+        ...state,
+        todoList: [
+          ...state.todoList,
+          {
+            id: crypto.randomUUID(),
+            content: action.content,
+            edit: false,
+            done: false,
+            selected: false,
+          },
+        ],
+      };
+    }
+    case 'DELETE_TODO': {
+      return {
+        ...state,
+        todoList: state.todoList.filter((t) => t.id !== action.id),
+      };
+    }
+    case 'TOGGLE_TODO': {
+      return {
+        ...state,
+        todoList: state.todoList.map((t) =>
+          t.id !== action.id ? t : { ...t, done: !t.done }
+        ),
+      };
+    }
+    case 'TOGGLE_EDIT_TODO': {
+      return {
+        ...state,
+        todoList: state.todoList.map((t) =>
+          t.id !== action.id ? t : { ...t, edit: !t.edit }
+        ),
+      };
+    }
+    case 'EDIT_TODO': {
+      return {
+        ...state,
+        todoList: state.todoList.map((t) =>
+          t.id !== action.id
+            ? t
+            : { ...t, content: action.content, edit: false }
+        ),
+      };
+    }
+    case 'SELECT_TODO': {
+      return {
+        ...state,
+        todoList: state.todoList.map((t) =>
+          t.id !== action.id
+            ? { ...t, selected: false }
+            : { ...t, selected: true }
+        ),
+      };
+    }
+    case 'SET_THEME': {
+      return {
+        ...state,
+        theme: action.theme,
+      };
+    }
+    default: {
+      throw new Error('action inconnue');
+    }
+  }
+}
+
+export default todoReducer;
+```
+
+Remarquez bien que l'état précédent n'est jamais modifié directement, il faut retourner un nouvel état.
+
+## Architecture avec les hooks useContext() et useReducer()
+
+L'objectif va être ici de combiner tout ce que nous avons vu sur les *reducers* et les *Contexts*.
+
+Nous avons vu que nous pouvions fournir n'importe quelle valeur dans un *Context*.
+
+**Nous pouvons donc passer l'état et la fonction d'envoi d'*action* (*dispatch*) retournés par un *reducer* dans un *Context* pour les rendre disponible à tous les composants plus bas dans l'arbre.**
+
+### Création de TodoContext.js
+
+Dans le dossier **context** commencez par créez un fichier *TodoContext.js* :
+
+```ts
+import { createContext } from 'react';
+
+export const TodoStateContext = createContext(null);
+export const TodoDispatcherContext = createContext(null);
+```
+ 
+### Modification de *App.jsx*
+
+Dans le composant racine nous allons fournir l'état et la fonction *dispatch* à tous les composants plus bas dans l'arbre grâce au *Context* :
+
+```ts
+import { useReducer } from 'react';
+import TodoList from './components/TodoList';
+import AddTodo from './components/AddTodo';
+import ThemeContext from './context/ThemeContext';
+import { TodoStateContext } from './context/TodoContext';
+import { TodoDispatcherContext } from './context/TodoContext';
+import todoReducer from './reducers/todoReducer';
+
+function App() {
+  const [state, dispatch] = useReducer(todoReducer, {
+    theme: 'primary',
+    todoList: [],
+  });
+
+  function handleThemeChange(e) {
+    dispatch({
+      type: 'SET_THEME',
+      theme: e.target.value,
+    });
+  }
+
+  return (
+    <TodoStateContext.Provider value={state}>
+      <TodoDispatcherContext.Provider value={dispatch}>
+        <ThemeContext.Provider value={state.theme}>
+          <div className="d-flex justify-content-center align-items-center p-20">
+            <div className="card container p-20">
+              <h1 className="mb-20 d-flex justify-content-center align-items-center">
+                <span className="flex-fill">Liste de tâches</span>
+                <select value={state.theme} onChange={handleThemeChange}>
+                  <option value="primary">Rouge</option>
+                  <option value="secondary">Bleu</option>
+                </select>
+              </h1>
+              <AddTodo />
+              <TodoList />
+            </div>
+          </div>
+        </ThemeContext.Provider>
+      </TodoDispatcherContext.Provider>
+    </TodoStateContext.Provider>
+  );
+}
+
+export default App;
+```
+
+Remarquez que nous n'avons plus aucune *prop* à passer aux composants enfants car nous allons utiliser le *hook* `useContext()` pour accéder à l'état et à *dispatch* plus bas dans l'arbre des composants.
+
+### Modification de *TodoList.jsx*
+
+Dans le composant *TodoList* nous pouvons grandement simplifier, nous n'avons plus de *prop* à passer depuis le composant parent vers les composants enfants.
+
+Remarquez que nous accédons à l'état, et plus particulièrement à la liste des tâches, en utilisant le *hook* `useContext()` et en récupérant l'état fourni.
+
+```ts
+import { useContext } from 'react';
+import TodoItem from './TodoItem';
+import EditTodo from './EditTodo';
+import { TodoStateContext } from '../context/TodoContext';
+
+export default function TodoList() {
+  const state = useContext(TodoStateContext);
+
+  return state.todoList.length ? (
+    <ul>
+      {state.todoList.map((todo) =>
+        todo.edit ? (
+          <EditTodo key={todo.id} todo={todo} />
+        ) : (
+          <TodoItem key={todo.id} todo={todo} />
+        )
+      )}
+    </ul>
+  ) : (
+    <p>Aucune tâche en cours </p>
+  );
+}
+```
+ 
+### Modification de *AddTodo.jsx*
+
+Dans le composant *AddTodo* nous accédons à la fonction *dispatch* grâce au *Context* et nous pouvons directement envoyer l'*action* permettant d'ajouter une tâche :
+
+```ts
+import { useState, useContext } from 'react';
+import Button from './Button';
+import { TodoDispatcherContext } from '../context/TodoContext';
+
+export default function AddTodo() {
+  const [value, setValue] = useState('');
+  const dispatch = useContext(TodoDispatcherContext);
+
+  function handleChange(e) {
+    const inputValue = e.target.value;
+    setValue(inputValue);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && value.length) {
+      dispatch({
+        type: 'ADD_TODO',
+        content: value,
+      });
+      setValue('');
+    }
+  }
+
+  function handleClick() {
+    if (value.length) {
+      dispatch({
+        type: 'ADD_TODO',
+        content: value,
+      });
+      setValue('');
+    }
+  }
+
+  return (
+    <div className="d-flex justify-content-center align-items-center mb-20">
+      <input
+        type="text"
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        value={value}
+        className="mr-15 flex-fill"
+        placeholder="Ajouter une tâche"
+      />
+      <Button text="Ajouter" onClick={handleClick} />
+    </div>
+  );
+}
+```
+
+### Modification de *TodoItem.jsx*
+
+Dans le composant *TodoItem* nous accédons à la fonction *dispatch* grâce au *Context* et nous pouvons directement envoyer les *actions* permettant de sélectionner une tâche, de la modifier, de la supprimer ou de la valider ou non :
+
+```ts
+import React, { useContext } from 'react';
+import Button from './Button';
+import { TodoDispatcherContext } from '../context/TodoContext';
+
+export default function TodoItem({ todo }) {
+  const dispatch = useContext(TodoDispatcherContext);
+
+  return (
+    <li
+      onClick={() =>
+        dispatch({
+          type: 'SELECT_TODO',
+          id: todo.id,
+        })
+      }
+      className={`mb-10 d-flex flex-row justify-content-center align-items-center p-10 ${
+        todo.selected ? 'selected' : ''
+      }  `}
+    >
+      <span className="flex-fill">
+        {todo.content} {todo.done && '✅'}
+      </span>
+      <Button
+        text="Valider"
+        className="mr-15"
+        onClick={(e) => {
+          e.stopPropagation();
+          dispatch({
+            type: 'TOGGLE_TODO',
+            id: todo.id,
+          });
+        }}
+      />
+      <Button
+        text="Modifier"
+        className="mr-15"
+        onClick={(e) => {
+          e.stopPropagation();
+          dispatch({
+            type: 'TOGGLE_EDIT_TODO',
+            id: todo.id,
+          });
+        }}
+      />
+      <Button
+        text="Supprimer"
+        onClick={(e) => {
+          e.stopPropagation();
+          dispatch({
+            type: 'DELETE_TODO',
+            id: todo.id,
+          });
+        }}
+      />
+    </li>
+  );
+}
+```
+
+### Modification de *EditTodo.jsx*
+
+Dans le composant *EditTodo* nous accédons à la fonction *dispatch* grâce au *Context* et nous pouvons directement envoyer les *actions* permettant d'éditer une tâche et d'annuler le mode édition :
+
+```ts
+import { useState, useContext } from 'react';
+import Button from './Button';
+import { TodoDispatcherContext } from '../context/TodoContext';
+
+export default function EditTodo({ todo }) {
+  const [value, setValue] = useState(todo.content);
+  const dispatch = useContext(TodoDispatcherContext);
+
+  function handleChange(e) {
+    const inputValue = e.target.value;
+    setValue(inputValue);
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && value.length) {
+      dispatch({
+        type: 'EDIT_TODO',
+        id: todo.id,
+        content: value,
+      });
+      setValue('');
+    }
+  }
+
+  function handleClick() {
+    if (value.length) {
+      dispatch({
+        type: 'EDIT_TODO',
+        id: todo.id,
+        content: value,
+      });
+      setValue('');
+    }
+  }
+
+  return (
+    <div className="d-flex justify-content-center align-items-center mb-10">
+      <input
+        type="text"
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        value={value}
+        className="mr-15 flex-fill"
+        placeholder="Ajouter une tâche"
+      />
+      <Button text="Sauvegarder" className="mr-15" onClick={handleClick} />
+      <Button
+        text="Annuler"
+        className="mr-15"
+        onClick={() =>
+          dispatch({
+            type: 'TOGGLE_EDIT_TODO',
+            id: todo.id,
+          })
+        }
+      />
+    </div>
+  );
+}
+```
+
+## Amélioration de l'architecture
+
+### Modification de *TodoContext.js*
+
+Nous utilisons des fonctions utilitaires pour faciliter l'usage des *Contexts* en ayant qu'un seul import à faire dans les composants qui les utilisent :
+
+```ts
+import { createContext, useContext } from 'react';
+
+export const TodoStateContext = createContext(null);
+export const TodoDispatcherContext = createContext(null);
+
+export const useTodos = () => useContext(TodoStateContext);
+export const useTodoDispatcher = () => useContext(TodoDispatcherContext);
+```
+
+### Création de *TodoProvider.jsx*
+
+Créez un composant *TodoProvider.jsx* dans le dossier **components**.
+
+Nous utilisons ce composant pour fournir tous les *Contexts* et affichons la *prop children* reçue :
+
+```ts
+import { useReducer } from 'react';
+import ThemeContext from '../context/ThemeContext';
+import { TodoStateContext } from '../context/TodoContext';
+import { TodoDispatcherContext } from '../context/TodoContext';
+import todoReducer from '../reducers/todoReducer';
+
+function TodoProvider({ children }) {
+  const [state, dispatch] = useReducer(todoReducer, {
+    theme: 'primary',
+    todoList: [],
+  });
+
+  return (
+    <TodoStateContext.Provider value={state}>
+      <TodoDispatcherContext.Provider value={dispatch}>
+        <ThemeContext.Provider value={state.theme}>
+          {children}
+        </ThemeContext.Provider>
+      </TodoDispatcherContext.Provider>
+    </TodoStateContext.Provider>
+  );
+}
+
+export default TodoProvider;
+```
+ 
+### Création de *TodoFeature.jsx*
+
+Créez un composant *TodoFeature.jsx* dans le dossier **components**.
+
+Le *JSX* de ce composant sera passé en *children* au composant *TodoProvider.jsx*.
+
+```ts
+import { useTodoDispatcher, useTodos } from '../context/TodoContext';
+import AddTodo from './AddTodo';
+import TodoList from './TodoList';
+
+function TodoFeature() {
+  const dispatch = useTodoDispatcher();
+  const state = useTodos();
+
+  function handleChange(e) {
+    dispatch({
+      type: 'SET_THEME',
+      theme: e.target.value,
+    });
+  }
+
+  return (
+    <div className="d-flex flex-row justify-content-center align-items-center p-20">
+      <div className="card container p-20">
+        <h1 className="mb-20 d-flex flex-row justify-content-center align-items-center">
+          <span className="flex-fill">Todo list</span>
+          <select value={state.theme} onChange={handleChange}>
+            <option value="primary">Rouge</option>
+            <option value="secondary">Bleu</option>
+          </select>
+        </h1>
+        <AddTodo />
+        <TodoList />
+      </div>
+    </div>
+  );
+}
+
+export default TodoFeature;
+```
+
+### Modification de *App.jsx*
+
+Nous modifions le composant racine, qui est maintenant très concis :
+
+```ts
+import TodoFeature from './components/TodoFeature';
+import TodoProvider from './components/TodoProvider';
+
+function App() {
+  return (
+    <TodoProvider>
+      <TodoFeature />
+    </TodoProvider>
+  );
+}
+
+export default App;
+```

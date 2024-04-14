@@ -16,7 +16,7 @@ Ceux-ci vous permettent également de récupérer, à l'intérieur du composant 
 
 Création d'un fichier *dashboard/page.js* dans notre segment statique :
 
-```ts
+```jsx
 const DashboardPage = () => {
   return (
     <div>
@@ -43,7 +43,7 @@ Le nom que vous définissez à l'intérieur de votre segment dynamique détermin
 
 Ainsi, en créant notre composant dans le fichier *products/[id]/page.js* nous étions en mesure d'accéder au chemin */products/15*. Le résultat produit était : *Welcome to product page with id : 15*.
 
-```ts
+```jsx
 const ProductPage = ({ params }) => {
   return (
     <div>
@@ -67,7 +67,7 @@ Comme nous avons pu nous en apercevoir, les pages (et layout) de segments enfant
 
 Par exemple, créer un fichier sous le répertoire *products/[id]/category/page.js* nous permettra de récupérer le props *params* avec la valeur du segment dynamique :
 
-```ts
+```jsx
 const ProductCategoryPage = ({ params }) => { // { id: 15 }
   return (
     <div>
@@ -95,11 +95,11 @@ Il s'agit d'un composant optionnel à ajouter pour chacun de nos segments. Il pe
 
 Son props children sera constitué d'un composant layout enfant s'il existe, ou d'une page directement.
 
-Le seul layout obligatoire est le RootLayout, présent à la racine de notre routage, dans le dossier app, celui-ci doit être constitué au minimum d'une balise <html> et <body>.
+Le seul layout obligatoire est le RootLayout, présent à la racine de notre routage, dans le dossier app, celui-ci doit être constitué au minimum d'une balise `<html>` et `<body>`.
 
 Ces composants sont des composants serveurs par défaut. Son état reste identique tout au long de la navigation dans votre application.
 
-```ts
+```jsx
 const DashboardLayout = ({ children }) => {
   return (
     <section className="dashboard-container">
@@ -127,7 +127,7 @@ Un composant error boundary est un composant qui vient intercepter toutes les er
 
 L'un des principaux intérêts de l'utilisation de ce composant de fallback est qu'il va vous permettre d'isoler une erreur créée dans votre application et ne pas impacter la totalité. Ses composants parents ne subiront pas l'erreur et conserveront leur état, on pourra donc par exemple conserver l'affichage de multiples layout de notre application.
 
-```ts
+```jsx
 "use client";
 
 const Error = ({ error, reset }) => {
@@ -156,7 +156,7 @@ Ce fichier a vocation a être créé uniquement **à la racine du dossier de rou
 
 Constitue également une interface de remplacement pour l'affichage d'une page non trouvée, page 404.
 
-```ts
+```jsx
 const NotFound = () => {
   return (
     <>
@@ -182,7 +182,7 @@ Ces étapes peuvent se révéler assez longue dans le cas où vous auriez une pa
 
 C'est là que peut intervenir la création du fichier *loading.js*. Agissant comme fallback du composant Suspense de React, il vous permet de générer une interface de remplacement en attendant que vos composants aient finis d'être générés.
 
-```ts
+```jsx
 const Loading = () => {
   return (
     <div>
@@ -204,7 +204,7 @@ Rappelons-nous, la création d'un segment ne signifie pas obligatoirement qu'il 
 
 Ce fichier constitue le point d'entrée de votre segment. Le composant créé dans le fichier est directement inclus depuis le layout du même niveau ou niveau parent. 
 
-```ts
+```jsx
 const ProductPage = ({ params, searchParams }) => {
   return (
     <div>
@@ -227,7 +227,7 @@ Nous reparlerons en détail de l'utilisation de ce fichier route.js qui vous per
 Grâce à la création de fonction nommée avec le verbe HTTP pour lequel vous souhaitez que votre route puisse être appelée, nous serons en mesure d'intercepter des requêtes.   
 Les verbes HTTP disponibles pour ces routes actuellement sont *GET*, *POST*, *PUT*, *PATCH*, *DELETE*, *OPTIONS* et *HEAD*.
 
-```ts
+```jsx
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -254,4 +254,114 @@ L'ensemble de ces fichiers de routage sont inclus dans un ordre bien particulier
 ![IMAGE ordre d'inclusion](../../assets/images/Next.js/image-03_10_1.webp)
 
 Dans la prochaine leçon, nous verrons en détail l'utilisation de ces fichiers et l'importance de leur placement.
+
+## Comportements et utilisations des fichiers de routage
+
+### L'importance de l'ordre d'inclusion
+
+Nous l'avons vu ensemble, dans cet exemple pratique. Garder en tête l'ordre d'inclusion des composants mis en place par Next lorsque nous créons par exemple un composant de fallback dans le fichier *error.js* est important.
+
+Gardez en tête que le *React Error Boundary* créé pour vous lorsque vous créez un fichier *error.js* conserve votre page du même segment en enfant de celui-ci. Cependant, ce n'est pas le cas pour le layout ou le template créé. Si vous souhaitez gérer le cas d'erreur d'un layout, il faudra créer un composant dans le fichier error.js dans le segment parent.
+
+C'est pour cela que le fichier *global-error.js* a été créé, uniquement pour pouvoir gérer les cas d'erreurs obtenus à l'intérieur du layout root, basé à la racine du dossier app.
+
+### L'utilisation de la fonction `notFound`
+
+Une fonction nous est proposée par Next pour nous permettre, au sein de nos composants serveurs (le composant page en est un), de créer une erreur spécifique, l'erreur *NEXT_NOT_FOUND*.
+
+La propagation de cette erreur peut être gérée lors de la création d'un fichier *not-found.js*. Celui-ci vient constituer un composant f**allback d'un React error boundary** créé par Next, uniquement présent pour gérer des erreurs de type *NEXT_NOT_FOUND*.
+
+Le composant créé dans ce fichier nous permet donc de créer une **interface utilisateur de remplacement** également pour ce type d'erreurs particulier. Ce composant n'hérite d'aucun props précis.
+
+```jsx
+const NotFound = () => {
+  return (
+    <div>
+      <p>Page non trouvée</p>
+    </div>
+  );
+};
+
+export default NotFound;
+```
+
+### Un exemple sur le chargement d'un composant page
+
+Comme évoqué lors de notre précédent exemple, la génération de votre rendu HTML pour vos pages a un processus bloquant.
+
+Pour illustrer ce comportement, je vous ai présenté l'utilisation d'une API qui nous permet de simuler un délai assez long de récupération d'une donnée : 
+
+```
+https://app-dir.vercel.app/api/categories?delay=5000
+```
+
+Lors de l'appel de cette API, le paramètre delay appliqué en paramètre de l'URL nous permet de retarder le délai de réponse.
+
+Pour concrétiser cet exemple, il nous faut voir légèrement la manière dont nous allons pouvoir effectuer une requête, dans un composant serveur. Nous reverrons cette partie en détail lors du chapitre sur la récupération de données.
+
+```jsx
+const ProductsPage = async () => {
+  const response = await fetch(
+    "https://app-dir.vercel.app/api/categories?delay=5000",
+    { cache: "no-cache" }
+  );
+  const categories = await response.json();
+  return (
+    <div className="page">
+      <h2>Welcome to products page</h2>
+      <ul>
+        {categories.map((category) => (
+          <li key={category.slug}>{category.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default ProductsPage;
+```
+
+Nous appliquons à l'appel fetch de cette requête, un paramètre `cache: no-cache` de manière à ce que Next ne mette pas en cache notre requête pour les prochaines tentatives de rendu. Nous reverrons également en détail l'utilisation de ce paramètre.
+
+Lors du test, il est facile de se rendre compte que notre page complète met désormais 5 secondes à être affichée. Aucun de nos layout définis comme parents ne s'affichent, alors qu'eux n'utilisent aucune donnée.
+
+Nous passons à la création du fichier *loading.js* au sein de notre segment.
+
+```jsx
+const Loading = () => {
+  return (
+    <div className="loading">
+      <p>Chargement en cours...</p>
+    </div>
+  );
+};
+
+export default Loading;
+```
+
+Désormais, un composant Suspense vient inclure notre composant page. Le fallback de ce composant ajouté à notre arbre est le composant créé dans le fichier loading.js.
+
+Maintenant, nous profitons d'un chargement instantané de notre document, avec l'affichage de nos layout parents, le composant créé constitue une interface de remplacement en attendant que le composant page soit rendu.
+
+[Code sur Github](https://github.com/AntoineBourin/nextjs-demo/tree/v3.3.0)
+
+## Groupe de routes
+
+Pour vous aider à mieux organiser votre routage dans votre application Next, est apparu la notion de groupe de routes.
+
+### Création d'un groupe de routes
+
+Jusqu'ici, nous avons vu comment créer facilement des segments statiques et des segments dynamiques.
+
+Il vous est également possible de créer un groupe de routes en insérant au nom de votre dossier des parenthèses. La création de ce dossier n'aura **aucun impact sur votre chemin d'URL** accessible pour vos segments enfants.
+
+La création d'un fichier *page.js* dans le répertoire */app/(blog)/articles/page.js* sera accessible via le chemin d'URL */articles*.
+
+### Les possibilités sont multiples
+
+Cet ajout vous permet, si vous créez vos groupes de routes à la racine de votre dossier app, de créer plusieurs RootLayout dans votre application.
+
+Par exemple, si nous créons un groupe de routes *(blog)* et un *(account)*, il nous sera désormais possible pour chacun d'eux de créer un fichier *layout.js* qui constitue désormais notre **RootLayout** pour chacun de ces groupes.
+
+Attention cependant, si vous venez à mettre en place ce type de routage, lorsque vous permettrez à votre utilisateur de naviguer entre deux **RootLayout** différents, cela produira un **rechargement de page complet** (contrairement aux navigations habituelles qui, rappelez-vous, produisent un re-rendu partiel de votre application uniquement pour la page et possiblement le ou les layouts).
 
